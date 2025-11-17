@@ -1,26 +1,160 @@
-@import "tailwindcss";
+/* Base reset and variables */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Colors - HSL format */
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(210, 24%, 16%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(210, 24%, 16%);
+  --primary: hsl(174, 62%, 47%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --primary-light: hsl(174, 62%, 65%);
+  --primary-dark: hsl(174, 62%, 35%);
+  --secondary: hsl(14, 100%, 70%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --secondary-light: hsl(14, 100%, 85%);
+  --secondary-dark: hsl(14, 100%, 55%);
+  --muted: hsl(210, 40%, 96.1%);
+  --muted-foreground: hsl(215.4, 16.3%, 46.9%);
+  --accent: hsl(250, 60%, 70%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --border: hsl(214.3, 31.8%, 91.4%);
+  --input: hsl(214.3, 31.8%, 91.4%);
+  --ring: hsl(174, 62%, 47%);
+  
+  /* Gradients */
+  --gradient-hero: linear-gradient(135deg, hsl(174, 62%, 97%) 0%, hsl(14, 100%, 97%) 100%);
+  --gradient-primary: linear-gradient(135deg, hsl(174, 62%, 47%) 0%, hsl(174, 62%, 35%) 100%);
+  --gradient-secondary: linear-gradient(135deg, hsl(14, 100%, 70%) 0%, hsl(14, 100%, 55%) 100%);
+  
+  /* Shadows */
+  --shadow-soft: 0 4px 20px -2px hsla(174, 62%, 47%, 0.08);
+  --shadow-medium: 0 8px 30px -4px hsla(174, 62%, 47%, 0.12);
+  --shadow-large: 0 20px 60px -10px hsla(174, 62%, 47%, 0.15);
+  
+  /* Transitions */
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  --radius: 0.75rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  --background: hsl(210, 24%, 10%);
+  --foreground: hsl(0, 0%, 98%);
+  --card: hsl(210, 24%, 12%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --primary: hsl(174, 62%, 47%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --primary-light: hsl(174, 62%, 55%);
+  --primary-dark: hsl(174, 62%, 35%);
+  --secondary: hsl(14, 100%, 70%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(210, 24%, 16%);
+  --muted-foreground: hsl(215, 20.2%, 65.1%);
+  --accent: hsl(250, 60%, 70%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --border: hsl(210, 24%, 20%);
+  --input: hsl(210, 24%, 20%);
+  --gradient-hero: linear-gradient(135deg, hsl(210, 24%, 12%) 0%, hsl(210, 24%, 8%) 100%);
+  --shadow-soft: 0 4px 20px -2px hsla(0, 0%, 0%, 0.3);
+  --shadow-medium: 0 8px 30px -4px hsla(0, 0%, 0%, 0.4);
+  --shadow-large: 0 20px 60px -10px hsla(0, 0%, 0%, 0.5);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+}
+
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+  max-width: 1280px;
+}
+
+/* Utility classes */
+.gradient-hero {
+  background: var(--gradient-hero);
+}
+
+.gradient-primary {
+  background: var(--gradient-primary);
+}
+
+.gradient-secondary {
+  background: var(--gradient-secondary);
+}
+
+.shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+
+.shadow-medium {
+  box-shadow: var(--shadow-medium);
+}
+
+.shadow-large {
+  box-shadow: var(--shadow-large);
+}
+
+.transition-smooth {
+  transition: var(--transition-smooth);
+}
+
+.transition-bounce {
+  transition: var(--transition-bounce);
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-1000 {
+  animation-delay: 1s;
 }
