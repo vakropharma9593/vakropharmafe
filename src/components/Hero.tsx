@@ -1,4 +1,4 @@
-import heroImage from "../../public/assets/hero-image.jpg";
+import heroImage from "../../public/assets/vakroallproducts.jpeg";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Image from "next/image";
 
@@ -25,14 +25,10 @@ const Hero = () => {
               Dermatologist Tested & Approved
             </div>
             <h1 className="hero-title">
-              Radiant Skin
-              <br />
-              <span className="hero-title-gradient">
-                Starts Here
-              </span>
+              Advanced Skincare Solutions for Acne, Pigmentation & Sun Protection
             </h1>
             <p className="hero-description">
-              Experience the perfect blend of science and nature with our premium dermatological care products. Transform your skincare routine today.
+              Vakro brings dermatologist-inspired skincare powered by clinically proven ingredients like Salicylic Acid, Azelaic Acid, Niacinamide, Ceramides, and SPF 50+ protection to target acne, dark spots, excess oil, and sun damage.
             </p>
             <div className="hero-buttons">
               <button
@@ -43,13 +39,13 @@ const Hero = () => {
                 Explore Products
                 <ArrowRight style={{width: '1.25rem', height: '1.25rem'}} />
               </button>
-              <button className="btn btn-lg btn-outline">
+              {/* <button className="btn btn-lg btn-outline">
                 Learn More
-              </button>
+              </button> */}
             </div>
             <div className="hero-stats">
               <div className="hero-stat">
-                <div className="hero-stat-number">10+</div>
+                <div className="hero-stat-number">4</div>
                 <div className="hero-stat-label">Premium Products</div>
               </div>
               <div className="hero-divider" />
@@ -59,13 +55,13 @@ const Hero = () => {
               </div>
               <div className="hero-divider" />
               <div className="hero-stat">
-                <div className="hero-stat-number">50K+</div>
+                <div className="hero-stat-number">1K+</div>
                 <div className="hero-stat-label">Happy Customers</div>
               </div>
             </div>
           </div>
           <div className="hero-image-container animate-fade-in delay-200">
-            <div className="hero-image-wrapper shadow-large">
+            <div className="hero-image-wrapper">
               <Image
                 src={heroImage}
                 height={616}

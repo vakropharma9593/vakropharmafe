@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import vakroLogo from "../../public/assets/vakro-logo.png";
+import vakroLogo from "../../public/assets/vakroGreenLogo.png";
 import Image from "next/image";
 
 const Navbar = () => {
@@ -25,7 +25,7 @@ const Navbar = () => {
       <div className="container">
         <div className="navbar-content">
           <div className="navbar-logo">
-            <Image src={vakroLogo} alt="Vakro" width={40} height={40} />
+            <Image src={vakroLogo} alt="Vakro" width={80} height={80} style={{ transform: "scale(1.5)", transformOrigin: "center" }} />
             <h1 className="navbar-brand">Vakro</h1>
           </div>
           <div className="navbar-links">
