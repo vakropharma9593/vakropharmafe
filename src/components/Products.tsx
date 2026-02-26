@@ -1,75 +1,37 @@
-import facewash from "../../public/assets/product-facewash.jpg";
-import faceSerum from "../../public/assets/product-face-serum.jpg";
-import hairSerum from "../../public/assets/product-hair-serum.jpg";
-import shampoo from "../../public/assets/product-shampoo.jpg";
-import cleanser from "../../public/assets/product-cleanser.jpg";
-import moisturizer from "../../public/assets/product-moisturizer.jpg";
-import eyeCream from "../../public/assets/product-eye-cream.jpg";
-import sunscreen from "../../public/assets/product-sunscreen.jpg";
-import bodyLotion from "../../public/assets/product-body-lotion.jpg";
-import lipBalm from "../../public/assets/product-lip-balm.jpg";
+import facewash from "../../public/assets/facewash.jpeg";
+import faceSerum from "../../public/assets/faceserum.jpeg";
+import moisturizer from "../../public/assets/moisturiser.jpeg";
+import sunscreen from "../../public/assets/sunscreen.jpeg";
 import Image from "next/image";
 
 const products = [
   {
-    name: "Gentle Face Wash",
-    description: "Deep cleansing formula with botanical extracts",
+    name: "Luxury Depigmenting Face Wash",
+    description: "Experience the Art of Balanced Skin with Vakro Depigmenting Face Wash.",
     category: "Face Care",
     image: facewash,
+    alt: "Vakro Glow Balance Depigmenting Face Wash with Salicylic Acid and Niacinamide",
   },
   {
-    name: "Radiance Face Serum",
-    description: "Intensive hydration with vitamin C boost",
+    name: "Anti-Acne & Depigmenting Face Serum",
+    description: "Multi-Active Acne Clarifying & Oil Balancing Serum.",
     category: "Face Care",
     image: faceSerum,
+    alt: "Vakro Lite Dual Hit Serum with Azelaic Acid and Salicylic Acid for acne control",
   },
   {
-    name: "Hair Growth Serum",
-    description: "Strengthening formula for healthy hair",
-    category: "Hair Care",
-    image: hairSerum,
-  },
-  {
-    name: "Nourishing Shampoo",
-    description: "Natural ingredients for silky smooth hair",
-    category: "Hair Care",
-    image: shampoo,
-  },
-  {
-    name: "Daily Face Cleanser",
-    description: "Gentle cleansing for sensitive skin",
-    category: "Face Care",
-    image: cleanser,
-  },
-  {
-    name: "Hydrating Moisturizer",
-    description: "24-hour moisture lock technology",
+    name: "Face Mositurizer Gel",
+    description: "Experience advanced hydration with powerful sun defense in one lightweight formula.",
     category: "Face Care",
     image: moisturizer,
+    alt: "Vakro Aqualite SPF 50+ Face Moisturizer Gel with 5 Ceramides",
   },
   {
-    name: "Anti-Aging Eye Cream",
-    description: "Reduces fine lines and dark circles",
-    category: "Face Care",
-    image: eyeCream,
-  },
-  {
-    name: "SPF 50 Sunscreen",
-    description: "Broad spectrum UV protection",
+    name: "Vakro Lite Anti-Pigment SPF 50+ Sunscreen",
+    description: "Broad-spectrum SPF 50+ sunscreen that protects from UV damage and helps reduce dark spots for an even-toned glow.",
     category: "Sun Care",
     image: sunscreen,
-  },
-  {
-    name: "Body Lotion",
-    description: "All-day hydration for soft skin",
-    category: "Body Care",
-    image: bodyLotion,
-  },
-  {
-    name: "Nourishing Lip Balm",
-    description: "Natural oils for smooth, healthy lips",
-    category: "Lip Care",
-    image: lipBalm,
+    alt: "Vakro Lite Anti-Pigment SPF 50+ Broad Spectrum Sunscreen",
   },
 ];
 
@@ -78,10 +40,10 @@ const Products = () => {
     <section id="products" className="products-section">
       <div className="container">
         <div className="products-header animate-fade-in">
-          <span className="badge badge-default" style={{marginBottom: '1rem'}}>
+          {/* <span className="badge badge-default" style={{marginBottom: '1rem'}}>
             Our Collection
-          </span>
-          <h2>Premium Products</h2>
+          </span> */}
+          <h2>Our Skincare Range</h2>
           <p className="products-description">
             Discover our range of dermatologist-tested products crafted with natural ingredients for your beauty needs
           </p>

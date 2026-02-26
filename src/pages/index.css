@@ -76,24 +76,24 @@
 .products-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
+  gap: 4.5rem;
 }
 
 @media (min-width: 768px) {
   .products-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 2fr);
   }
 }
 
 @media (min-width: 1024px) {
   .products-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 2fr);
   }
 }
 
 @media (min-width: 1280px) {
   .products-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 2fr);
   }
 }
 
@@ -113,7 +113,6 @@
 .product-image-wrapper {
   position: relative;
   overflow: hidden;
-  aspect-ratio: 1;
 }
 
 .product-image {
@@ -130,7 +129,7 @@
 .product-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, hsla(0, 0%, 100%, 0.8), transparent);
+  /* background: linear-gradient(to top, hsla(0, 0%, 100%, 0.8), transparent); */
   opacity: 0;
   transition: var(--transition-smooth);
 }
@@ -194,6 +193,7 @@
 .navbar-logo img {
   height: 2.5rem;
   width: 2.5rem;
+  background-color: transparent;
 }
 
 .navbar-brand {
@@ -203,6 +203,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  margin-left: 8;
 }
 
 .navbar-links {
@@ -377,19 +378,17 @@
 }
 
 .hero-image-container {
-  position: relative;
+  /* position: relative; */
 }
 
 .hero-image-wrapper {
-  position: relative;
-  border-radius: 1.5rem;
-  overflow: hidden;
+  border-radius: 16px;
 }
 
 .hero-image {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
+  width: 78%;
+  object-fit: fill;
+  border-radius: 16px;
 }
 
 .hero-image-glow-1 {

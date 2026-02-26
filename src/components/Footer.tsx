@@ -1,5 +1,5 @@
 import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
-import vakroLogo from "../../public/assets/vakro-logo.png";
+import vakroLogo from "../../public/assets/vakroGreenLogo.png";
 import Image from "next/image";
 
 const Footer = () => {
@@ -18,7 +18,7 @@ const Footer = () => {
         <div className="footer-grid">
           <div>
             <div className="footer-brand">
-              <Image src={vakroLogo} alt="Vakro" className="footer-logo" height={40} width={40}/>
+              <Image src={vakroLogo} alt="Vakro" className="footer-logo" height={80} width={80}/>
               <h3>Vakro</h3>
             </div>
             <p className="footer-description">
@@ -39,10 +39,10 @@ const Footer = () => {
           <div className="footer-section">
             <h4>Products</h4>
             <div className="footer-links">
-              <button className="footer-link">Face Care</button>
-              <button className="footer-link">Hair Care</button>
-              <button className="footer-link">Body Care</button>
-              <button className="footer-link">Sun Care</button>
+              <button onClick={() => scrollToSection("products")} className="footer-link">Face Care</button>
+              <button onClick={() => scrollToSection("products")} className="footer-link">Hair Care</button>
+              <button onClick={() => scrollToSection("products")} className="footer-link">Body Care</button>
+              <button onClick={() => scrollToSection("products")} className="footer-link">Sun Care</button>
             </div>
           </div>
           

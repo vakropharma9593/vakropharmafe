@@ -41,7 +41,7 @@ const Contact = () => {
                     </div>
                     <div className="contact-item-content">
                       <div className="contact-item-label">Email Us</div>
-                      <div className="contact-item-value">info@vakro.com</div>
+                      <div className="contact-item-value">info@vakropharma.com</div>
                     </div>
                   </div>
                   <div className="contact-item">
@@ -50,7 +50,7 @@ const Contact = () => {
                     </div>
                     <div className="contact-item-content">
                       <div className="contact-item-label">Call Us</div>
-                      <div className="contact-item-value">+1 (555) 123-4567</div>
+                      <div className="contact-item-value">+91 9079811724</div>
                     </div>
                   </div>
                   <div className="contact-item">
@@ -60,7 +60,7 @@ const Contact = () => {
                     <div className="contact-item-content">
                       <div className="contact-item-label">Visit Us</div>
                       <div className="contact-item-value">
-                        123 Beauty Street, Wellness City, WC 12345
+                        Piragi, Raipur Berisal, Bijnor, Uttar Pradesh, 246721
                       </div>
                     </div>
                   </div>
