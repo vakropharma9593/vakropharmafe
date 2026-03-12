@@ -1,23 +1,108 @@
 import { Mail, Phone, MapPin } from "lucide-react";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { toast, Bounce } from 'react-toastify';
 
 const Contact = () => {
-  const { toast } = useToast();
+
+  const [errors, setErrors] = useState({
+                                phone: "",
+                                email: "",
+                              });
+
   const [formData, setFormData] = useState({
     name: "",
+    phone: "",
     email: "",
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast({
-      title: "Message Sent!",
-      description: "We'll get back to you as soon as possible.",
+  const validatePhone = (phone: string) => {
+  const phoneRegex = /^[0-9]{10}$/;
+
+  if (!phoneRegex.test(phone)) {
+    setErrors((prev) => ({
+      ...prev,
+      phone: "Phone number must be exactly 10 digits",
+    }));
+    return false;
+  }
+
+  setErrors((prev) => ({ ...prev, phone: "" }));
+  return true;
+};
+
+const validateEmail = (email: string) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(email)) {
+    setErrors((prev) => ({
+      ...prev,
+      email: "Please enter a valid email address",
+    }));
+    return false;
+  }
+
+  setErrors((prev) => ({ ...prev, email: "" }));
+  return true;
+};
+
+const isFormValid =
+  formData.name.trim() !== "" &&
+  formData.phone.trim() !== "" &&
+  formData.email.trim() !== "" &&
+  formData.message.trim() !== "" &&
+  !errors.phone &&
+  !errors.email;
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+
+  try {
+    const response = await fetch("http://docter-api-service-lb-413222422.ap-south-1.elb.amazonaws.com/v1/contactus", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
     });
-    setFormData({ name: "", email: "", message: "" });
-  };
+
+    if (!response.ok) throw new Error();
+    toast("Message Sent! We'll get back to you soon.", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      type: "success",
+      transition: Bounce,
+    });
+
+    setFormData({
+      name: "",
+      phone: "",
+      email: "",
+      message: "",
+    });
+
+  } catch {
+    toast("Failed to send message. Please try again.", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      type: "error",
+      theme: "light",
+      transition: Bounce,
+    });
+  }
+};
 
   return (
     <section id="contact" className="contact-section">
@@ -44,6 +129,7 @@ const Contact = () => {
                       <div className="contact-item-value">info@vakropharma.com</div>
                     </div>
                   </div>
+
                   <div className="contact-item">
                     <div className="contact-icon-wrapper secondary">
                       <Phone className="contact-icon" />
@@ -53,6 +139,7 @@ const Contact = () => {
                       <div className="contact-item-value">+91 9079811724</div>
                     </div>
                   </div>
+
                   <div className="contact-item">
                     <div className="contact-icon-wrapper accent">
                       <MapPin className="contact-icon" />
@@ -68,7 +155,10 @@ const Contact = () => {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="contact-form animate-fade-in delay-200">
+            <form
+              onSubmit={handleSubmit}
+              className="contact-form animate-fade-in delay-200"
+            >
               <div>
                 <input
                   className="input input-lg"
@@ -80,6 +170,26 @@ const Contact = () => {
                   required
                 />
               </div>
+
+              <div>
+                  <input
+                    type="tel"
+                    className="input input-lg"
+                    placeholder="Your Contact Number"
+                    value={formData.phone}
+                    maxLength={10}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "");
+                      setFormData({ ...formData, phone: value });
+                    }}
+                    onBlur={() => validatePhone(formData.phone)}
+                    required
+                  />
+                  {errors.phone && (
+                    <p style={{ color: "red", fontSize: "12px" }}>{errors.phone}</p>
+                  )}
+              </div>
+
               <div>
                 <input
                   type="email"
@@ -89,9 +199,15 @@ const Contact = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
+                  onBlur={() => validateEmail(formData.email)}
                   required
                 />
+
+                {errors.email && (
+                  <p style={{ color: "red", fontSize: "12px" }}>{errors.email}</p>
+                )}
               </div>
+
               <div>
                 <textarea
                   className="textarea"
@@ -104,7 +220,13 @@ const Contact = () => {
                   rows={5}
                 />
               </div>
-              <button type="submit" className="btn btn-lg btn-gradient-primary" style={{width: '100%'}}>
+
+              <button
+                type="submit"
+                className="btn btn-lg btn-gradient-primary"
+                style={{ width: "100%" }}
+                disabled={!isFormValid}
+              >
                 Send Message
               </button>
             </form>
