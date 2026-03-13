@@ -1,4 +1,4 @@
-"use client";
+"use-client";
 
 import ACTIONS from "@/store/actions";
 import { Context } from "@/store/context";
@@ -15,7 +15,7 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (phone === "1111" && password === "1111") {
+    if (phone === process.env.NEXT_PUBLIC_PHONE && password === process.env.NEXT_PUBLIC_PASSWORD) {
         dispatch({ type: ACTIONS.SET_AUTH, payload: { username: phone, isLoggedIn: true }});
         router.push("/admin");
     } else {
