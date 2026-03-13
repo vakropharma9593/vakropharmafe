@@ -48,7 +48,7 @@ export default function LoginPage() {
           <div className="form-group">
             <label>Mobile Number</label>
             <input
-              type="tel"
+              type="string"
               placeholder="Enter mobile number"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
