@@ -59,7 +59,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 
   try {
-    const response = await fetch("http://docter-api-service-lb-413222422.ap-south-1.elb.amazonaws.com/v1/contactus", {
+    const response = await fetch("/api/contactus", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

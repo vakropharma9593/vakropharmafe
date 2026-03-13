@@ -5,6 +5,10 @@
   box-sizing: border-box;
 }
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   /* Colors - HSL format */
   --background: hsl(0, 0%, 100%);
@@ -157,4 +161,90 @@ body {
 
 .delay-1000 {
   animation-delay: 1s;
+}
+
+/* Page Background */
+
+.login-page {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f4f8fb;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Card */
+
+.login-card {
+  width: 380px;
+  background: white;
+  padding: 35px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* Header */
+
+.login-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.login-header h1 {
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 26px;
+}
+
+.login-header p {
+  margin-top: 5px;
+  color: #777;
+  font-size: 14px;
+}
+
+/* Form */
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #444;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  transition: border 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #2e7d32;
+}
+
+/* Button */
+
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background: #2e7d32;
+  color: white;
+  font-size: 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+
+.login-btn:hover {
+  background: #256428;
 }
