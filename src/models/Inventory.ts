@@ -10,6 +10,12 @@ const InventorySchema = new mongoose.Schema(
     itemName: {
       type: String,
       required: true,
+      enum: [
+        "Facewash",
+        "Face_Serum",
+        "Face_Moisturizer",
+        "Sunscreen",
+      ],
     },
     totalCount: {
       type: Number,

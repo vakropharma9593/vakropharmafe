@@ -15,7 +15,7 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (phone === "84779admin" && password === "vAkrO$4AdmIn") {
+    if (phone === "1111" && password === "1111") {
         dispatch({ type: ACTIONS.SET_AUTH, payload: { username: phone, isLoggedIn: true }});
         router.push("/admin");
     } else {

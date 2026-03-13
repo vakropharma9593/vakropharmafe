@@ -4,13 +4,14 @@ import { ActionMap } from "@/lib/utils";
 import { initialState, StateType } from "./initialState";
 import { AppPayload } from "./reducers/appReducer";
 import { AuthPayload } from "./reducers/authReducer";
+import { AdminPayload } from "./reducers/adminReducer";
 
 // to merge the TYPE
 type UnionToType<U extends Record<string, unknown>> = {
   [K in U extends unknown ? keyof U : never]: U extends unknown ? (K extends keyof U ? U[K] : never) : never;
 };
 // merging all the payload
-type combinedPayload = UnionToType<AuthPayload | AppPayload >;
+type combinedPayload = UnionToType<AuthPayload | AppPayload | AdminPayload >;
 
 // mapped all the actions along with the payload
 export type actionType = ActionMap<combinedPayload>[keyof ActionMap<combinedPayload>];

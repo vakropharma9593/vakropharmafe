@@ -1473,4 +1473,79 @@
   font-weight: 600;
 }
 
+.product-row{
+  display:flex;
+  gap:10px;
+  margin-bottom:10px;
+  flex-wrap: wrap;
+}
+
+.product-row input{
+  flex:1;
+}
+
+.vakro-add-product{
+  background:#f4f7f7;
+  border:none;
+  padding:8px;
+  cursor:pointer;
+  border-radius:6px;
+}
+
+.large{
+  width:650px;
+}
+
+.clickable-row{
+  cursor:pointer;
+}
+
+.clickable-row:hover{
+  background:#f5f7f8;
+}
+
+.status-badge{
+  padding:5px 10px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:600;
+  display:inline-block;
+}
+
+/* Payment Pending */
+.status-pending{
+  background:#fff3cd;
+  color:#856404;
+}
+
+/* Payment Done */
+.status-paid{
+  background:#d4edda;
+  color:#155724;
+}
+
+/* Preparing */
+.status-preparing{
+  background:#d1ecf1;
+  color:#0c5460;
+}
+
+/* Dispatched */
+.status-dispatched{
+  background:#cce5ff;
+  color:#004085;
+}
+
+/* Delivered */
+.status-delivered{
+  background:#e2e3e5;
+  color:#383d41;
+}
+
+/* Received */
+.status-received{
+  background:#e6ffe6;
+  color:#0a5c2b;
+}
+
 /* Contact Us */
