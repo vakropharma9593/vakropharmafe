@@ -1,4 +1,4 @@
-import { Home, Mail, LogOut } from "lucide-react";
+import { Home, Mail, LogOut, Package, Users } from "lucide-react";
 import vakroLogo from "../../public/assets/vakroGreenLogo.png";
 import { useContext } from "react";
 import { Context } from "@/store/context";
@@ -23,8 +23,14 @@ const AdminNavbar = () => {
             <span>Vakro Admin</span>
           </div>
           <div className="admin-navbar-links">
-            <button className={`admin-nav-link ${location.pathname === "/" ? "active" : ""}`} onClick={() => router.replace("/admin")}>
+            <button className={`admin-nav-link ${location.pathname === "/admin" ? "active" : ""}`} onClick={() => router.replace("/admin")}>
               <Home size={18} /> Home
+            </button>
+            <button className={`admin-nav-link ${location.pathname === "/admin/inventory" ? "active" : ""}`} onClick={() => router.push("/admin/inventory")}>
+              <Package size={18} /> Inventory
+            </button>
+            <button className={`admin-nav-link ${location.pathname === "/admin/customer" ? "active" : ""}`} onClick={() => router.push("/admin/customer")}>
+              <Users size={18} /> Customer
             </button>
             <button className={`admin-nav-link ${location.pathname === "/admin/contact-submissions" ? "active" : ""}`} onClick={() => router.push("/admin/contactus")}>
               <Mail size={18} /> Contact Us
