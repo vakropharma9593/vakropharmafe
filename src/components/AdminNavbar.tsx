@@ -23,7 +23,7 @@ const AdminNavbar = () => {
             <span>Vakro Admin</span>
           </div>
           <div className="admin-navbar-links">
-            <button className={`admin-nav-link ${location.pathname === "/" ? "active" : ""}`} onClick={() => router.replace("/")}>
+            <button className={`admin-nav-link ${location.pathname === "/" ? "active" : ""}`} onClick={() => router.replace("/admin")}>
               <Home size={18} /> Home
             </button>
             <button className={`admin-nav-link ${location.pathname === "/admin/contact-submissions" ? "active" : ""}`} onClick={() => router.push("/admin/contactus")}>
