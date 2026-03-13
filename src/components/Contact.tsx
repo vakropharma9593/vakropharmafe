@@ -20,19 +20,19 @@ const Contact = () => {
   const [loader, setLoader] = useState<boolean>(false);
 
   const validatePhone = (phone: string) => {
-  const phoneRegex = /^[0-9]{10}$/;
+    const phoneRegex = /^[0-9]{10}$/;
 
-  if (!phoneRegex.test(phone)) {
-    setErrors((prev) => ({
-      ...prev,
-      phone: "Phone number must be exactly 10 digits",
-    }));
-    return false;
-  }
+    if (!phoneRegex.test(phone)) {
+      setErrors((prev) => ({
+        ...prev,
+        phone: "Phone number must be exactly 10 digits",
+      }));
+      return false;
+    }
 
-  setErrors((prev) => ({ ...prev, phone: "" }));
-  return true;
-};
+    setErrors((prev) => ({ ...prev, phone: "" }));
+    return true;
+  };
 
 const validateEmail = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

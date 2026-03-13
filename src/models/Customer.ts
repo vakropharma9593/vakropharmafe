@@ -1,0 +1,28 @@
+import mongoose from "mongoose";
+import { unique } from "next/dist/build/utils";
+
+const CustomerSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    address: {
+      type: String,
+    },
+    type: {
+      type: String,
+      enum: ["Individual", "Retail", "Doctor"],
+      required: true
+    }
+  },
+  { timestamps: true }
+);
+
+export default mongoose.models.Customer ||
+  mongoose.model("Customer", CustomerSchema);
