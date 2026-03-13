@@ -1,6 +1,7 @@
 import { Mail, Phone, MapPin } from "lucide-react";
 import { useState } from "react";
 import { toast, Bounce } from 'react-toastify';
+import Loader from "./Loader";
 
 const Contact = () => {
 
@@ -15,6 +16,8 @@ const Contact = () => {
     email: "",
     message: "",
   });
+
+  const [loader, setLoader] = useState<boolean>(false);
 
   const validatePhone = (phone: string) => {
   const phoneRegex = /^[0-9]{10}$/;
@@ -55,6 +58,7 @@ const isFormValid =
   !errors.email;
 
 const handleSubmit = async (e: React.FormEvent) => {
+  setLoader(true);
   e.preventDefault();
 
 
@@ -101,6 +105,8 @@ const handleSubmit = async (e: React.FormEvent) => {
       theme: "light",
       transition: Bounce,
     });
+  } finally {
+    setLoader(false);
   }
 };
 
@@ -233,6 +239,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
         </div>
       </div>
+      {loader && <Loader />}
     </section>
   );
 };
