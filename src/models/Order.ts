@@ -1,34 +1,69 @@
 import mongoose from "mongoose";
 
+/**
+ * Product Enum
+ */
+export enum ProductName {
+  FACEWASH = "Facewash",
+  FACE_SERUM = "Face_Serum",
+  FACE_MOISTURIZER = "Face_Moisturizer",
+  SUNSCREEN = "Sunscreen",
+}
+
+/**
+ * Product Schema
+ */
+const ProductSchema = new mongoose.Schema({
+  productName: {
+    type: String,
+    enum: Object.values(ProductName),
+    required: true,
+  },
+  sellingPrice: {
+    type: Number,
+    required: true,
+  },
+  batch: {
+    type: String,
+    required: true,
+  },
+  quantity: {
+    type: Number,
+    required: true,
+    min: 1,
+  },
+});
+
+/**
+ * Order Schema
+ */
 const OrderSchema = new mongoose.Schema(
   {
-    batch: {
+    customerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Customer",
+      required: true,
+    },
+
+    date: {
+      type: Date,
+      required: true,
+    },
+
+    status: {
       type: String,
-      required: true,
-      unique: true,
+      enum: [
+        "Payment_Pending",
+        "Payment_Done",
+        "Preparing",
+        "Dispatched",
+        "Delivered",
+      ],
+      default: "Payment_Pending",
     },
-    itemName: {
-      type: String,
-      required: true,
-    },
-    totalCount: {
-      type: Number,
-      required: true,
-    },
-    remainingCount: {
-      type: Number,
-      required: true,
-    },
-    mfgDate: {
-      type: Date,
-      required: true,
-    },
-    receivedDate: {
-      type: Date,
-      required: true,
-    },
-    expiryDate: {
-      type: Date,
+
+    products: {
+      type: [ProductSchema],
       required: true,
     },
   },

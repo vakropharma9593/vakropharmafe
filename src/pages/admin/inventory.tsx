@@ -1,23 +1,14 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
 import { dateToShow, getExpiryClass } from "@/lib/utils";
-import { useEffect, useState } from "react";
-import { toast, Bounce } from "react-toastify";
-
-type InventoryItem = {
-  id: string;
-  batch: string;
-  itemName: string;
-  totalCount: number;
-  remainingCount: number;
-  receivedDate: string;
-  mfgDate: string;
-  expiryDate: string;
-};
+import ACTIONS from "@/store/actions";
+import { Context } from "@/store/context";
+import { useContext, useState } from "react";
+import { toast } from "react-toastify";
 
 const Inventory = () => {
-
-    const [inventory, setInventory] = useState<InventoryItem[]>([]);
+    const { state, dispatch } = useContext(Context);
+    const inventory = state.inventory;
     const [loader, setLoader] = useState<boolean>(false);
     const [showModal, setShowModal] = useState(false);
 
@@ -31,35 +22,7 @@ const Inventory = () => {
         expiryDate: "",
     });
 
-    useEffect(() => {
-        const getInventory = async () => {
-            setLoader(true);
-            try {
-                const res = await fetch("/api/inventory");
-
-                const data = await res.json();
-                setInventory(data.data || []);
-            } catch (error) {
-                toast(`Failed to get inventory details. Please try again. ${error}`, {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    type: "error",
-                    theme: "light",
-                    transition: Bounce,
-                });
-            } finally {
-                setLoader(false);
-            }
-        };
-        getInventory();
-    }, []);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
 
         setFormData((prev) => ({
@@ -86,7 +49,7 @@ const Inventory = () => {
 
             const allData = [...inventory, data.data]
 
-            setInventory(allData);
+            dispatch({ type: ACTIONS.SET_INVENTORY, payload: allData });
 
             setShowModal(false);
 
@@ -173,12 +136,16 @@ const Inventory = () => {
                 required
                 />
 
-                <input
-                name="itemName"
-                placeholder="Item Name"
-                onChange={handleChange}
-                required
-                />
+                <select
+                    name="itemName"
+                    onChange={handleChange}
+                >
+                    <option value="">Select Product</option>
+                    <option value="Facewash">Facewash</option>
+                    <option value="Face_Serum">Face Serum</option>
+                    <option value="Face_Moisturizer">Face Moisturizer</option>
+                    <option value="Sunscreen">Sunscreen</option>
+                </select>
 
                 <input
                 name="totalCount"
