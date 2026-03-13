@@ -1,13 +1,16 @@
 import AdminNavbar from "@/components/AdminNavbar";
+import Loader from "@/components/Loader";
 import { useEffect, useState } from "react";
 import { toast, Bounce } from "react-toastify";
 
 const ContactSubmissions = () => {
 
     const [contactUs, setContactUs] = useState([]);
+    const [loader, setLoader] = useState<boolean>(false);
 
     useEffect(() => {
         const getContacts = async () => {
+            setLoader(true);
             try {
                 const res = await fetch("/api/contactus");
 
@@ -26,6 +29,8 @@ const ContactSubmissions = () => {
                     theme: "light",
                     transition: Bounce,
                 });
+            } finally {
+                setLoader(false);
             }
         };
         getContacts();
@@ -76,6 +81,7 @@ const ContactSubmissions = () => {
           )}
         </div>
       </div>
+      {loader && <Loader />}
     </div>
   );
 };
