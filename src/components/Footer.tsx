@@ -1,8 +1,10 @@
 import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 import vakroLogo from "../../public/assets/vakroGreenLogo.png";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 const Footer = () => {
+  const router = useRouter();
   const currentYear = new Date().getFullYear();
 
   const scrollToSection = (id: string) => {
@@ -39,10 +41,10 @@ const Footer = () => {
           <div className="footer-section">
             <h4>Products</h4>
             <div className="footer-links">
-              <button onClick={() => scrollToSection("products")} className="footer-link">Face Care</button>
-              <button onClick={() => scrollToSection("products")} className="footer-link">Hair Care</button>
-              <button onClick={() => scrollToSection("products")} className="footer-link">Body Care</button>
-              <button onClick={() => scrollToSection("products")} className="footer-link">Sun Care</button>
+              <button onClick={() => router.push("/products/facewash")} className="footer-link">Face Wash</button>
+              <button onClick={() => router.push("/products/facemoisturizer")} className="footer-link">Face Moisturizer</button>
+              <button onClick={() => router.push("/products/faceserum")} className="footer-link">Face Serum</button>
+              <button onClick={() => router.push("/products/sunscreen")} className="footer-link">Sunscreen</button>
             </div>
           </div>
           

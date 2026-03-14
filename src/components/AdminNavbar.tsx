@@ -23,10 +23,10 @@ const AdminNavbar = () => {
             <span>Vakro Admin</span>
           </div>
           <div className="admin-navbar-links">
-            <button className={`admin-nav-link ${location.pathname === "/admin" ? "active" : ""}`} onClick={() => router.replace("/admin")}>
+            <button className={`admin-nav-link ${location.pathname === "/admin" ? "active" : ""}`} onClick={() => router.push("/admin")}>
               <Home size={18} /> Home
             </button>
-            <button className={`admin-nav-link ${location.pathname === "/admin/order" ? "active" : ""}`} onClick={() => router.replace("/admin/order")}>
+            <button className={`admin-nav-link ${location.pathname === "/admin/order" ? "active" : ""}`} onClick={() => router.push("/admin/order")}>
               <ShoppingCart size={18} /> Order
             </button>
             <button className={`admin-nav-link ${location.pathname === "/admin/inventory" ? "active" : ""}`} onClick={() => router.push("/admin/inventory")}>

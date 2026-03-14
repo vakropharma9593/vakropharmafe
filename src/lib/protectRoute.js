@@ -8,7 +8,7 @@ const ProtectRoute = ({ children }) => {
   const router = useRouter();
   const { state, dispatch, isAuthenticated } = useContext(Context);
 
-  const publicRoutes = ["/login", "/"];
+  const publicRoutes = ["/login", "/", "/products/facewash", "/products/facemoisturizer" , "/products/faceserum", "/products/sunscreen"];
 
   const isPublicRoute = publicRoutes.includes(router.pathname);
   const isAuthorized =

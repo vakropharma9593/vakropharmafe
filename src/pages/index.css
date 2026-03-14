@@ -1549,3 +1549,667 @@
 }
 
 /* Contact Us */
+
+/* Products pages */
+/* Facewash */
+  /* GLOBAL */
+
+.product-page{
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+color:#1b1b1b;
+}
+
+
+/* HERO */
+
+.product-hero{
+padding:180px 20px 100px;
+background:linear-gradient(180deg,#ffffff 0%,#f7f9f8 100%);
+}
+
+.product-container{
+max-width:1200px;
+margin:auto;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:80px;
+align-items:center;
+}
+
+
+/* PRODUCT IMAGE */
+
+.product-image{
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.product-image img{
+width:420px;
+max-width:100%;
+border-radius:18px;
+box-shadow:0 25px 60px rgba(0,0,0,0.08);
+transition:transform .3s ease;
+}
+
+.product-image img:hover{
+transform:scale(1.03);
+}
+
+
+/* PRODUCT INFO */
+
+.product-info h1{
+font-size:40px;
+font-weight:700;
+letter-spacing:-0.5px;
+margin-bottom:10px;
+}
+
+.product-subtitle{
+font-size:18px;
+color:#6c6c6c;
+margin-bottom:25px;
+}
+
+
+/* PRICE */
+
+.price-section{
+display:flex;
+align-items:center;
+gap:15px;
+margin-bottom:30px;
+}
+
+.price{
+font-size:30px;
+font-weight:700;
+color:#1f7a63;
+}
+
+.mrp{
+font-size:16px;
+color:#999;
+text-decoration:line-through;
+}
+
+.discount{
+font-size:13px;
+background:#e9f7f3;
+color:#1f7a63;
+padding:5px 10px;
+border-radius:20px;
+font-weight:600;
+}
+
+
+/* DESCRIPTION */
+
+.product-description{
+font-size:16px;
+line-height:1.8;
+color:#444;
+margin-bottom:25px;
+}
+
+
+/* BENEFITS */
+
+.product-benefits{
+list-style:none;
+padding:0;
+margin-bottom:35px;
+}
+
+.product-benefits li{
+margin-bottom:10px;
+font-size:15px;
+position:relative;
+padding-left:22px;
+}
+
+.product-benefits li:before{
+content:"✓";
+position:absolute;
+left:0;
+color:#1f7a63;
+font-weight:700;
+}
+
+
+/* BUTTON */
+
+.buy-button{
+display:inline-block;
+background:#1f7a63;
+color:white;
+padding:14px 34px;
+border-radius:8px;
+font-size:15px;
+font-weight:600;
+text-decoration:none;
+transition:all .25s ease;
+box-shadow:0 10px 25px rgba(31,122,99,0.25);
+}
+
+.buy-button:hover{
+background:#166a55;
+transform:translateY(-2px);
+box-shadow:0 14px 32px rgba(31,122,99,0.35);
+}
+
+
+
+/* SECTION BASE */
+
+.product-section{
+padding:110px 20px;
+background:#ffffff;
+}
+
+.product-section.light{
+background:#f7f9f8;
+}
+
+.product-section h2{
+font-size:30px;
+text-align:center;
+margin-bottom:60px;
+letter-spacing:-0.3px;
+}
+
+
+
+/* INGREDIENT GRID */
+
+.ingredients-grid{
+max-width:1100px;
+margin:auto;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:30px;
+}
+
+
+/* INGREDIENT CARD */
+
+/* INGREDIENT SECTION */
+
+.ingredients-section{
+padding:110px 20px;
+background:linear-gradient(180deg,#f8fbfa,#ffffff);
+}
+
+.section-title{
+text-align:center;
+font-size:34px;
+margin-bottom:60px;
+color:#1f7a63;
+}
+
+.ingredients-grid{
+max-width:1100px;
+margin:auto;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:30px;
+}
+
+.ingredient-card{
+background:white;
+padding:35px;
+border-radius:16px;
+text-align:center;
+box-shadow:0 20px 45px rgba(0,0,0,0.06);
+transition:all .3s ease;
+position:relative;
+overflow:hidden;
+}
+
+.ingredient-card::before{
+content:"";
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:4px;
+background:#1f7a63;
+}
+
+.ingredient-card:hover{
+transform:translateY(-10px);
+box-shadow:0 30px 70px rgba(0,0,0,0.08);
+}
+
+.ingredient-icon{
+font-size:36px;
+margin-bottom:15px;
+}
+
+.ingredient-card h3{
+font-size:20px;
+margin-bottom:10px;
+}
+
+.ingredient-card p{
+font-size:14px;
+color:#666;
+}
+
+
+/* HOW TO USE */
+
+.usage-section{
+padding:120px 20px;
+background:#f6f9f8;
+}
+
+.usage-container{
+max-width:1100px;
+margin:auto;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:70px;
+align-items:center;
+}
+
+.usage-image img{
+width:100%;
+max-width:380px;
+}
+
+.usage-content h2{
+font-size:32px;
+margin-bottom:25px;
+}
+
+.usage-content ol{
+padding-left:18px;
+line-height:1.9;
+font-size:16px;
+}
+
+.usage-content li{
+margin-bottom:8px;
+}
+
+
+/* MOBILE */
+
+@media(max-width:900px){
+
+.usage-container{
+grid-template-columns:1fr;
+text-align:center;
+}
+
+.usage-content ol{
+text-align:left;
+}
+
+}
+
+
+
+/* RESPONSIVE */
+
+@media(max-width:950px){
+
+.product-container{
+grid-template-columns:1fr;
+text-align:center;
+gap:50px;
+}
+
+.product-info{
+max-width:520px;
+margin:auto;
+}
+
+.price-section{
+justify-content:center;
+}
+
+.product-image img{
+width:340px;
+}
+
+}
+
+
+/* Facewash */
+
+/* Moisturizer */
+
+.container{
+max-width:1200px;
+margin:auto;
+padding:60px 20px;
+}
+
+.hero-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+align-items:center;
+gap:60px;
+}
+
+.moisturizer-hero{
+  background:linear-gradient(135deg,#f6fbf9,#e8f3ef);
+  padding:180px 20px 100px;
+}
+
+.hero-content h1{
+font-size:42px;
+font-weight:700;
+margin-bottom:15px;
+}
+
+.tagline{
+font-size:18px;
+color:#555;
+margin-bottom:20px;
+}
+
+.price{
+font-size:28px;
+font-weight:700;
+color:#0a7c66;
+margin-bottom:20px;
+}
+
+.features{
+list-style:none;
+padding:0;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.features li{
+display:flex;
+align-items:center;
+gap:8px;
+font-weight:500;
+}
+
+.hero-image{
+animation:float 5s ease-in-out infinite;
+}
+
+@keyframes float{
+0%{transform:translateY(0)}
+50%{transform:translateY(-10px)}
+100%{transform:translateY(0)}
+}
+
+/* BENEFITS */
+
+.moisturizer-benefits{
+padding:100px 20px;
+text-align:center;
+background:#fff;
+}
+
+.benefit-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:30px;
+margin-top:50px;
+}
+
+.benefit-card{
+background:#f8fbfa;
+padding:35px;
+border-radius:16px;
+transition:all .3s ease;
+}
+
+.benefit-card:hover{
+transform:translateY(-8px);
+box-shadow:0 15px 40px rgba(0,0,0,0.1);
+}
+
+/* INGREDIENTS */
+
+.moisturizer-ingredients{
+background:#f4faf7;
+padding:100px 20px;
+text-align:center;
+}
+
+.ingredient-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:25px;
+margin-top:50px;
+}
+
+.ingredient-card{
+background:white;
+padding:30px;
+border-radius:14px;
+transition:.3s;
+}
+
+.ingredient-card:hover{
+transform:translateY(-6px);
+box-shadow:0 12px 30px rgba(0,0,0,0.1);
+}
+
+/* HOW TO USE */
+
+.moisturizer-usage{
+padding:100px 20px;
+}
+
+.usage-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:60px;
+align-items:center;
+}
+
+.usage-image{
+background:#eef6f3;
+padding:40px;
+border-radius:20px;
+}
+
+.usage-steps ol{
+font-size:17px;
+line-height:1.9;
+color:#444;
+}
+
+/* MOBILE */
+
+@media(max-width:900px){
+
+.hero-grid,
+.usage-grid{
+grid-template-columns:1fr;
+text-align:center;
+}
+
+.benefit-grid{
+grid-template-columns:1fr;
+}
+
+.ingredient-grid{
+grid-template-columns:1fr 1fr;
+}
+
+}
+
+/* Moisturizer */
+
+/* face serum */
+
+.serum-hero{
+  background:linear-gradient(135deg,#f7fbfa,#e9f4f1);
+  padding:180px 20px 100px;
+}
+
+.serum-hero-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:60px;
+align-items:center;
+}
+
+.serum-content h1{
+font-size:42px;
+font-weight:700;
+margin-bottom:15px;
+}
+
+.tagline{
+font-size:18px;
+color:#555;
+margin-bottom:20px;
+}
+
+.price{
+font-size:28px;
+font-weight:700;
+color:#0a7c66;
+margin-bottom:20px;
+}
+
+.serum-features{
+list-style:none;
+padding:0;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.serum-features li{
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.serum-image{
+animation:float 5s ease-in-out infinite;
+}
+
+@keyframes float{
+0%{transform:translateY(0)}
+50%{transform:translateY(-10px)}
+100%{transform:translateY(0)}
+}
+
+/* BENEFITS */
+
+.serum-benefits{
+padding:100px 20px;
+text-align:center;
+background:#fff;
+}
+
+/* INGREDIENTS */
+
+.serum-ingredients{
+background:#f4faf7;
+padding:100px 20px;
+text-align:center;
+}
+
+/* HOW TO USE */
+
+.serum-usage{
+padding:100px 20px;
+}
+
+/* face serum */
+
+/* sunscreen */
+
+.sunscreen-hero{
+background:linear-gradient(135deg,#f9fbff,#eaf2ff);
+padding:180px 20px 100px;
+}
+
+.sunscreen-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:60px;
+align-items:center;
+}
+
+.sunscreen-content h1{
+font-size:42px;
+font-weight:700;
+margin-bottom:15px;
+}
+
+.tagline{
+font-size:18px;
+color:#555;
+margin-bottom:20px;
+}
+
+.price{
+font-size:28px;
+font-weight:700;
+color:#0a7c66;
+margin-bottom:20px;
+}
+
+.sunscreen-features{
+list-style:none;
+padding:0;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.sunscreen-features li{
+display:flex;
+align-items:center;
+gap:8px;
+font-weight:500;
+}
+
+.sunscreen-image{
+animation:float 5s ease-in-out infinite;
+}
+
+@keyframes float{
+0%{transform:translateY(0)}
+50%{transform:translateY(-10px)}
+100%{transform:translateY(0)}
+}
+
+.sunscreen-benefits{
+padding:100px 20px;
+text-align:center;
+background:#ffffff;
+}
+
+.sunscreen-ingredients{
+background:#f4faf7;
+padding:100px 20px;
+text-align:center;
+}
+
+.sunscreen-usage{
+padding:100px 20px;
+}
+
+@media(max-width:900px){
+
+.sunscreen-grid,
+.usage-grid{
+grid-template-columns:1fr;
+text-align:center;
+}
+
+}
+
+/* sunscreen */
+/* Products pages */

@@ -1,9 +1,16 @@
 import { useState, useEffect } from "react";
 import vakroLogo from "../../public/assets/vakroGreenLogo.png";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
-const Navbar = () => {
+type NavbarProps = {
+  source?: string;
+};
+
+const Navbar: React.FC<NavbarProps> = ({ source }) => {
   const [scrolled, setScrolled] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,36 +36,45 @@ const Navbar = () => {
             <h1 className="navbar-brand">Vakro</h1>
           </div>
           <div className="navbar-links">
-            <button
-              onClick={() => scrollToSection("home")}
-              className="navbar-link"
-            >
-              Home
-            </button>
-            <button
+            {source === "product" ? 
+              <button
+                onClick={() => router.push("/")}
+                className="btn btn-default btn-lg btn-gradient-primary"
+              >
+                Home
+              </button>
+             : 
+              <button
+                onClick={() => scrollToSection("home")}
+                className="navbar-link"
+              >
+                Home
+              </button>
+            }
+            {source === "product" ? null : <button
               onClick={() => scrollToSection("products")}
               className="navbar-link"
             >
               Products
-            </button>
-            <button
+            </button>}
+            {source === "product" ? null :<button
               onClick={() => scrollToSection("benefits")}
               className="navbar-link"
             >
               Why Us
-            </button>
-            <button
+            </button>}
+            {source === "product" ? null :<button
               onClick={() => scrollToSection("contact")}
               className="navbar-link"
             >
               Contact
-            </button>
-            <button
+            </button>}
+            {source === "product" ? null :<button
               onClick={() => scrollToSection("contact")}
               className="btn btn-default btn-lg btn-gradient-primary"
             >
               Get Started
-            </button>
+            </button>}
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ import faceSerum from "../../public/assets/faceserum.jpeg";
 import moisturizer from "../../public/assets/moisturiser.jpeg";
 import sunscreen from "../../public/assets/sunscreen.jpeg";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 const products = [
   {
@@ -11,6 +12,7 @@ const products = [
     category: "Face Care",
     image: facewash,
     alt: "Vakro Glow Balance Depigmenting Face Wash with Salicylic Acid and Niacinamide",
+    productLink: "/products/facewash",
   },
   {
     name: "Anti-Acne & Depigmenting Face Serum",
@@ -18,6 +20,7 @@ const products = [
     category: "Face Care",
     image: faceSerum,
     alt: "Vakro Lite Dual Hit Serum with Azelaic Acid and Salicylic Acid for acne control",
+    productLink: "/products/faceserum",
   },
   {
     name: "Face Mositurizer Gel",
@@ -25,6 +28,7 @@ const products = [
     category: "Face Care",
     image: moisturizer,
     alt: "Vakro Aqualite SPF 50+ Face Moisturizer Gel with 5 Ceramides",
+    productLink: "/products/facemoisturizer",
   },
   {
     name: "Vakro Lite Anti-Pigment SPF 50+ Sunscreen",
@@ -32,18 +36,20 @@ const products = [
     category: "Sun Care",
     image: sunscreen,
     alt: "Vakro Lite Anti-Pigment SPF 50+ Broad Spectrum Sunscreen",
+    productLink: "/products/sunscreen",
   },
 ];
 
 const Products = () => {
+  const router = useRouter();
   return (
     <section id="products" className="products-section">
       <div className="container">
         <div className="products-header animate-fade-in">
-          {/* <span className="badge badge-default" style={{marginBottom: '1rem'}}>
-            Our Collection
-          </span> */}
-          <h2>Our Skincare Range</h2>
+          <span className="badge badge-default" style={{marginBottom: '1rem'}}>
+            Our Skincare Range
+          </span>
+          {/* <h2>Our Skincare Range</h2> */}
           <p className="products-description">
             Discover our range of dermatologist-tested products crafted with natural ingredients for your beauty needs
           </p>
@@ -55,6 +61,7 @@ const Products = () => {
               key={index}
               className="product-card shadow-soft animate-fade-in"
               style={{ animationDelay: `${index * 50}ms` }}
+              onClick={() => router.push(product.productLink)}
             >
               <div className="product-image-wrapper">
                 <Image
@@ -68,9 +75,9 @@ const Products = () => {
                 </span>
               </div>
               <div className="product-content">
-                <h3 className="product-name">
+                <h2 className="product-name">
                   {product.name}
-                </h3>
+                </h2>
                 <p className="product-description">
                   {product.description}
                 </p>
