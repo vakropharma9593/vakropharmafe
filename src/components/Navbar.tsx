@@ -29,7 +29,7 @@ const Navbar: React.FC<NavbarProps> = ({ source }) => {
 
   return (
     <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
-      <div className="container">
+      <div className="nav-container">
         <div className="navbar-content">
           <div className="navbar-logo">
             <Image src={vakroLogo} alt="Vakro" width={80} height={80} style={{ transform: "scale(1.5)", transformOrigin: "center" }} />

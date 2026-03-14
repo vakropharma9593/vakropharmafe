@@ -112,7 +112,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   return (
     <section id="contact" className="contact-section">
-      <div className="container">
+      <div className="nav-container">
         <div className="contact-container">
           <div className="contact-header animate-fade-in">
             <h2>Get In Touch</h2>

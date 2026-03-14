@@ -26,7 +26,7 @@ const benefits = [
 const Benefits = () => {
   return (
     <section id="benefits" className="benefits-section">
-      <div className="container">
+      <div className="nav-container">
         <div className="benefits-header animate-fade-in">
           <h2>
             Why Choose <span className="benefits-title-gradient">Vakro</span>
