@@ -17,7 +17,7 @@ const CustomerSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["Individual", "Retail", "Doctor"],
+      enum: ["Individual", "Whole_Sale", "Retail", "Doctor"],
       required: true
     }
   },

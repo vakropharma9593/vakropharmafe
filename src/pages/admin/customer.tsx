@@ -8,7 +8,7 @@ type Customer = {
   name: string;
   phone: string;
   address?: string;
-  type: "Individual" | "Retail" | "Doctor";
+  type: "Individual" | "Retail" | "Doctor" | "Whole_Sale";
 };
 
 const Customers = () => {
@@ -214,6 +214,7 @@ const Customers = () => {
 
               <select name="type" onChange={handleChange}>
                 <option value="Individual">Individual</option>
+                <option value="Whole_Sale">Whole Sale</option>
                 <option value="Retail">Retail</option>
                 <option value="Doctor">Doctor</option>
               </select>
