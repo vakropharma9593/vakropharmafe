@@ -17,7 +17,7 @@ const Hero = () => {
         <div className="hero-bg-circle-2" />
       </div>
       
-      <div className="container hero-content">
+      <div className="nav-container hero-content">
         <div className="hero-grid">
           <div className="hero-text animate-fade-in">
             <div className="hero-badge">

@@ -16,7 +16,7 @@ const Footer = () => {
 
   return (
     <footer className="footer">
-      <div className="container">
+      <div className="nav-container">
         <div className="footer-grid">
           <div>
             <div className="footer-brand">
@@ -35,6 +35,7 @@ const Footer = () => {
               <button onClick={() => scrollToSection("products")} className="footer-link">Products</button>
               <button onClick={() => scrollToSection("benefits")} className="footer-link">About Us</button>
               <button onClick={() => scrollToSection("contact")} className="footer-link">Contact</button>
+              <button onClick={() => router.push("/faq")} className="footer-link">FAQ</button>
             </div>
           </div>
           

@@ -37,6 +37,7 @@ export default function SEO({
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
+      <link rel="icon" href="/favicon.ico" />
 
       {/* Canonical */}
       <link rel="canonical" href={url} />

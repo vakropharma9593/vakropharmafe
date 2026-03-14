@@ -44,7 +44,7 @@ const Products = () => {
   const router = useRouter();
   return (
     <section id="products" className="products-section">
-      <div className="container">
+      <div className="nav-container">
         <div className="products-header animate-fade-in">
           <span className="badge badge-default" style={{marginBottom: '1rem'}}>
             Our Skincare Range
