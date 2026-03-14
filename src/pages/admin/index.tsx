@@ -67,7 +67,7 @@ const Admin = () => {
                 <h3>Contact Submissions</h3>
                 <p>View all contact form submissions from users.</p>
             </div>
-            <div className="admin-card" onClick={() => router.replace("/")}>
+            <div className="admin-card" onClick={() => router.push("/")}>
                 <div className="admin-card-icon secondary">
                 <Home size={24} />
                 </div>
