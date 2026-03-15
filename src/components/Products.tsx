@@ -4,11 +4,13 @@ import moisturizer from "../../public/assets/moisturiser.jpeg";
 import sunscreen from "../../public/assets/sunscreen.jpeg";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import styles from "../styles/products.module.css";
 
 const products = [
   {
     name: "Luxury Depigmenting Face Wash",
-    description: "Experience the Art of Balanced Skin with Vakro Depigmenting Face Wash.",
+    description:
+      "Experience the Art of Balanced Skin with Vakro Depigmenting Face Wash.",
     category: "Face Care",
     image: facewash,
     alt: "Vakro Glow Balance Depigmenting Face Wash with Salicylic Acid and Niacinamide",
@@ -24,7 +26,8 @@ const products = [
   },
   {
     name: "Face Mositurizer Gel",
-    description: "Experience advanced hydration with powerful sun defense in one lightweight formula.",
+    description:
+      "Experience advanced hydration with powerful sun defense in one lightweight formula.",
     category: "Face Care",
     image: moisturizer,
     alt: "Vakro Aqualite SPF 50+ Face Moisturizer Gel with 5 Ceramides",
@@ -32,7 +35,8 @@ const products = [
   },
   {
     name: "Vakro Lite Anti-Pigment SPF 50+ Sunscreen",
-    description: "Broad-spectrum SPF 50+ sunscreen that protects from UV damage and helps reduce dark spots for an even-toned glow.",
+    description:
+      "Broad-spectrum SPF 50+ sunscreen that protects from UV damage and helps reduce dark spots for an even-toned glow.",
     category: "Sun Care",
     image: sunscreen,
     alt: "Vakro Lite Anti-Pigment SPF 50+ Broad Spectrum Sunscreen",
@@ -42,49 +46,61 @@ const products = [
 
 const Products = () => {
   const router = useRouter();
+
   return (
-    <section id="products" className="products-section">
-      <div className="nav-container">
-        <div className="products-header animate-fade-in">
-          <span className="badge badge-default" style={{marginBottom: '1rem'}}>
-            Our Skincare Range
-          </span>
-          {/* <h2>Our Skincare Range</h2> */}
-          <p className="products-description">
-            Discover our range of dermatologist-tested products crafted with natural ingredients for your beauty needs
+    <section id="products" className={styles.productsSection}>
+      <div className={styles.container}>
+
+        <div className={styles.header}>
+          <span className={styles.badge}>Our Skincare Range</span>
+
+          <p className={styles.description}>
+            Discover dermatologist-tested skincare powered by clinically proven
+            ingredients for acne control, hydration, pigmentation care and
+            daily sun protection.
           </p>
         </div>
 
-        <div className="products-grid">
+        <div className={styles.productsGrid}>
           {products.map((product, index) => (
             <div
               key={index}
-              className="product-card shadow-soft animate-fade-in"
-              style={{ animationDelay: `${index * 50}ms` }}
+              className={styles.productCard}
+              style={{ animationDelay: `${index * 80}ms` }}
               onClick={() => router.push(product.productLink)}
             >
-              <div className="product-image-wrapper">
+              <div className={styles.imageWrapper}>
+
                 <Image
                   src={product.image}
-                  alt={product.name}
-                  className="product-image"
+                  alt={product.alt}
+                  className={styles.productImage}
                 />
-                <div className="product-overlay" />
-                <span className="badge badge-default" style={{position: 'absolute', top: '1rem', left: '1rem'}}>
+
+                <span className={styles.categoryBadge}>
                   {product.category}
                 </span>
+
               </div>
-              <div className="product-content">
-                <h2 className="product-name">
+
+              <div className={styles.productContent}>
+                <h2 className={styles.productName}>
                   {product.name}
                 </h2>
-                <p className="product-description">
+
+                <p className={styles.productDescription}>
                   {product.description}
                 </p>
+
+                <div className={styles.viewProduct}>
+                  View Product →
+                </div>
               </div>
+
             </div>
           ))}
         </div>
+
       </div>
     </section>
   );

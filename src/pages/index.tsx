@@ -6,6 +6,7 @@ import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import { ToastContainer, Bounce } from 'react-toastify';
 import SEO from "@/components/SEO";
+// import Dermatologist from "@/components/Dermatologist";
 
 const Index = () => {
   return (
@@ -43,6 +44,7 @@ const Index = () => {
         <Hero />
         <Products />
         <Benefits />
+        {/* <Dermatologist /> */}
         <Contact />
         <Footer />
         <ToastContainer

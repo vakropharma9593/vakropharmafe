@@ -46,6 +46,7 @@ const FAQ = () => {
         description="Frequently asked questions about Vakro Pharma skincare products including facewash, serum, moisturizer and sunscreen."
         url="https://www.vakropharma.com/faq"
       />
+
       <Navbar source="product" />
 
       {/* FAQ Schema */}
@@ -67,11 +68,15 @@ const FAQ = () => {
         }}
       />
 
-      <div className={styles.container}>
-        <h1 className={styles.title}>Frequently Asked Questions</h1>
-        <p className={styles.subtitle}>
-          Everything you need to know about Vakro skincare products.
-        </p>
+      <section className={styles.section}>
+
+        <div className={styles.header}>
+          <h1>Frequently Asked Questions</h1>
+          <p>
+            Everything you need to know about Vakro skincare products
+            and dermatology-backed formulations.
+          </p>
+        </div>
 
         <div className={styles.faqWrapper}>
           {faqData.map((faq, index) => (
@@ -80,25 +85,33 @@ const FAQ = () => {
               className={`${styles.faqItem} ${
                 active === index ? styles.active : ""
               }`}
-              onClick={() => toggle(index)}
             >
-              <div className={styles.question}>
-                {faq.question}
-                <span className={styles.icon}>
-                  {active === index ? "-" : "+"}
-                </span>
-              </div>
+              <button
+                className={styles.question}
+                onClick={() => toggle(index)}
+              >
+                <span>{faq.question}</span>
 
-              {active === index && (
-                <div className={styles.answer}>{faq.answer}</div>
-              )}
+                <span className={styles.icon}>
+                  {active === index ? "−" : "+"}
+                </span>
+              </button>
+
+              <div
+                className={`${styles.answerWrapper} ${
+                  active === index ? styles.show : ""
+                }`}
+              >
+                <p className={styles.answer}>{faq.answer}</p>
+              </div>
             </div>
           ))}
         </div>
-      </div>
+      </section>
+
       <Footer />
     </>
   );
-}
+};
 
 export default FAQ;
