@@ -70,17 +70,20 @@ const Products = () => {
               onClick={() => router.push(product.productLink)}
             >
               <div className={styles.imageWrapper}>
-
                 <Image
                   src={product.image}
                   alt={product.alt}
+                  fill
+                  sizes="(max-width: 600px) 100vw,
+                        (max-width: 1024px) 50vw,
+                        25vw"
                   className={styles.productImage}
+                  priority
                 />
 
                 <span className={styles.categoryBadge}>
                   {product.category}
                 </span>
-
               </div>
 
               <div className={styles.productContent}>
