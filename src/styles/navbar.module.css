@@ -127,3 +127,64 @@
   }
 
 }
+
+/* HAMBURGER */
+
+.hamburger {
+  display: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #173F36;
+}
+
+/* MOBILE MENU */
+
+.mobileMenu {
+  display: none;
+}
+
+/* MOBILE DESIGN */
+
+@media (max-width: 768px) {
+
+  .links {
+    display: none;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  .mobileMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+
+    padding: 20px 24px;
+    background: #F4EFE7;
+
+    border-top: 1px solid rgba(0,0,0,0.05);
+  }
+
+  .mobileMenu button {
+    background: none;
+    border: none;
+
+    font-size: 16px;
+    font-weight: 500;
+
+    text-align: left;
+    cursor: pointer;
+    color: #1F1F1F;
+  }
+
+}
+
+@media (max-width:768px){
+
+    .logo{
+      width:40px;
+      height:40px;
+    }
+
+}

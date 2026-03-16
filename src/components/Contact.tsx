@@ -127,7 +127,9 @@ const Contact = () => {
               </div>
               <div>
                 <div className={styles.label}>Email Us</div>
-                <div className={styles.value}>info@vakropharma.com</div>
+                <a href="mailto:info@vakropharma.com" className={styles.value}>
+                  info@vakropharma.com
+                </a>
               </div>
             </div>
 
@@ -137,7 +139,9 @@ const Contact = () => {
               </div>
               <div>
                 <div className={styles.label}>Call Us</div>
-                <div className={styles.value}>+91 9079811724</div>
+                <a href="tel:+919079811724" className={styles.value}>
+                  +91 9079811724
+                </a>
               </div>
             </div>
 
