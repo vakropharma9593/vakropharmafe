@@ -1,5 +1,5 @@
 import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
-import vakroLogo from "../../public/assets/vakroGreenLogo.png";
+import vakroLogo from "../../public/assets/goldenLogo.svg";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import styles from "../styles/footer.module.css";
@@ -28,7 +28,7 @@ const Footer = () => {
 
           <div className={styles.brandSection}>
 
-            <div className={styles.brand}>
+            <div className={styles.brand} onClick={() => router.push("/")}>
 
               <Image
                 src={vakroLogo}

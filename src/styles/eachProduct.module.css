@@ -137,6 +137,10 @@
   gap:20px;
 }
 
+.ingredientGrid.threeGrid {
+  grid-template-columns:repeat(3,1fr);
+}
+
 .ingredientCard{
   border:1px solid #eee;
   padding:24px;

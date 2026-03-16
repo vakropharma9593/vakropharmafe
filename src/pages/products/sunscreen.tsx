@@ -113,6 +113,7 @@ const Sunscreen = () => {
         benefits={benefits}
         ingredients={ingredients}
         usageSteps={usageSteps}
+        product="sunscreen"
       />
 
       <Footer />

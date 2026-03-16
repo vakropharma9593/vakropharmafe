@@ -84,6 +84,7 @@ const FaceSerum = () => {
         benefits={benefits}
         ingredients={ingredients}
         usageSteps={usageSteps}
+        product="faceSerum"
       />
 
       <Footer/>

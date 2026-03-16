@@ -8,17 +8,23 @@ const benefits = [
     description:
       "All our products are clinically tested and approved by certified dermatologists for safety and efficacy.",
   },
-  {
-    icon: Leaf,
-    title: "100% Natural",
-    description:
-      "We use only natural botanical extracts and ingredients, free from harmful chemicals and parabens.",
-  },
+  // {
+  //   icon: Leaf,
+  //   title: "100% Natural",
+  //   description:
+  //     "We use only natural botanical extracts and ingredients, free from harmful chemicals and parabens.",
+  // },
+  // {
+  //   icon: Award,
+  //   title: "Award Winning",
+  //   description:
+  //     "Recognized by industry experts for excellence in skincare innovation and product quality.",
+  // },
   {
     icon: Award,
-    title: "Award Winning",
+    title: "Dermatologist Recommended",
     description:
-      "Recognized by industry experts for excellence in skincare innovation and product quality.",
+      "Recommended by India's best dermatologist doctors.",
   },
   {
     icon: Heart,

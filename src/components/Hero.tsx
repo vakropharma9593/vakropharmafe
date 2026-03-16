@@ -56,12 +56,12 @@ const Hero = () => {
                 <div className={styles.statLabel}>Premium Products</div>
               </div>
 
-              <div className={styles.divider}></div>
+              {/* <div className={styles.divider}></div> */}
 
-              <div className={styles.stat}>
+              {/* <div className={styles.stat}>
                 <div className={styles.statNumber}>100%</div>
                 <div className={styles.statLabel}>Natural Ingredients</div>
-              </div>
+              </div> */}
 
               <div className={styles.divider}></div>
 

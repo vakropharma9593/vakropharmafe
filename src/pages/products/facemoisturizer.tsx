@@ -113,6 +113,7 @@ const FaceMoisturizer = () => {
         benefits={benefits}
         ingredients={ingredients}
         usageSteps={usageSteps}
+        product="faceMoisturizer"
       />
 
       <Footer />

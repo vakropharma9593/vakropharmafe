@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import vakroLogo from "../../public/assets/vakroGreenLogo.png";
+import vakroLogo from "../../public/assets/darkGreenLogo.svg";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import styles from "../styles/navbar.module.css";
@@ -35,7 +35,7 @@ const Navbar: React.FC<NavbarProps> = ({ source }) => {
       <div className={styles.container}>
         <div className={styles.navContent}>
           
-          <div className={styles.logoSection}>
+          <div className={styles.logoSection} onClick={() => router.push("/")}>
             <Image
               src={vakroLogo}
               alt="Vakro"

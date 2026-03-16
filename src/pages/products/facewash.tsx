@@ -109,6 +109,7 @@ const FacewashPage = () => {
         benefits={benefits}
         ingredients={ingredients}
         usageSteps={usageSteps}
+        product="facewash"
       />
 
       <Footer />

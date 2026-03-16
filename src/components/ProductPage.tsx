@@ -29,6 +29,7 @@ type ProductPageProps = {
   benefits: Benefit[];
   ingredients: Ingredient[];
   usageSteps: string[];
+  product: string;
 };
 
 const ProductPage = ({
@@ -41,7 +42,8 @@ const ProductPage = ({
   benefitsTitle,
   benefits,
   ingredients,
-  usageSteps
+  usageSteps,
+  product
 }: ProductPageProps) => {
   return (
     <main className={styles.productPage}>
@@ -112,7 +114,7 @@ const ProductPage = ({
 
           <h2>Key Ingredients</h2>
 
-          <div className={styles.ingredientGrid}>
+          <div className={`${styles.ingredientGrid} ${product === "facewash" ? styles.threeGrid : ""}`}>
             {ingredients.map((ing, i) => (
               <div key={i} className={styles.ingredientCard}>
                 <h3>{ing.name}</h3>
