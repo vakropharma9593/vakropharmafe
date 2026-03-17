@@ -1,0 +1,116 @@
+.container {
+  background: #0f2f2a;
+  min-height: 100vh;
+  color: white;
+}
+
+.content {
+  padding: 20px;
+}
+
+/* HEADER */
+.header {
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header span {
+  color: #9ad3c7;
+  font-size: 18px;
+}
+
+.header p {
+  color: #b7dcd5;
+  margin-top: 5px;
+}
+
+/* TABLE */
+.tableWrapper {
+  overflow-x: auto;
+  background: #173f36;
+  border-radius: 16px;
+  padding: 10px;
+}
+
+.table {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px;
+  font-size: 14px;
+  color: #9ad3c7;
+}
+
+.table td {
+  padding: 12px;
+  font-size: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* MESSAGE TOOLTIP */
+.messageCell {
+  position: relative;
+  max-width: 200px;
+}
+
+.messageText {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+  cursor: pointer;
+}
+
+.tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 120%;
+  left: 0;
+  background: #000;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  width: 250px;
+  font-size: 12px;
+  transition: 0.2s ease;
+  z-index: 10;
+}
+
+.messageCell:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* EMPTY */
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #b7dcd5;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .table {
+    min-width: 600px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+  }
+}

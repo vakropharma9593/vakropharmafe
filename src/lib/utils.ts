@@ -33,12 +33,29 @@ export const getExpiryClass = (expiryDate: string) => {
   const diffTime = expiry.getTime() - today.getTime();
   const diffDays = diffTime / (1000 * 60 * 60 * 24);
 
-  if (diffDays <= 7) return "expiry-red";
-  if (diffDays <= 30) return "expiry-yellow";
-  if (diffDays <= 0) return "expiry-expired";
+  if (diffDays <= 7) return "red";
+  if (diffDays <= 30) return "yellow";
+  if (diffDays <= 0) return "expired";
 
-  return "";
+  return "basic";
 };
 
 export const formatStatus = (status: string) =>
   status.replace(/_/g, " ");
+
+export type Product = {
+  productName: string;
+  sellingPrice: number;
+  batch: string;
+  quantity: number;
+  discountPercentage: number;
+};
+
+export const isLastRowEmpty = (products: Product[]) => {
+  const lastProduct = products[products?.length - 1];
+    if (lastProduct.productName && lastProduct?.batch && lastProduct?.discountPercentage && lastProduct?.sellingPrice && lastProduct?.quantity) {
+      return false;
+    } else {
+      return true;
+    }
+}

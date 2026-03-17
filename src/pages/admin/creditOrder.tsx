@@ -17,7 +17,7 @@ type Order = {
   paymentType: string;
 };
 
-const Orders = () => {
+const CreditOrders = () => {
   const { state, dispatch } = useContext(Context);
   const stateInventory = state.inventory;
 
@@ -599,4 +599,4 @@ const Orders = () => {
   );
 };
 
-export default Orders;
+export default CreditOrders;

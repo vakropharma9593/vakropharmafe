@@ -1,0 +1,293 @@
+.container {
+  background: #0f2f2a;
+  min-height: 100vh;
+  color: white;
+}
+
+.content {
+  padding: 20px;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  font-size: 24px;
+}
+
+.header span {
+  margin-left: 10px;
+  color: #9ad3c7;
+}
+
+.header button {
+  background: #173f36;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* TABLE */
+.tableWrapper {
+  overflow-x: auto;
+  background: #173f36;
+  border-radius: 16px;
+  padding: 10px;
+}
+
+.table {
+  width: 100%;
+  min-width: 900px; /* important for horizontal scroll */
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px;
+  font-size: 14px;
+  color: #9ad3c7;
+}
+
+.table td {
+  padding: 12px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 14px;
+}
+
+.table tr:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* EMPTY */
+.empty {
+  text-align: center;
+  padding: 40px;
+}
+
+/* MODAL */
+/* OVERLAY */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 20, 18, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* MODAL BASE */
+.modal {
+  width: 95%;
+  max-width: 480px;
+  background: linear-gradient(135deg, #173f36, #0f2f2a);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  animation: modalFade 0.25s ease;
+  color: #ffffff;
+}
+
+/* LARGE MODAL */
+.large {
+  max-width: 720px;
+}
+
+/* HEADER */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.modalHeader h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.modalHeader button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.modalHeader button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* FORM */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* INPUTS */
+.form input,
+.form select {
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background: #f5f5f5;
+  color: #222;
+  transition: all 0.2s ease;
+}
+
+.form input:focus,
+.form select:focus {
+  box-shadow: 0 0 0 2px #00c896;
+}
+
+/* PRODUCT ROW */
+.productRow {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 0.8fr;
+  gap: 10px;
+}
+
+/* ADD PRODUCT BUTTON */
+.form button[type="button"] {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.form button[type="button"]:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* TOTAL */
+.total {
+  text-align: right;
+  font-weight: 600;
+  font-size: 15px;
+  color: #b7f7e6;
+}
+
+/* SUBMIT BUTTON */
+.form button:not([type="button"]) {
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #00c896, #00e6ac);
+  color: #00332a;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form button:not([type="button"]):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 200, 150, 0.4);
+}
+
+/* STATUS MODAL TEXT */
+.form p {
+  font-size: 14px;
+  color: #cfe8e3;
+  margin: 0;
+}
+
+/* ERROR */
+.error {
+  color: #ff6b6b;
+  font-size: 12px;
+  margin-top: -6px;
+}
+
+/* ANIMATION */
+@keyframes modalFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* FORM */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form input,
+.form select {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+
+.form button {
+  margin-top: 10px;
+  background: white;
+  color: #173f36;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* CALC */
+.calculation {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #9ad3c7;
+}
+
+/* MOBILE OPTIMIZATION */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .table {
+    min-width: 800px;
+  }
+}
+
+.expiryRed {
+  background-color: #ffe5e5;
+  color: #a40000;
+  font-weight: 500;
+}
+
+.expiryYellow {
+  background-color: #fff9db;
+  color: #000;
+}
+
+.expiryExpired {
+  background-color: #ffb3b3;
+  color: #7a0000;
+  font-weight: 600;
+}

@@ -1,0 +1,418 @@
+.container {
+  background: #0f2f2a;
+  min-height: 100vh;
+  color: white;
+}
+
+.content {
+  padding: 20px;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header h1 span {
+  color: #9ad3c7;
+  margin-left: 8px;
+}
+
+.header button {
+  background: #173f36;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* TABLE */
+.tableWrapper {
+  overflow-x: auto;
+  background: #173f36;
+  padding: 10px;
+  border-radius: 16px;
+}
+
+.table {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 12px;
+  text-align: start;
+}
+
+.table th {
+  color: #9ad3c7;
+}
+
+.table tr {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ACTIONS */
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.actions button {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.actions button:first-child {
+  background: #2c7a6a;
+  color: white;
+}
+
+.actions button:last-child {
+  background: white;
+  color: #173f36;
+}
+
+/* MODAL */
+/* OVERLAY */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 20, 18, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* MODAL BASE */
+.modal {
+  width: 65%;
+  background: linear-gradient(135deg, #173f36, #0f2f2a);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  animation: modalFade 0.25s ease;
+  color: #ffffff;
+}
+
+/* LARGE MODAL */
+.large {
+  max-width: 720px;
+}
+
+/* HEADER */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.modalHeader h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.modalHeader button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.modalHeader button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* FORM */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* INPUTS */
+.form input,
+.form select {
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background: #f5f5f5;
+  color: #222;
+  transition: all 0.2s ease;
+}
+
+.form input:focus,
+.form select:focus {
+  box-shadow: 0 0 0 2px #00c896;
+}
+
+/* PRODUCT ROW */
+
+/* ADD PRODUCT BUTTON */
+.form button[type="button"] {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.form button[type="button"]:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* TOTAL */
+.total {
+  text-align: right;
+  font-weight: 600;
+  font-size: 15px;
+  color: #b7f7e6;
+}
+
+/* SUBMIT BUTTON */
+.form button:not([type="button"]) {
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #00c896, #00e6ac);
+  color: #00332a;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form button:not([type="button"]):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 200, 150, 0.4);
+}
+
+/* STATUS MODAL TEXT */
+.form p {
+  font-size: 14px;
+  color: #cfe8e3;
+  margin: 0;
+}
+
+/* ERROR */
+.error {
+  color: #ff6b6b;
+  font-size: 12px;
+  margin-top: -6px;
+}
+
+/* ANIMATION */
+@keyframes modalFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* FORM */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form input,
+.form select {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  max-width: 50%;
+}
+
+.productRow select, .productRow input {
+  max-width: 100%;
+}
+
+.form button {
+  background: white;
+  color: #173f36;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  font-weight: bold;
+}
+
+.error {
+  color: #ff6b6b;
+  font-size: 12px;
+}
+
+/* EMPTY */
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #b7dcd5;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+}
+
+.productRow {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr 0.8fr 0.5fr;
+  gap: 10px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px;
+  border-radius: 12px;
+}
+
+/* LABEL STYLE (MRP / Selling Price) */
+.infoBox {
+  background: rgba(0, 0, 0, 0.25);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #cfe8e3;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.infoBox span {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* INPUT SMALL */
+.smallInput {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+}
+
+/* PRODUCT HEADER ROW */
+.productHeader {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr 0.8fr 0.5fr;
+  gap: 10px;
+  font-size: 12px;
+  color: #b7f7e6;
+  margin-bottom: 6px;
+  padding: 0 4px;
+}
+
+.deleteBtn {
+  background: rgba(255, 0, 0, 0.1);
+  color: #ff6b6b;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.deleteBtn:hover {
+  background: rgba(255, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+
+.detailsContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOP INFO GRID */
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.detailsGrid div {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.detailsGrid span {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.detailsGrid p {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+
+/* TABLE */
+.detailsTable {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detailsHeader,
+.detailsRow {
+  display: grid;
+  grid-template-columns: 1fr 0.8fr 0.7fr 0.8fr 0.8fr 0.5fr 0.8fr 0.7fr;
+  gap: 4px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  font-size: 11.5px;
+}
+
+.detailsRow div,
+.detailsHeader div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.detailsHeader {
+  background: rgba(255, 255, 255, 0.08);
+  font-weight: 600;
+}
+
+.detailsRow {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* TOTAL */
+.detailsTotal {
+  margin-top: 14px;
+  text-align: right;
+  font-weight: 600;
+  color: #b7f7e6;
+}

@@ -1,47 +1,81 @@
-import { Home, Mail, LogOut, Package, Users, ShoppingCart } from "lucide-react";
-import vakroLogo from "../../public/assets/vakroGreenLogo.png";
 import { useContext } from "react";
+import { useRouter } from "next/router";
+import styles from "../styles/adminNavbar.module.css";
+
 import { Context } from "@/store/context";
 import ACTIONS from "@/store/actions";
 import Image from "next/image";
-import { useRouter } from "next/router";
+import vakroLogo from "../../public/assets/goldenLogo.svg";
 
 const AdminNavbar = () => {
-    const { dispatch } = useContext(Context);
-    const router = useRouter();
+  const router = useRouter();
+  const { dispatch } = useContext(Context);
 
   const handleLogout = () => {
-    dispatch({ type: ACTIONS.REMOVE_AUTH });
+    dispatch({
+      type: ACTIONS.SET_AUTH,
+      payload: { username: "", isLoggedIn: false },
+    });
+    router.push("/");
   };
 
   return (
-    <nav className="admin-navbar">
-      <div className="admin-navbar-content">
-        <div className="admin-navbar-left">
-          <div className="admin-navbar-logo">
-            <Image src={vakroLogo} alt="Vakro" width={80} height={80} style={{ transform: "scale(1.5)", transformOrigin: "center" }} />
-            <span>Vakro Admin</span>
-          </div>
-          <div className="admin-navbar-links">
-            <button className={`admin-nav-link ${location.pathname === "/admin" ? "active" : ""}`} onClick={() => router.push("/admin")}>
-              <Home size={18} /> Home
-            </button>
-            <button className={`admin-nav-link ${location.pathname === "/admin/order" ? "active" : ""}`} onClick={() => router.push("/admin/order")}>
-              <ShoppingCart size={18} /> Order
-            </button>
-            <button className={`admin-nav-link ${location.pathname === "/admin/inventory" ? "active" : ""}`} onClick={() => router.push("/admin/inventory")}>
-              <Package size={18} /> Inventory
-            </button>
-            <button className={`admin-nav-link ${location.pathname === "/admin/customer" ? "active" : ""}`} onClick={() => router.push("/admin/customer")}>
-              <Users size={18} /> Customer
-            </button>
-            <button className={`admin-nav-link ${location.pathname === "/admin/contactus" ? "active" : ""}`} onClick={() => router.push("/admin/contactus")}>
-              <Mail size={18} /> Contact Us
-            </button>
-          </div>
-        </div>
-        <button className="admin-logout-btn" onClick={handleLogout}>
-          <LogOut size={18} /> Logout
+    <nav className={styles.navbar}>
+      {/* LEFT */}
+      <div className={styles.logo} onClick={() => router.push("/admin")}>
+        <Image src={vakroLogo} alt="Vakro" width={80} height={80} style={{ transform: "scale(1.5)", transformOrigin: "center" }} />
+        Vakro Pharma
+      </div>
+
+      {/* CENTER LINKS */}
+      <div className={styles.links}>
+        <button
+          className={router.pathname === "/admin" ? styles.active : ""}
+          onClick={() => router.push("/admin")}
+        >
+          Dashboard
+        </button>
+
+        <button
+          className={router.pathname === "/admin/inventory" ? styles.active : ""}
+          onClick={() => router.push("/admin/inventory")}
+        >
+          Inventory
+        </button>
+
+        <button
+          className={router.pathname === "/admin/customer" ? styles.active : ""}
+          onClick={() => router.push("/admin/customer")}
+        >
+          Customers
+        </button>
+
+        <button
+          className={router.pathname === "/admin/order" ? styles.active : ""}
+          onClick={() => router.push("/admin/order")}
+        >
+          Orders
+        </button>
+
+        {/* <button
+          className={router.pathname === "/admin/creditOrder" ? styles.active : ""}
+          onClick={() => router.push("/admin/creditOrder")}
+        >
+          Credit Orders
+        </button> */}
+
+        <button
+          className={router.pathname === "/admin/contactus" ? styles.active : ""}
+          onClick={() => router.push("/admin/contactus")}
+        >
+          Contact Forms
+        </button>
+      </div>
+
+      {/* RIGHT */}
+      <div className={styles.actions}>
+        <button className={styles.logout} onClick={handleLogout}>
+          Logout
         </button>
       </div>
     </nav>

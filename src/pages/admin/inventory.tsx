@@ -5,196 +5,211 @@ import ACTIONS from "@/store/actions";
 import { Context } from "@/store/context";
 import { useContext, useState } from "react";
 import { toast } from "react-toastify";
+import styles from "../../styles/inventory.module.css";
+import { InventoryItem } from "@/store/reducers/adminReducer";
 
 const Inventory = () => {
-    const { state, dispatch } = useContext(Context);
-    const inventory = state.inventory;
-    const [loader, setLoader] = useState<boolean>(false);
-    const [showModal, setShowModal] = useState(false);
+  const { state, dispatch } = useContext(Context);
+  const inventory = state.inventory;
 
-    const [formData, setFormData] = useState({
-        batch: "",
-        itemName: "",
-        totalCount: "",
-        remainingCount: "",
-        receivedDate: "",
-        mfgDate: "",
-        expiryDate: "",
-    });
+  const [loader, setLoader] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
+  const [formData, setFormData] = useState({
+    batch: "",
+    itemName: "",
+    totalCount: "",
+    remainingCount: "",
+    receivedDate: "",
+    mfgDate: "",
+    expiryDate: "",
+    mrp: null,
+    gstPercentage: null,
+    basePrice: 0,
+    gstAmount: 0,
+  });
 
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+  const calculateValues = (mrp: number, gst: number) => {
+    const basePrice = mrp / (1 + gst / 100);
+    const gstAmount = mrp - basePrice;
+    return {
+      basePrice: Number(basePrice.toFixed(2)),
+      gstAmount: Number(gstAmount.toFixed(2)),
     };
+  };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        setLoader(true);
-        e.preventDefault();
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
 
-        try {
+    let updated = { ...formData, [name]: value };
 
-            const res = await fetch("/api/inventory", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-            });
+    if (name === "mrp" && updated.gstPercentage) {
+      const calc = calculateValues(Number(value), Number(updated.gstPercentage));
+      updated = { ...updated, ...calc };
+    }
 
-            const data = await res.json();
+    if (name === "gstPercentage" && updated.mrp) {
+      const calc = calculateValues(Number(updated.mrp), Number(value));
+      updated = { ...updated, ...calc };
+    }
 
-            const allData = [...inventory, data.data]
+    setFormData(updated);
+  };
 
-            dispatch({ type: ACTIONS.SET_INVENTORY, payload: allData });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoader(true);
+    if (formData?.batch !== "" && formData?.itemName !== "" && formData?.totalCount !== "" && formData?.remainingCount !== "" && formData?.receivedDate !== "" && formData?.mfgDate !== "" && formData?.expiryDate !== "" && formData?.mrp !== "" && formData?.gstPercentage !== "") {
+      try {
+        const res = await fetch("/api/inventory", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
 
-            setShowModal(false);
+        const data = await res.json();
+        dispatch({
+          type: ACTIONS.SET_INVENTORY,
+          payload: [...inventory, data.data],
+        });
 
-            toast.success("Inventory added successfully");
-        } catch (err) {
-            toast.error("Failed to add inventory");
-        } finally {
-            setLoader(false);
-        }
-    };
+        setShowModal(false);
+        toast.success("Inventory added successfully");
+      } catch {
+        toast.error("Failed to add inventory");
+      } finally {
+        setLoader(false);
+      }
+    } else {
+      toast.error("Please fill all fields.");
+      setLoader(false);
+    }
+  };
+
+  const getExpiryClass = (expiryDate: string) => {
+    const today = new Date();
+    const expiry = new Date(expiryDate);
+
+    const diffTime = expiry.getTime() - today.getTime();
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+    if (diffDays <= 7) return styles.expiryRed;
+    if (diffDays <= 30) return styles.expiryYellow;
+    if (diffDays <= 0) return styles.expiryExpired;
+
+    return "basic";
+  };
 
   return (
-    <div className="submissions-page">
+    <div className={styles.container}>
       <AdminNavbar />
-      <div className="submissions-content">
-        <div className="submissions-header">
+
+      <div className={styles.content}>
+        {/* Header */}
+        <div className={styles.header}>
           <h1>
-            Inventory List
-            <span className="submissions-count">{inventory.length}</span>
+            Inventory
+            <span>{inventory.length}</span>
           </h1>
-          <button className="vakro-add-btn" onClick={() => setShowModal(true)}>
-            + Add New Inventory
+
+          <button onClick={() => setShowModal(true)}>
+            + Add Inventory
           </button>
-          {/* <p>Add and manage all your inventory.</p> */}
         </div>
-        <div className="submissions-table-wrapper">
+
+        {/* Table */}
+        <div className={styles.tableWrapper}>
           {inventory.length > 0 ? (
-            <table className="submissions-table">
+            <table className={styles.table}>
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Batch No.</th>
+                  <th>Batch</th>
                   <th>Item</th>
-                  <th>Total Count</th>
-                  <th>Remaining Count</th>
-                  <th>Received Date</th>
-                  <th>Mfg Date</th>
-                  <th>Expiry Date</th>
+                  <th>Total</th>
+                  <th>Remaining</th>
+                  <th>Received</th>
+                  <th>Mfg</th>
+                  <th>Expiry</th>
+                  <th>MRP</th>
+                  <th>Base</th>
+                  <th>GST Amt</th>
+                  <th>GST %</th>
                 </tr>
               </thead>
+
               <tbody>
-                {inventory.map((item: { id: string, batch: string, itemName: string, totalCount: number, remainingCount: number,  receivedDate: string, mfgDate: string, expiryDate: string }, index) => (
-                  <tr key={item?.id} className={getExpiryClass(item?.expiryDate)}>
-                    <td>{index + 1}</td>
-                    <td>{item?.batch}</td>
-                    <td>{item?.itemName}</td>
-                    <td>{item?.totalCount}</td>
-                    <td>{item?.remainingCount}</td>
-                    <td>{dateToShow(item?.receivedDate)}</td>
-                    <td>{dateToShow(item?.mfgDate)}</td>
-                    <td>{dateToShow(item?.expiryDate)}</td>
+                {inventory.map((item: InventoryItem, i: number) => (
+                  <tr key={item.id} className={getExpiryClass(item.expiryDate)}>
+                    <td>{i + 1}</td>
+                    <td>{item.batch}</td>
+                    <td>{item.itemName}</td>
+                    <td>{item.totalCount}</td>
+                    <td>{item.remainingCount}</td>
+                    <td>{dateToShow(item.receivedDate)}</td>
+                    <td>{dateToShow(item.mfgDate)}</td>
+                    <td>{dateToShow(item.expiryDate)}</td>
+                    <td>₹{item.mrp}</td>
+                    <td>₹{item.basePrice}</td>
+                    <td>₹{item.gstAmount}</td>
+                    <td>{item.gstPercentage}%</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           ) : (
-            <div className="submissions-empty">
-              <p>No inventory yet.</p>
-            </div>
+            <p className={styles.empty}>No inventory yet</p>
           )}
         </div>
       </div>
-      {loader && <Loader />}
+
+      {/* Modal */}
       {showModal && (
-        <div className="vakro-modal-overlay">
-            <div className="vakro-modal">
-
-            <div className="vakro-modal-header">
-                <h2>Add New Inventory</h2>
-                <button
-                className="vakro-close"
-                onClick={() => setShowModal(false)}
-                >
-                ✕
-                </button>
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <h2>Add Inventory</h2>
+              <button onClick={() => setShowModal(false)}>✕</button>
             </div>
 
-            <form className="vakro-form" onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className={styles.form}>
+              <input name="batch" placeholder="Batch" onChange={handleChange} required />
 
-                <input
-                name="batch"
-                placeholder="Batch Number"
-                onChange={handleChange}
-                required
-                />
+              <select name="itemName" onChange={handleChange}>
+                <option value="">Select Product</option>
+                <option value="Facewash">Facewash</option>
+                <option value="Face_Serum">Face Serum</option>
+                <option value="Face_Moisturizer">Moisturizer</option>
+                <option value="Sunscreen">Sunscreen</option>
+              </select>
 
-                <select
-                    name="itemName"
-                    onChange={handleChange}
-                >
-                    <option value="">Select Product</option>
-                    <option value="Facewash">Facewash</option>
-                    <option value="Face_Serum">Face Serum</option>
-                    <option value="Face_Moisturizer">Face Moisturizer</option>
-                    <option value="Sunscreen">Sunscreen</option>
-                </select>
+              <input type="number" name="totalCount" placeholder="Total Count" onChange={handleChange} />
+              <input type="number" name="remainingCount" placeholder="Remaining Count" onChange={handleChange} />
 
-                <input
-                name="totalCount"
-                type="number"
-                placeholder="Total Count"
-                onChange={handleChange}
-                required
-                />
+              <label>MFG</label>
+              <input type="date" name="mfgDate" onChange={handleChange} />
 
-                <input
-                name="remainingCount"
-                type="number"
-                placeholder="Remaining Count"
-                onChange={handleChange}
-                required
-                />
+              <label>Expiry</label>
+              <input type="date" name="expiryDate" onChange={handleChange} />
 
-                <label>Received Date</label>
-                <input
-                name="receivedDate"
-                type="date"
-                onChange={handleChange}
-                required
-                />
+              <label>Received</label>
+              <input type="date" name="receivedDate" onChange={handleChange} />
 
-                <label>Mfg Date</label>
-                <input
-                name="mfgDate"
-                type="date"
-                onChange={handleChange}
-                required
-                />
+              <input type="number" name="mrp" placeholder="MRP" step="0.01" onChange={handleChange} />
+              <input type="number" name="gstPercentage" placeholder="GST %" step="0.01" onChange={handleChange} />
 
-                <label>Expiry Date</label>
-                <input
-                name="expiryDate"
-                type="date"
-                onChange={handleChange}
-                required
-                />
+              <div className={styles.calculation}>
+                <p>Base: ₹{formData.basePrice}</p>
+                <p>GST: ₹{formData.gstAmount}</p>
+              </div>
 
-                <button className="vakro-submit-btn">
-                Submit Inventory
-                </button>
-
+              <button type="submit">Submit</button>
             </form>
-            </div>
+          </div>
         </div>
       )}
+
+      {loader && <Loader />}
     </div>
   );
 };

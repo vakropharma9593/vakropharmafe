@@ -12,6 +12,10 @@ export interface InventoryItem {
   receivedDate: string;
   mfgDate: string;
   expiryDate: string;
+  mrp: number;
+  basePrice: number;
+  gstAmount: number;
+  gstPercentage: number;
 }
 
 export type AdminPayload = {
