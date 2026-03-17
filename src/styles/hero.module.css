@@ -72,6 +72,8 @@
 
 .buttons {
   margin-top: 28px;
+  position: relative;
+  z-index: 1;
 }
 
 .primaryBtn {
