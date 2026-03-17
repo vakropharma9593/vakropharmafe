@@ -1,14 +1,15 @@
 import { Mail, Phone, MapPin } from "lucide-react";
 import { useState } from "react";
-import { toast, Bounce } from 'react-toastify';
+import { toast, Bounce } from "react-toastify";
 import Loader from "./Loader";
+import styles from "../styles/contact.module.css";
 
 const Contact = () => {
 
   const [errors, setErrors] = useState({
-                                phone: "",
-                                email: "",
-                              });
+    phone: "",
+    email: "",
+  });
 
   const [formData, setFormData] = useState({
     name: "",
@@ -34,211 +35,194 @@ const Contact = () => {
     return true;
   };
 
-const validateEmail = (email: string) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  if (!emailRegex.test(email)) {
-    setErrors((prev) => ({
-      ...prev,
-      email: "Please enter a valid email address",
-    }));
-    return false;
-  }
+    if (!emailRegex.test(email)) {
+      setErrors((prev) => ({
+        ...prev,
+        email: "Please enter a valid email address",
+      }));
+      return false;
+    }
 
-  setErrors((prev) => ({ ...prev, email: "" }));
-  return true;
-};
+    setErrors((prev) => ({ ...prev, email: "" }));
+    return true;
+  };
 
-const isFormValid =
-  formData.name.trim() !== "" &&
-  formData.phone.trim() !== "" &&
-  formData.email.trim() !== "" &&
-  formData.message.trim() !== "" &&
-  !errors.phone &&
-  !errors.email;
+  const isFormValid =
+    formData.name.trim() !== "" &&
+    formData.phone.trim() !== "" &&
+    formData.email.trim() !== "" &&
+    formData.message.trim() !== "" &&
+    !errors.phone &&
+    !errors.email;
 
-const handleSubmit = async (e: React.FormEvent) => {
-  setLoader(true);
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    setLoader(true);
+    e.preventDefault();
 
+    try {
+      const response = await fetch("/api/contactus", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-  try {
-    const response = await fetch("/api/contactus", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
+      if (!response.ok) throw new Error();
 
-    if (!response.ok) throw new Error();
-    toast("Message Sent! We'll get back to you soon.", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-      type: "success",
-      transition: Bounce,
-    });
+      toast("Message Sent! We'll get back to you soon.", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "light",
+        type: "success",
+        transition: Bounce,
+      });
 
-    setFormData({
-      name: "",
-      phone: "",
-      email: "",
-      message: "",
-    });
+      setFormData({
+        name: "",
+        phone: "",
+        email: "",
+        message: "",
+      });
 
-  } catch {
-    toast("Failed to send message. Please try again.", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      type: "error",
-      theme: "light",
-      transition: Bounce,
-    });
-  } finally {
-    setLoader(false);
-  }
-};
+    } catch {
+      toast("Failed to send message. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+        type: "error",
+        theme: "light",
+        transition: Bounce,
+      });
+
+    } finally {
+      setLoader(false);
+    }
+  };
 
   return (
-    <section id="contact" className="contact-section">
-      <div className="nav-container">
-        <div className="contact-container">
-          <div className="contact-header animate-fade-in">
-            <h2>Get In Touch</h2>
-            <p className="contact-description">
-              Have questions about our products? We&apos;d love to hear from you
-            </p>
-          </div>
+    <section id="contact" className={styles.contactSection}>
+      <div className={styles.container}>
 
-          <div className="contact-grid">
-            <div className="contact-info animate-fade-in">
+        <div className={styles.header}>
+          <h2 className={styles.title}>Get In Touch</h2>
+          <p className={styles.description}>
+            Have questions about our products? We&apos;d love to hear from you.
+          </p>
+        </div>
+
+        <div className={styles.grid}>
+
+          {/* Contact Info */}
+
+          <div className={styles.contactInfo}>
+
+            <h3 className={styles.infoTitle}>Contact Information</h3>
+
+            <div className={styles.contactItem}>
+              <div className={styles.iconWrapper}>
+                <Mail size={20}/>
+              </div>
               <div>
-                <h3>Contact Information</h3>
-                <div className="contact-items">
-                  <div className="contact-item">
-                    <div className="contact-icon-wrapper primary">
-                      <Mail className="contact-icon" />
-                    </div>
-                    <div className="contact-item-content">
-                      <div className="contact-item-label">Email Us</div>
-                      <div className="contact-item-value">info@vakropharma.com</div>
-                    </div>
-                  </div>
+                <div className={styles.label}>Email Us</div>
+                <a href="mailto:info@vakropharma.com" className={styles.value}>
+                  info@vakropharma.com
+                </a>
+              </div>
+            </div>
 
-                  <div className="contact-item">
-                    <div className="contact-icon-wrapper secondary">
-                      <Phone className="contact-icon" />
-                    </div>
-                    <div className="contact-item-content">
-                      <div className="contact-item-label">Call Us</div>
-                      <div className="contact-item-value">+91 9079811724</div>
-                    </div>
-                  </div>
+            <div className={styles.contactItem}>
+              <div className={styles.iconWrapper}>
+                <Phone size={20}/>
+              </div>
+              <div>
+                <div className={styles.label}>Call Us</div>
+                <a href="tel:+919079811724" className={styles.value}>
+                  +91 9079811724
+                </a>
+              </div>
+            </div>
 
-                  <div className="contact-item">
-                    <div className="contact-icon-wrapper accent">
-                      <MapPin className="contact-icon" />
-                    </div>
-                    <div className="contact-item-content">
-                      <div className="contact-item-label">Visit Us</div>
-                      <div className="contact-item-value">
-                        Piragi, Raipur Berisal, Bijnor, Uttar Pradesh, 246721
-                      </div>
-                    </div>
-                  </div>
+            <div className={styles.contactItem}>
+              <div className={styles.iconWrapper}>
+                <MapPin size={20}/>
+              </div>
+              <div>
+                <div className={styles.label}>Visit Us</div>
+                <div className={styles.value}>
+                  Piragi, Raipur Berisal, Bijnor, Uttar Pradesh, 246721
                 </div>
               </div>
             </div>
 
-            <form
-              onSubmit={handleSubmit}
-              className="contact-form animate-fade-in delay-200"
-            >
-              <div>
-                <input
-                  className="input input-lg"
-                  placeholder="Your Name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              <div>
-                  <input
-                    type="tel"
-                    className="input input-lg"
-                    placeholder="Your Contact Number"
-                    value={formData.phone}
-                    maxLength={10}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, "");
-                      setFormData({ ...formData, phone: value });
-                    }}
-                    onBlur={() => validatePhone(formData.phone)}
-                    required
-                  />
-                  {errors.phone && (
-                    <p style={{ color: "red", fontSize: "12px" }}>{errors.phone}</p>
-                  )}
-              </div>
-
-              <div>
-                <input
-                  type="email"
-                  className="input input-lg"
-                  placeholder="Your Email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  onBlur={() => validateEmail(formData.email)}
-                  required
-                />
-
-                {errors.email && (
-                  <p style={{ color: "red", fontSize: "12px" }}>{errors.email}</p>
-                )}
-              </div>
-
-              <div>
-                <textarea
-                  className="textarea"
-                  placeholder="Your Message"
-                  value={formData.message}
-                  onChange={(e) =>
-                    setFormData({ ...formData, message: e.target.value })
-                  }
-                  required
-                  rows={5}
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="btn btn-lg btn-gradient-primary"
-                style={{ width: "100%" }}
-                disabled={!isFormValid}
-              >
-                Send Message
-              </button>
-            </form>
           </div>
+
+          {/* Form */}
+
+          <form onSubmit={handleSubmit} className={styles.contactForm}>
+
+            <input
+              className={styles.input}
+              placeholder="Your Name"
+              value={formData.name}
+              onChange={(e)=>setFormData({...formData,name:e.target.value})}
+              required
+            />
+
+            <div>
+              <input
+                type="tel"
+                className={styles.input}
+                placeholder="Your Contact Number"
+                value={formData.phone}
+                maxLength={10}
+                onChange={(e)=>{
+                  const value=e.target.value.replace(/\D/g,"");
+                  setFormData({...formData,phone:value});
+                }}
+                onBlur={()=>validatePhone(formData.phone)}
+                required
+              />
+              {errors.phone && <p className={styles.error}>{errors.phone}</p>}
+            </div>
+
+            <div>
+              <input
+                type="email"
+                className={styles.input}
+                placeholder="Your Email"
+                value={formData.email}
+                onChange={(e)=>setFormData({...formData,email:e.target.value})}
+                onBlur={()=>validateEmail(formData.email)}
+                required
+              />
+              {errors.email && <p className={styles.error}>{errors.email}</p>}
+            </div>
+
+            <textarea
+              className={styles.textarea}
+              placeholder="Your Message"
+              value={formData.message}
+              rows={5}
+              onChange={(e)=>setFormData({...formData,message:e.target.value})}
+              required
+            />
+
+            <button
+              type="submit"
+              className={styles.submitBtn}
+              disabled={!isFormValid}
+            >
+              Send Message
+            </button>
+
+          </form>
+
         </div>
       </div>
+
       {loader && <Loader />}
     </section>
   );

@@ -1,0 +1,190 @@
+.navbar {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+
+  background: rgba(244, 239, 231, 0.85);
+  backdrop-filter: blur(12px);
+
+  transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.scrolled {
+  box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+}
+
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 24px;
+}
+
+.navContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 75px;
+}
+
+/* LOGO */
+
+.logoSection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.logo {
+  object-fit: contain;
+}
+
+.brand {
+  font-size: 20px;
+  font-weight: 600;
+  color: #173F36;
+  letter-spacing: 1px;
+}
+
+/* LINKS */
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.link {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1F1F1F;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  position: relative;
+  transition: color 0.25s ease;
+}
+
+.link:hover {
+  color: #173F36;
+}
+
+/* underline animation */
+
+.link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+
+  width: 0%;
+  height: 2px;
+  background: #C9A25E;
+
+  transition: width 0.3s ease;
+}
+
+.link:hover::after {
+  width: 100%;
+}
+
+/* CTA BUTTON */
+
+.primaryBtn {
+  padding: 10px 18px;
+  border-radius: 8px;
+
+  background: #173F36;
+  color: white;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  border: none;
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+.primaryBtn:hover {
+  background: #2E5E52;
+  transform: translateY(-1px);
+}
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+
+  .links {
+    gap: 18px;
+  }
+
+  .brand {
+    font-size: 18px;
+  }
+
+}
+
+/* HAMBURGER */
+
+.hamburger {
+  display: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #173F36;
+}
+
+/* MOBILE MENU */
+
+.mobileMenu {
+  display: none;
+}
+
+/* MOBILE DESIGN */
+
+@media (max-width: 768px) {
+
+  .links {
+    display: none;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  .mobileMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+
+    padding: 20px 24px;
+    background: #F4EFE7;
+
+    border-top: 1px solid rgba(0,0,0,0.05);
+  }
+
+  .mobileMenu button {
+    background: none;
+    border: none;
+
+    font-size: 16px;
+    font-weight: 500;
+
+    text-align: left;
+    cursor: pointer;
+    color: #1F1F1F;
+  }
+
+}
+
+@media (max-width:768px){
+
+    .logo{
+      width:40px;
+      height:40px;
+    }
+
+}

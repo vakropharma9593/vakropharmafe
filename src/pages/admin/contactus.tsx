@@ -2,54 +2,53 @@ import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
 import { useEffect, useState } from "react";
 import { toast, Bounce } from "react-toastify";
+import styles from "../../styles/contactus.module.css";
 
 const ContactSubmissions = () => {
+  const [contactUs, setContactUs] = useState([]);
+  const [loader, setLoader] = useState<boolean>(false);
 
-    const [contactUs, setContactUs] = useState([]);
-    const [loader, setLoader] = useState<boolean>(false);
+  useEffect(() => {
+    const getContacts = async () => {
+      setLoader(true);
+      try {
+        const res = await fetch("/api/contactus");
+        const data = await res.json();
+        setContactUs(data.data || []);
+      } catch (error) {
+        toast(`Failed to get contacts details. Please try again. ${error}`, {
+          position: "top-right",
+          autoClose: 5000,
+          type: "error",
+          theme: "light",
+          transition: Bounce,
+        });
+      } finally {
+        setLoader(false);
+      }
+    };
 
-    useEffect(() => {
-        const getContacts = async () => {
-            setLoader(true);
-            try {
-                const res = await fetch("/api/contactus");
-
-                const data = await res.json();
-                setContactUs(data.data || []);
-            } catch (error) {
-                toast(`Failed to get contacts details. Please try again. ${error}`, {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    type: "error",
-                    theme: "light",
-                    transition: Bounce,
-                });
-            } finally {
-                setLoader(false);
-            }
-        };
-        getContacts();
-    }, []);
+    getContacts();
+  }, []);
 
   return (
-    <div className="submissions-page">
+    <div className={styles.container}>
       <AdminNavbar />
-      <div className="submissions-content">
-        <div className="submissions-header">
+
+      <div className={styles.content}>
+        {/* HEADER */}
+        <div className={styles.header}>
           <h1>
             Contact Submissions
-            <span className="submissions-count">{contactUs.length}</span>
+            <span>{contactUs.length}</span>
           </h1>
-          <p>All contact form submissions from users.</p>
+          <p>All contact form submissions from users</p>
         </div>
-        <div className="submissions-table-wrapper">
+
+        {/* TABLE */}
+        <div className={styles.tableWrapper}>
           {contactUs.length > 0 ? (
-            <table className="submissions-table">
+            <table className={styles.table}>
               <thead>
                 <tr>
                   <th>#</th>
@@ -59,28 +58,46 @@ const ContactSubmissions = () => {
                   <th>Message</th>
                 </tr>
               </thead>
+
               <tbody>
-                {contactUs.map((submission: { id: string, name: string, email: string, phone: string, message: string }, index) => (
-                  <tr key={submission?.id}>
-                    <td>{index + 1}</td>
-                    <td>{submission?.name}</td>
-                    <td>{submission?.email}</td>
-                    <td>{submission?.phone}</td>
-                    <td className="message-cell">
-                      <span className="message-text">{submission?.message}</span>
-                      <div className="message-tooltip">{submission?.message}</div>
-                    </td>
-                  </tr>
-                ))}
+                {contactUs.map(
+                  (
+                    submission: {
+                      id: string;
+                      name: string;
+                      email: string;
+                      phone: string;
+                      message: string;
+                    },
+                    index
+                  ) => (
+                    <tr key={submission?.id}>
+                      <td>{index + 1}</td>
+                      <td>{submission?.name}</td>
+                      <td>{submission?.email}</td>
+                      <td>{submission?.phone}</td>
+
+                      <td className={styles.messageCell}>
+                        <span className={styles.messageText}>
+                          {submission?.message}
+                        </span>
+                        <div className={styles.tooltip}>
+                          {submission?.message}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                )}
               </tbody>
             </table>
           ) : (
-            <div className="submissions-empty">
-              <p>No submissions yet.</p>
+            <div className={styles.empty}>
+              <p>No submissions yet</p>
             </div>
           )}
         </div>
       </div>
+
       {loader && <Loader />}
     </div>
   );

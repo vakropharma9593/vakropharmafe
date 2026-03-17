@@ -19,7 +19,17 @@ export default async function handler(
         mfgDate,
         receivedDate,
         expiryDate,
+        mrp,
+        gstPercentage,
       } = req.body;
+
+      const gst = parseFloat(gstPercentage);
+      const mrpAmount = parseFloat(mrp);
+      const basePrice: number = mrpAmount / (1 + gst / 100);
+      const gstAmount = mrpAmount - basePrice;
+      const mrpToSave = Number(mrpAmount.toFixed(2));
+      const basePriceToSave = Number(basePrice.toFixed(2));
+      const gstAmountToSave = Number(gstAmount.toFixed(2));
 
       const inventory = await Inventory.create({
         batch,
@@ -29,6 +39,10 @@ export default async function handler(
         mfgDate,
         receivedDate,
         expiryDate,
+        mrp: mrpToSave,
+        basePrice: basePriceToSave,
+        gstPercentage,
+        gstAmount: gstAmountToSave
       });
 
       return res.status(201).json({

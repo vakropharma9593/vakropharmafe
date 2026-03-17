@@ -32,6 +32,10 @@ const ProductSchema = new mongoose.Schema({
     required: true,
     min: 1,
   },
+  basePrice: {
+    type: Number,
+    required: true,
+  }
 });
 
 /**

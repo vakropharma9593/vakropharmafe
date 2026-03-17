@@ -37,6 +37,22 @@ const InventorySchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    mrp: {
+      type: Number,
+      required: true,
+    },
+    basePrice: {
+      type: Number,
+      required: true,
+    },
+    gstPercentage: {
+      type: Number,
+      required: true,
+    },
+    gstAmount: {
+      type: Number,
+      required: true,
+    }
   },
   { timestamps: true }
 );

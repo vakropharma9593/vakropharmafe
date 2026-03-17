@@ -1,6 +1,7 @@
 import heroImage from "../../public/assets/vakroallproducts.jpeg";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Image from "next/image";
+import styles from "../styles/hero.module.css";
 
 const Hero = () => {
   const scrollToProducts = () => {
@@ -11,68 +12,86 @@ const Hero = () => {
   };
 
   return (
-    <section id="home" className="hero-section gradient-hero">
-      <div className="hero-bg">
-        <div className="hero-bg-circle-1" />
-        <div className="hero-bg-circle-2" />
-      </div>
+    <section id="home" className={styles.heroSection}>
       
-      <div className="nav-container hero-content">
-        <div className="hero-grid">
-          <div className="hero-text animate-fade-in">
-            <div className="hero-badge">
-              <Sparkles style={{width: '1rem', height: '1rem'}} />
+      <div className={styles.backgroundDecor}>
+        <div className={styles.circleOne}></div>
+        <div className={styles.circleTwo}></div>
+      </div>
+
+      <div className={styles.container}>
+        <div className={styles.heroGrid}>
+
+          {/* LEFT CONTENT */}
+
+          <div className={styles.heroText}>
+
+            <div className={styles.badge}>
+              <Sparkles size={16} />
               Dermatologist Tested & Approved
             </div>
-            <h1 className="hero-title">
+
+            <h1 className={styles.title}>
               Advanced Skincare Solutions for Acne, Pigmentation & Sun Protection
             </h1>
-            <p className="hero-description">
-              Vakro brings dermatologist-inspired skincare powered by clinically proven ingredients like Salicylic Acid, Azelaic Acid, Niacinamide, Ceramides, and SPF 50+ protection to target acne, dark spots, excess oil, and sun damage.
+
+            <p className={styles.description}>
+              Vakro brings dermatologist-inspired skincare powered by clinically
+              proven ingredients like Salicylic Acid, Azelaic Acid, Niacinamide,
+              Ceramides, and SPF 50+ protection to target acne, dark spots,
+              excess oil, and sun damage.
             </p>
-            <div className="hero-buttons">
-              <button
-                onClick={scrollToProducts}
-                className="btn btn-lg btn-gradient-primary"
-                style={{display: 'inline-flex', alignItems: 'center', gap: '0.5rem'}}
-              >
+
+            <div className={styles.buttons}>
+              <button onClick={scrollToProducts} className={styles.primaryBtn}>
                 Explore Products
-                <ArrowRight style={{width: '1.25rem', height: '1.25rem'}} />
+                <ArrowRight size={18} />
               </button>
-              {/* <button className="btn btn-lg btn-outline">
-                Learn More
-              </button> */}
             </div>
-            <div className="hero-stats">
-              <div className="hero-stat">
-                <div className="hero-stat-number">4</div>
-                <div className="hero-stat-label">Premium Products</div>
+
+            <div className={styles.stats}>
+              
+              <div className={styles.stat}>
+                <div className={styles.statNumber}>4</div>
+                <div className={styles.statLabel}>Premium Products</div>
               </div>
-              <div className="hero-divider" />
-              <div className="hero-stat">
-                <div className="hero-stat-number">100%</div>
-                <div className="hero-stat-label">Natural Ingredients</div>
+
+              {/* <div className={styles.divider}></div> */}
+
+              {/* <div className={styles.stat}>
+                <div className={styles.statNumber}>100%</div>
+                <div className={styles.statLabel}>Natural Ingredients</div>
+              </div> */}
+
+              <div className={styles.divider}></div>
+
+              <div className={styles.stat}>
+                <div className={styles.statNumber}>1K+</div>
+                <div className={styles.statLabel}>Happy Customers</div>
               </div>
-              <div className="hero-divider" />
-              <div className="hero-stat">
-                <div className="hero-stat-number">1K+</div>
-                <div className="hero-stat-label">Happy Customers</div>
-              </div>
+
             </div>
+
           </div>
-          <div className="hero-image-container animate-fade-in delay-200">
-            <div className="hero-image-wrapper">
+
+          {/* RIGHT IMAGE */}
+
+          <div className={styles.imageContainer}>
+            <div className={styles.imageWrapper}>
+
               <Image
                 src={heroImage}
                 height={616}
                 width={647}
-                alt="Premium skincare products"
-                className="hero-image"
+                alt="Vakro skincare products"
+                className={styles.heroImage}
               />
+
             </div>
-            <div className="hero-image-glow-1" />
-            <div className="hero-image-glow-2" />
+
+            <div className={styles.imageGlow}></div>
           </div>
+
         </div>
       </div>
     </section>

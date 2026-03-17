@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/mongodb";
-import Customer from "@/models/Customer";
 import Order from "@/models/Order";
 import Payment from "@/models/Payment";
 import Inventory from "@/models/Inventory";
@@ -29,17 +28,9 @@ export default async function handler(
 
     // CREATE ORDER
     if (req.method === "POST") {
-      const { customerPhone, date, status, products, paymentType } = req.body;
+      const { customerId, customerName, date, status, products, paymentType } = req.body;
 
-      // 1️⃣ Get customer
-      const customer = await Customer.findOne({ phone: customerPhone });
-
-      if (!customer) {
-        return res.status(404).json({
-          success: false,
-          message: "Customer not found"
-        });
-      }
+       const finalProducts = [];
 
       // 2️⃣ Check inventory & deduct stock
       for (const product of products) {
@@ -64,14 +55,19 @@ export default async function handler(
 
         inventory.remainingCount -= product.quantity;
         await inventory.save();
-      }
 
+        const basePrice = parseFloat(product.sellingPrice)/(1 + (inventory.gstPercentage/100));
+        const basePriceToSave = Number(basePrice.toFixed(2));
+        const newProduct = { ...product, basePrice: basePriceToSave };
+        finalProducts.push(newProduct);
+      }
+      
       // 3️⃣ Create order
       const order = await Order.create({
-        customerId: customer._id,
+        customerId: customerId,
         date,
         status,
-        products
+        products: finalProducts,
       });
 
       // 4️⃣ Calculate payment amount
@@ -89,7 +85,7 @@ export default async function handler(
 
       const result = {
             id: order._id,
-            customerName: customer?.name,
+            customerName: customerName,
             date: order.date,
             status: order.status,
             products: order.products,
