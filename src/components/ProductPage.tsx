@@ -45,6 +45,12 @@ const ProductPage = ({
   usageSteps,
   product
 }: ProductPageProps) => {
+  const handleBuyNow = () => {
+    const phoneNumber = 919286382701;
+    const url = `https://wa.me/${phoneNumber}`;
+    window.open(url, "_blank");
+  }
+
   return (
     <main className={styles.productPage}>
 
@@ -77,7 +83,7 @@ const ProductPage = ({
                 ))}
               </ul>
 
-              <button className={styles.buyButton}>
+              <button className={styles.buyButton} onClick={() => handleBuyNow()} >
                 Buy Now
               </button>
 
