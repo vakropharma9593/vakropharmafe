@@ -20,6 +20,41 @@ const Footer: React.FC<FooterProps> = ({ source }) => {
     }
   };
 
+  const handleSocialMedia = (media: string) => {
+    switch (media) {
+      case "fb": {
+          const url = "https://www.instagram.com/vakropharma/";
+          window.open(url, "_blank");
+        }
+        break;
+      case "insta": {
+          const url = "https://www.instagram.com/vakropharma/";
+          window.open(url, "_blank");
+        }
+        break;
+
+      case "x": {
+          const url = "https://www.instagram.com/vakropharma/";
+          window.open(url, "_blank");
+        }
+        break;
+      
+      case "youtube": {
+          const url = "https://www.instagram.com/vakropharma/";
+          window.open(url, "_blank");
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  const handleBuyNow = () => {
+    const phoneNumber = 919286382701;
+    const url = `https://wa.me/${phoneNumber}`;
+    window.open(url, "_blank");
+  }
+
   return (
 
     <footer className={styles.footer}>
@@ -115,30 +150,41 @@ const Footer: React.FC<FooterProps> = ({ source }) => {
 
             <div className={styles.social}>
 
-              <button className={styles.socialLink} aria-label="Facebook">
+              {/* <button className={styles.socialLink} onClick={() => handleSocialMedia("fb")} aria-label="Facebook">
                 <Facebook size={20}/>
-              </button>
+              </button> */}
 
-              <button className={styles.socialLink} aria-label="Instagram">
+              <button className={styles.socialLink} onClick={() => handleSocialMedia("insta")} aria-label="Instagram">
                 <Instagram size={20}/>
               </button>
 
-              <button className={styles.socialLink} aria-label="Twitter">
+              {/* <button className={styles.socialLink} onClick={() => handleSocialMedia("x")} aria-label="Twitter">
                 <Twitter size={20}/>
-              </button>
+              </button> */}
 
-              <button className={styles.socialLink} aria-label="YouTube">
+              {/* <button className={styles.socialLink} onClick={() => handleSocialMedia("youtube")} aria-label="YouTube">
                 <Youtube size={20}/>
-              </button>
+              </button> */}
 
             </div>
 
             <div className={styles.contactInfo}>
 
-              <p>Email: info@vakropharma.com</p>
-
-              <p>Phone: +91 9079811724</p>
-
+              <div>
+                  <a href="mailto:info@vakropharma.com" className={styles.value}>
+                    Email: info@vakropharma.com
+                  </a>
+              </div>
+              <div>
+                <a href="tel:+919079811724" className={styles.value}>
+                  Call: +91 9079811724
+                </a>
+              </div>
+              <div>
+                <a onClick={handleBuyNow} className={styles.value}>
+                  Whatsapp: +91 9286382701
+                </a>
+              </div>
             </div>
 
           </div>
