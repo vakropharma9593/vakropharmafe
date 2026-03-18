@@ -176,7 +176,7 @@
 }
 
 .usageImage img{
-  max-width:380px;
+  max-width: 100%;
   height:auto;
 }
 
@@ -194,20 +194,24 @@
 
 @media(max-width:900px){
 
-.heroGrid{
-grid-template-columns:1fr;
-}
+  .heroGrid{
+    grid-template-columns:1fr;
+  }
 
-.benefitGrid{
-grid-template-columns:1fr;
-}
+  .benefitGrid{
+    grid-template-columns:1fr;
+  }
 
-.ingredientGrid{
-grid-template-columns:1fr 1fr;
-}
+  .ingredientGrid{
+    grid-template-columns:1fr 1fr;
+  }
 
-.usageGrid{
-grid-template-columns:1fr;
-}
+  .usageGrid{
+    grid-template-columns:1fr;
+  }
+
+  .ingredientGrid.threeGrid {
+    grid-template-columns: 1fr;
+  }
 
 }

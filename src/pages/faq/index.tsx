@@ -109,7 +109,7 @@ const FAQ = () => {
         </div>
       </section>
 
-      <Footer />
+      <Footer source="product" />
     </>
   );
 };

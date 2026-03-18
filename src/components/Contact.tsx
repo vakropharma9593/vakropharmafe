@@ -125,7 +125,7 @@ const Contact = () => {
               <div className={styles.iconWrapper}>
                 <Mail size={20}/>
               </div>
-              <div>
+              <div className={styles.contactItemRight}>
                 <div className={styles.label}>Email Us</div>
                 <a href="mailto:info@vakropharma.com" className={styles.value}>
                   info@vakropharma.com
@@ -137,7 +137,7 @@ const Contact = () => {
               <div className={styles.iconWrapper}>
                 <Phone size={20}/>
               </div>
-              <div>
+              <div className={styles.contactItemRight}>
                 <div className={styles.label}>Call Us</div>
                 <a href="tel:+919079811724" className={styles.value}>
                   +91 9079811724
@@ -149,7 +149,7 @@ const Contact = () => {
               <div className={styles.iconWrapper}>
                 <MapPin size={20}/>
               </div>
-              <div>
+              <div className={styles.contactItemRight} >
                 <div className={styles.label}>Visit Us</div>
                 <div className={styles.value}>
                   Piragi, Raipur Berisal, Bijnor, Uttar Pradesh, 246721

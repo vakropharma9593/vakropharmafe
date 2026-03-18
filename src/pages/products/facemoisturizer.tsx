@@ -116,7 +116,7 @@ const FaceMoisturizer = () => {
         product="faceMoisturizer"
       />
 
-      <Footer />
+      <Footer source="product" />
     </>
   );
 };

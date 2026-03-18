@@ -116,7 +116,7 @@ const Sunscreen = () => {
         product="sunscreen"
       />
 
-      <Footer />
+      <Footer source="product" />
     </>
   );
 };

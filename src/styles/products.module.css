@@ -1,5 +1,5 @@
 .productsSection {
-  padding: 110px 0;
+  padding: 40px 0;
   background: #F4EFE7;
 }
 
@@ -17,7 +17,7 @@
   text-align: center;
   max-width: 650px;
   margin: auto;
-  margin-bottom: 70px;
+  margin-bottom: 40px;
 }
 
 .badge {

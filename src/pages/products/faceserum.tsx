@@ -87,7 +87,7 @@ const FaceSerum = () => {
         product="faceSerum"
       />
 
-      <Footer/>
+      <Footer source="product" />
     </>
   );
 };
