@@ -112,6 +112,18 @@
   font-size:13px;
   color:#cfcfcf;
   line-height:1.6;
+  display: flex;
+  flex-direction: column;
+}
+
+.contactInfo div {
+  margin-bottom: 8px;
+}
+
+.contactInfo a {
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 /* BOTTOM */
