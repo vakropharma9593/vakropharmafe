@@ -39,6 +39,9 @@ export default function LoginPage() {
       <div className="login-card">
 
         <div className="login-header">
+           <button onClick={() => router.push("/")} className="login-btn" style={{ backgroundColor: "#C9A25E"}}>
+            Home
+          </button>
           <h1>Login</h1>
           <p>Access your account</p>
         </div>

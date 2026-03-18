@@ -4,7 +4,11 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import styles from "../styles/footer.module.css";
 
-const Footer = () => {
+type FooterProps = {
+  source?: string;
+};
+
+const Footer: React.FC<FooterProps> = ({ source }) => {
 
   const router = useRouter();
   const currentYear = new Date().getFullYear();
@@ -61,13 +65,13 @@ const Footer = () => {
 
             <div className={styles.links}>
 
-              <button onClick={() => scrollToSection("home")} className={styles.link}>Home</button>
+              <button onClick={() => source === "product" ? router.push("/") : scrollToSection("home")} className={styles.link}>Home</button>
 
-              <button onClick={() => scrollToSection("products")} className={styles.link}>Products</button>
+              {source === "product" ? null : <button onClick={() => scrollToSection("products")} className={styles.link}>Products</button>}
 
-              <button onClick={() => scrollToSection("benefits")} className={styles.link}>About Us</button>
-
-              <button onClick={() => scrollToSection("contact")} className={styles.link}>Contact</button>
+              {source === "product" ? null : <button onClick={() => scrollToSection("benefits")} className={styles.link}>About Us</button>
+}
+              {source === "product" ? null : <button onClick={() => scrollToSection("contact")} className={styles.link}>Contact</button>}
 
               <button onClick={() => router.push("/faq")} className={styles.link}>FAQ</button>
 

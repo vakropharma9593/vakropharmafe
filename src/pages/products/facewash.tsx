@@ -112,7 +112,7 @@ const FacewashPage = () => {
         product="facewash"
       />
 
-      <Footer />
+      <Footer source="product" />
     </>
   );
 };
