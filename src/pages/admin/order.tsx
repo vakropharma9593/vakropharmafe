@@ -1,11 +1,11 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
-import { dateToShow, formatStatus, isLastRowEmpty, Product } from "@/lib/utils";
-import ACTIONS from "@/store/actions";
+import { dateToShow, formatStatus, Product } from "@/lib/utils";
 import { Context } from "@/store/context";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/order.module.css";
+import OrderModal from "@/components/OrderModal";
 
 type Order = {
   id?: string;
@@ -18,56 +18,22 @@ type Order = {
 };
 
 const Orders = () => {
-  const { state, dispatch } = useContext(Context);
+  const { state } = useContext(Context);
   const stateInventory = state.inventory;
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loader, setLoader] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [totalAmountPaid, setTotalAmountPaid] = useState<number>(0);
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [statusUpdate, setStatusUpdate] = useState("");
   const [showStatusModal, setShowStatusModal] = useState(false);
-
-  const [errors, setErrors] = useState({ customerPhone: "" });
-
-  const [formData, setFormData] = useState({
-    customerPhone: "",
-    customerId: "",
-    customerName: "",
-    date: "",
-    status: "Payment_Pending",
-    paymentType: "UPI",
-  });
-
-  const [products, setProducts] = useState<Product[]>([
-    { productName: "", sellingPrice: 0, batch: "", quantity: 1, discountPercentage: 0 },
-  ]);
-
-  const [batches, setBatches] = useState<{batch: string, mrp: number}[]>([]);
 
   const [showViewModal, setShowViewModal] = useState(false);
 
   useEffect(() => {
     getOrders();
   }, []);
-
-  useEffect(() => {
-    if (!showModal) {
-      setFormData({
-        customerPhone: "",
-        customerId: "",
-        customerName: "",
-        date: "",
-        status: "Payment_Pending",
-        paymentType: "UPI",
-      })
-      setProducts([
-        { productName: "", sellingPrice: 0, batch: "", quantity: 1, discountPercentage: 0 },
-      ])
-    }
-  },[showModal])
 
   const getOrders = async () => {
     try {
@@ -79,97 +45,6 @@ const Orders = () => {
       toast.error("Failed to fetch orders");
     } finally {
       setLoader(false);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-    const handleProductChange = <K extends keyof Product>(
-        index: number,
-        field: K,
-        value: Product[K],
-        p?: Product
-    ) => {
-    const updated = [...products];
-
-    updated[index] = {
-        ...updated[index],
-        [field]: value,
-    };
-
-    setProducts(updated);
-
-    const total = calculateTotal(updated);
-
-    setTotalAmountPaid(total);
-    // update batches based on product
-    if (field === "productName") {
-      const allbatches = stateInventory?.filter((item: { batch: string, itemName: string }) => item?.itemName === value).map((inventory: { batch: string, mrp: number }) => { return {batch: inventory.batch, mrp: inventory.mrp}});
-      setBatches(allbatches);
-    }
-    if (field === "discountPercentage" && p) {
-      const mrp = batches?.filter((b: {batch: string, mrp: number}) => b.batch === p.batch)[0].mrp;
-      const sellingPrice = mrp*(1 - parseFloat(value as string)/ 100);
-      updated[index] = {
-          ...updated[index],
-          sellingPrice: Number(sellingPrice.toFixed(2)),
-      };
-    }
-  };
-
-  const addProduct = () => {
-    setProducts([
-      ...products,
-      { productName: "", sellingPrice: 0, batch: "", quantity: 1, discountPercentage: 0 },
-    ]);
-  };
-
-  const calculateTotal = (products: Product[]) => {
-    return products.reduce(
-      (total, product) => total + product.sellingPrice * product.quantity,
-      0
-    );
-  };
-
-  const getInventory = async () => {
-    try {
-      const res = await fetch("/api/inventory");
-      const data = await res.json();
-      dispatch({ type: ACTIONS.SET_INVENTORY, payload: data.data || [] });
-    } catch (error) {
-      toast.error("Failed to get inventory");
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoader(true);
-    if (formData?.customerId !== "" && formData?.customerName !== "" && formData?.paymentType !== "" && formData?.status && products?.length > 0) {
-      try {
-        const res = await fetch("/api/order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...formData, products }),
-        });
-
-        const data = await res.json();
-
-        setOrders([...orders, data.data]);
-        setShowModal(false);
-        getInventory();
-
-        toast.success("Order created successfully");
-      } catch {
-        toast.error("Failed to create order");
-      } finally {
-        setLoader(false);
-      }
-    } else {
-      setLoader(false);
-      toast.error("Please fill all fields.");
     }
   };
 
@@ -206,43 +81,6 @@ const Orders = () => {
     Preparing: styles.preparing,
     Dispatched: styles.dispatched,
     Delivered: styles.delivered,
-  };
-
-  const getCustomer = async (phone: string) => {
-    setLoader(true);
-    try {
-      const res = await fetch(`/api/customer/${phone}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      const data = await res.json();
-      setFormData({ ...formData, customerName: data.data.name, customerId: data.data?._id})
-
-      toast.success("Customer fetched successfully");
-    } catch {
-      toast.error("Failed to fetch customer details.");
-    } finally {
-      setLoader(false);
-    }
-  }
-
-  const validatePhone = (phone: string) => {
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(phone)) {
-      setErrors({ customerPhone: "Phone must be 10 digits" });
-      return false;
-    }
-    setErrors({ customerPhone: "" });
-    return true;
-  };
-
-  const removeProduct = (index: number) => {
-    const updated = products.filter((_, i) => i !== index);
-    setProducts(updated);
-
-    const total = calculateTotal(updated);
-    setTotalAmountPaid(total);
   };
 
   return (
@@ -332,157 +170,158 @@ const Orders = () => {
 
       {/* MODAL */}
       {showModal && (
-        <div className={styles.modalOverlay}>
-          <div className={`${styles.modal}`}>
-            <div className={styles.modalHeader}>
-              <h2>Create Order</h2>
-              <button onClick={() => setShowModal(false)}>✕</button>
-            </div>
+        // <div className={styles.modalOverlay}>
+        //   <div className={`${styles.modal}`}>
+        //     <div className={styles.modalHeader}>
+        //       <h2>Create Order</h2>
+        //       <button onClick={() => setShowModal(false)}>✕</button>
+        //     </div>
 
-            <form className={styles.form} onSubmit={handleSubmit}>
-              <input
-                placeholder="Customer Phone"
-                value={formData.customerPhone}
-                maxLength={10}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, "");
-                  setFormData({
-                    ...formData,
-                    customerPhone: value,
-                  })
-                  if (value?.length === 10) {
-                    getCustomer(value);
-                  }
-                }}
-                onBlur={() => validatePhone(formData.customerPhone)}
-              />
-              {errors.customerPhone && (
-                <p className={styles.error}>{errors.customerPhone}</p>
-              )}
+        //     <form className={styles.form} onSubmit={handleSubmit}>
+        //       <input
+        //         placeholder="Customer Phone"
+        //         value={formData.customerPhone}
+        //         maxLength={10}
+        //         onChange={(e) => {
+        //           const value = e.target.value.replace(/\D/g, "");
+        //           setFormData({
+        //             ...formData,
+        //             customerPhone: value,
+        //           })
+        //           if (value?.length === 10) {
+        //             getCustomer(value);
+        //           }
+        //         }}
+        //         onBlur={() => validatePhone(formData.customerPhone)}
+        //       />
+        //       {errors.customerPhone && (
+        //         <p className={styles.error}>{errors.customerPhone}</p>
+        //       )}
 
-              {formData?.customerName && <h4>Customer Details :: {formData?.customerName}</h4>}
+        //       {formData?.customerName && <h4>Customer Details :: {formData?.customerName}</h4>}
 
-              <input type="date" name="date" onChange={handleChange} />
+        //       <input type="date" name="date" onChange={handleChange} />
 
-              <select name="status" onChange={handleChange}>
-                <option>Payment_Pending</option>
-                <option>Payment_Done</option>
-                <option>Preparing</option>
-                <option>Dispatched</option>
-                <option>Delivered</option>
-              </select>
+        //       <select name="status" onChange={handleChange}>
+        //         <option>Payment_Pending</option>
+        //         <option>Payment_Done</option>
+        //         <option>Preparing</option>
+        //         <option>Dispatched</option>
+        //         <option>Delivered</option>
+        //       </select>
 
-              <select name="paymentType" onChange={handleChange}>
-                <option>UPI</option>
-                <option>Cash</option>
-                <option>Bank Transfer</option>
-              </select>
+        //       <select name="paymentType" onChange={handleChange}>
+        //         <option>UPI</option>
+        //         <option>Cash</option>
+        //         <option>Bank Transfer</option>
+        //       </select>
 
-              <h4>Products</h4>
+        //       <h4>Products</h4>
 
-              <div className={styles.productHeader}>
-                <div>Product</div>
-                <div>Batch</div>
-                <div>MRP</div>
-                <div>Discount %</div>
-                <div>Selling</div>
-                <div>Qty</div>
-                <div></div>
-              </div>
+        //       <div className={styles.productHeader}>
+        //         <div>Product</div>
+        //         <div>Batch</div>
+        //         <div>MRP</div>
+        //         <div>Discount %</div>
+        //         <div>Selling</div>
+        //         <div>Qty</div>
+        //         <div></div>
+        //       </div>
 
-              {products.map((p, index) => (
-                <div key={index} className={styles.productRow}>
-                  {/* PRODUCT */}
-                  <select
-                    value={p.productName}
-                    onChange={(e) =>
-                      handleProductChange(index, "productName", e.target.value)
-                    }
-                  >
-                    <option value="">Select</option>
-                    <option value="Facewash">Facewash</option>
-                    <option value="Face_Serum">Face Serum</option>
-                    <option value="Face_Moisturizer">Face Moisturizer</option>
-                    <option value="Sunscreen">Sunscreen</option>
-                  </select>
+        //       {products.map((p, index) => (
+        //         <div key={index} className={styles.productRow}>
+        //           {/* PRODUCT */}
+        //           <select
+        //             value={p.productName}
+        //             onChange={(e) =>
+        //               handleProductChange(index, "productName", e.target.value)
+        //             }
+        //           >
+        //             <option value="">Select</option>
+        //             <option value="Facewash">Facewash</option>
+        //             <option value="Face_Serum">Face Serum</option>
+        //             <option value="Face_Moisturizer">Face Moisturizer</option>
+        //             <option value="Sunscreen">Sunscreen</option>
+        //           </select>
 
-                  {/* BATCH */}
-                  <select
-                    value={p.batch}
-                    onChange={(e) =>
-                      handleProductChange(index, "batch", e.target.value)
-                    }
-                  >
-                    <option value="">Batch</option>
-                    {batches.map((b) => (
-                      <option key={b.batch}>{b.batch}</option>
-                    ))}
-                  </select>
+        //           {/* BATCH */}
+        //           <select
+        //             value={p.batch}
+        //             onChange={(e) =>
+        //               handleProductChange(index, "batch", e.target.value)
+        //             }
+        //           >
+        //             <option value="">Batch</option>
+        //             {batches.map((b) => (
+        //               <option key={b.batch}>{b.batch}</option>
+        //             ))}
+        //           </select>
 
-                  {/* MRP */}
-                  <div className={styles.infoBox}>
-                    <span>MRP</span>
-                    ₹{
-                      batches?.filter((b) => b.batch === p.batch)[0]?.mrp || 0
-                    }
-                  </div>
+        //           {/* MRP */}
+        //           <div className={styles.infoBox}>
+        //             <span>MRP</span>
+        //             ₹{
+        //               batches?.filter((b) => b.batch === p.batch)[0]?.mrp || 0
+        //             }
+        //           </div>
 
-                  {/* DISCOUNT */}
-                  <input
-                    type="number"
-                    className={styles.smallInput}
-                    placeholder="%"
-                    onChange={(e) =>
-                      handleProductChange(
-                        index,
-                        "discountPercentage",
-                        Number(e.target.value),
-                        p
-                      )
-                    }
-                  />
+        //           {/* DISCOUNT */}
+        //           <input
+        //             type="number"
+        //             className={styles.smallInput}
+        //             placeholder="%"
+        //             onChange={(e) =>
+        //               handleProductChange(
+        //                 index,
+        //                 "discountPercentage",
+        //                 Number(e.target.value),
+        //                 p
+        //               )
+        //             }
+        //           />
 
-                  {/* SELLING PRICE */}
-                  <div className={styles.infoBox}>
-                    <span>Selling</span>
-                    ₹{p.sellingPrice}
-                  </div>
+        //           {/* SELLING PRICE */}
+        //           <div className={styles.infoBox}>
+        //             <span>Selling</span>
+        //             ₹{p.sellingPrice}
+        //           </div>
 
-                  {/* QTY */}
-                  <input
-                    type="number"
-                    className={styles.smallInput}
-                    placeholder="Qty"
-                    onChange={(e) =>
-                      handleProductChange(
-                        index,
-                        "quantity",
-                        Number(e.target.value)
-                      )
-                    }
-                  />
-                  {!(index === 0 && products?.length === 1) && <button
-                    type="button"
-                    className={styles.deleteBtn}
-                    onClick={() => removeProduct(index)}
-                  >
-                    ✕
-                  </button>}
-                </div>
-              ))}
+        //           {/* QTY */}
+        //           <input
+        //             type="number"
+        //             className={styles.smallInput}
+        //             placeholder="Qty"
+        //             onChange={(e) =>
+        //               handleProductChange(
+        //                 index,
+        //                 "quantity",
+        //                 Number(e.target.value)
+        //               )
+        //             }
+        //           />
+        //           {!(index === 0 && products?.length === 1) && <button
+        //             type="button"
+        //             className={styles.deleteBtn}
+        //             onClick={() => removeProduct(index)}
+        //           >
+        //             ✕
+        //           </button>}
+        //         </div>
+        //       ))}
 
-              <button type="button" disabled={isLastRowEmpty(products)} onClick={addProduct}>
-                + Add Product
-              </button>
+        //       <button type="button" disabled={isLastRowEmpty(products)} onClick={addProduct}>
+        //         + Add Product
+        //       </button>
 
-              <div className={styles.total}>
-                Total: ₹{totalAmountPaid}
-              </div>
+        //       <div className={styles.total}>
+        //         Total: ₹{totalAmountPaid}
+        //       </div>
 
-              <button>Create Order</button>
-            </form>
-          </div>
-        </div>
+        //       <button>Create Order</button>
+        //     </form>
+        //   </div>
+        // </div>
+        <OrderModal setShowOrderModal={setShowModal} source="orderPage" callAfterSave={getOrders} allowedProducts={[{ name: "Facewash", value: "Facewash" }, { name: "Face Serum", value : "Face_Serum" }, { name: "Face Moisturizer", value: "Face_Moisturizer" }, { name: "Sunscreen", value: "Sunscreen" }]} />
       )}
 
       {/* STATUS MODAL */}

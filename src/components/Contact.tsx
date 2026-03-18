@@ -23,7 +23,7 @@ const Contact = () => {
   const validatePhone = (phone: string) => {
     const phoneRegex = /^[0-9]{10}$/;
 
-    if (!phoneRegex.test(phone)) {
+    if (!phoneRegex.test(phone) && phone?.length > 0) {
       setErrors((prev) => ({
         ...prev,
         phone: "Phone number must be exactly 10 digits",
@@ -38,7 +38,7 @@ const Contact = () => {
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(email) && email?.length > 0) {
       setErrors((prev) => ({
         ...prev,
         email: "Please enter a valid email address",
@@ -182,7 +182,7 @@ const Contact = () => {
                   const value=e.target.value.replace(/\D/g,"");
                   setFormData({...formData,phone:value});
                 }}
-                onBlur={()=>validatePhone(formData.phone)}
+                onBlur={()=> validatePhone(formData.phone)}
                 required
               />
               {errors.phone && <p className={styles.error}>{errors.phone}</p>}
