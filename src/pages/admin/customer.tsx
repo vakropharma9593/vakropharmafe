@@ -1,11 +1,9 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/customer.module.css";
-import { Context } from "@/store/context";
-import ACTIONS from "@/store/actions";
-import { isLastRowEmpty, Product } from "@/lib/utils";
+import OrderModal from "@/components/OrderModal";
 
 type Customer = {
   id?: string;
@@ -17,8 +15,6 @@ type Customer = {
 };
 
 const Customers = () => {
-  const { state, dispatch } = useContext(Context);
-  const stateInventory = state.inventory;
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loader, setLoader] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -35,7 +31,6 @@ const Customers = () => {
   });
 
   const [showOrderModal, setShowOrderModal] = useState(false);
-  const [totalAmountPaid, setTotalAmountPaid] = useState<number>(0);
   const [orderFormData, setOrderFormData] = useState({
     customerPhone: "",
     customerId: "",
@@ -44,31 +39,10 @@ const Customers = () => {
     status: "Payment_Pending",
     paymentType: "UPI",
   });
-  
-    const [products, setProducts] = useState<Product[]>([
-      { productName: "", sellingPrice: 0, batch: "", quantity: 1, discountPercentage: 0 },
-    ]);
-    const [batches, setBatches] = useState<{batch: string, mrp: number}[]>([]);
 
   useEffect(() => {
     getCustomers();
   }, []);
-
-  useEffect(() => {
-    if (!showOrderModal) {
-      setOrderFormData({
-        customerPhone: "",
-        customerId: "",
-        customerName: "",
-        date: "",
-        status: "Payment_Pending",
-        paymentType: "UPI",
-      })
-      setProducts([
-        { productName: "", sellingPrice: 0, batch: "", quantity: 1, discountPercentage: 0 },
-      ])
-    }
-  },[showOrderModal])
 
   const getCustomers = async () => {
     setLoader(true);
@@ -149,102 +123,6 @@ const Customers = () => {
     } else {
       setErrors((prev) => ({ ...prev, name: "" }));
     }
-  };
-
-  const handleOrderChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setOrderFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const calculateTotal = (products: Product[]) => {
-    return products.reduce(
-      (total, product) => total + product.sellingPrice * product.quantity,
-      0
-    );
-  };
-
-  const handleProductChange = <K extends keyof Product>(
-        index: number,
-        field: K,
-        value: Product[K],
-        p?: Product
-    ) => {
-    const updated = [...products];
-
-    updated[index] = {
-        ...updated[index],
-        [field]: value,
-    };
-
-    setProducts(updated);
-
-    const total = calculateTotal(updated);
-
-    setTotalAmountPaid(total);
-    // update batches based on product
-    if (field === "productName") {
-      const allbatches = stateInventory?.filter((item: { batch: string, itemName: string }) => item?.itemName === value).map((inventory: { batch: string, mrp: number }) => { return {batch: inventory.batch, mrp: inventory.mrp}});
-      setBatches(allbatches);
-    }
-    if (field === "discountPercentage" && p) {
-      const mrp = batches?.filter((b: {batch: string, mrp: number}) => b.batch === p.batch)[0].mrp;
-      const sellingPrice = mrp*(1 - parseFloat(value as string)/ 100);
-      updated[index] = {
-          ...updated[index],
-          sellingPrice: Number(sellingPrice.toFixed(2)),
-      };
-    }
-  };
-
-  const addProduct = () => {
-    setProducts([
-      ...products,
-      { productName: "", sellingPrice: 0, batch: "", quantity: 1, discountPercentage: 0 },
-    ]);
-  };
-
-  const getInventory = async () => {
-    try {
-      const res = await fetch("/api/inventory");
-      const data = await res.json();
-      dispatch({ type: ACTIONS.SET_INVENTORY, payload: data.data || [] });
-    } catch (error) {
-      toast.error("Failed to get inventory");
-    }
-  };
-
-  const handleOrderSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoader(true);
-    if (orderFormData?.customerId !== "" && orderFormData?.customerName !== "" && orderFormData?.paymentType !== "" && orderFormData?.status && products?.length > 0 && !isLastRowEmpty(products)) {
-      try {
-        await fetch("/api/order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...orderFormData, products }),
-        });
-
-        setShowOrderModal(false);
-        getInventory();
-
-        toast.success("Order created successfully");
-      } catch {
-        toast.error("Failed to create order");
-      } finally {
-        setLoader(false);
-      }
-    } else {
-      toast.error("Please fill all fields.");
-      setLoader(false);
-    }
-  };
-
-  const removeProduct = (index: number) => {
-    const updated = products.filter((_, i) => i !== index);
-    setProducts(updated);
-
-    const total = calculateTotal(updated);
-    setTotalAmountPaid(total);
   };
 
   return (
@@ -377,139 +255,7 @@ const Customers = () => {
       )}
 
       {showOrderModal && (
-        <div className={styles.modalOverlay}>
-          <div className={`${styles.modal}`}>
-            <div className={styles.modalHeader}>
-              <h2>Create Order</h2>
-              <button onClick={() => setShowOrderModal(false)}>✕</button>
-            </div>
-
-            <form className={styles.form} onSubmit={handleOrderSubmit}>
-              <h4>Customer Phone : {orderFormData?.customerPhone}</h4>
-
-              {orderFormData?.customerName && <h4>Customer Name :: {orderFormData?.customerName}</h4>}
-
-              <input type="date" name="date" onChange={handleOrderChange} />
-
-              <select name="status" onChange={handleOrderChange}>
-                <option>Payment_Pending</option>
-                <option>Payment_Done</option>
-                <option>Preparing</option>
-                <option>Dispatched</option>
-                <option>Delivered</option>
-              </select>
-
-              <select name="paymentType" onChange={handleOrderChange}>
-                <option>UPI</option>
-                <option>Cash</option>
-                <option>Bank Transfer</option>
-              </select>
-
-              <h4>Products</h4>
-
-              <div className={styles.productHeader}>
-                <div>Product</div>
-                <div>Batch</div>
-                <div>MRP</div>
-                <div>Discount %</div>
-                <div>Selling</div>
-                <div>Qty</div>
-                <div></div>
-              </div>
-
-              {products.map((p, index) => (
-                <div key={index} className={styles.productRow}>
-                  {/* PRODUCT */}
-                  <select
-                    value={p.productName}
-                    onChange={(e) =>
-                      handleProductChange(index, "productName", e.target.value)
-                    }
-                  >
-                    <option value="">Select</option>
-                    <option value="Facewash">Facewash</option>
-                    <option value="Face_Serum">Face Serum</option>
-                    <option value="Face_Moisturizer">Face Moisturizer</option>
-                    <option value="Sunscreen">Sunscreen</option>
-                  </select>
-
-                  {/* BATCH */}
-                  <select
-                    value={p.batch}
-                    onChange={(e) =>
-                      handleProductChange(index, "batch", e.target.value)
-                    }
-                  >
-                    <option value="">Batch</option>
-                    {batches.map((b) => (
-                      <option key={b.batch}>{b.batch}</option>
-                    ))}
-                  </select>
-
-                  {/* MRP */}
-                  <div className={styles.infoBox}>
-                    <span>MRP</span>
-                    ₹{
-                      batches?.filter((b) => b.batch === p.batch)[0]?.mrp || 0
-                    }
-                  </div>
-
-                  {/* DISCOUNT */}
-                  <input
-                    type="number"
-                    className={styles.smallInput}
-                    placeholder="%"
-                    onChange={(e) =>
-                      handleProductChange(
-                        index,
-                        "discountPercentage",
-                        Number(e.target.value),
-                        p
-                      )
-                    }
-                  />
-
-                  {/* SELLING PRICE */}
-                  <div className={styles.infoBox}>
-                    <span>Selling</span>
-                    ₹{p.sellingPrice}
-                  </div>
-
-                  {/* QTY */}
-                  <input
-                    type="number"
-                    className={styles.smallInput}
-                    placeholder="Qty"
-                    onChange={(e) =>
-                      handleProductChange(
-                        index,
-                        "quantity",
-                        Number(e.target.value)
-                      )
-                    }
-                  />
-                  {!(index === 0 && products?.length === 1) && <button
-                    type="button"
-                    className={styles.deleteBtn}
-                    onClick={() => removeProduct(index)}
-                  >
-                    ✕
-                  </button>}
-                </div>
-              ))}
-
-              <button type="button" disabled={isLastRowEmpty(products)} onClick={addProduct}>
-                + Add Product
-              </button>
-
-              <div className={styles.total}>
-                Total: ₹{totalAmountPaid}
-              </div>
-
-              <button>Create Order</button>
-            </form>
-          </div>
-        </div>
+        <OrderModal setShowOrderModal={setShowOrderModal} orderData={orderFormData} source="customerPage" allowedProducts={[{ name: "Facewash", value: "Facewash" }, { name: "Face Serum", value : "Face_Serum" }, { name: "Face Moisturizer", value: "Face_Moisturizer" }, { name: "Sunscreen", value: "Sunscreen" }]} />
       )}
 
       {loader && <Loader />}

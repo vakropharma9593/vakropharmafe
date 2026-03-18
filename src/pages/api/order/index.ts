@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import Order from "@/models/Order";
 import Payment from "@/models/Payment";
 import Inventory from "@/models/Inventory";
+import CreditInventory from "@/models/CreditInventory";
 
 interface OrderWithCustomer {
   _id: string;
@@ -28,7 +29,7 @@ export default async function handler(
 
     // CREATE ORDER
     if (req.method === "POST") {
-      const { customerId, customerName, date, status, products, paymentType } = req.body;
+      const { customerId, customerName, date, status, products, paymentType, orderType } = req.body;
 
        const finalProducts = [];
 
@@ -55,6 +56,31 @@ export default async function handler(
 
         inventory.remainingCount -= product.quantity;
         await inventory.save();
+
+        if (orderType === "CREDIT") {
+          const creditInventory = await CreditInventory.findOne({
+            batch: product.batch,
+            itemName: product.productName,
+            customerId: customerId
+          });
+
+          if (!creditInventory) {
+            return res.status(400).json({
+              success: false,
+              message: `Credit inventory not found for ${product.productName} (batch ${product.batch}) for this customer`
+            });
+          }
+
+          if (creditInventory.remainingCount < product.quantity) {
+            return res.status(400).json({
+              success: false,
+              message: `Not enough CREDIT stock for ${product.productName} batch ${product.batch}`
+            });
+          }
+
+          creditInventory.remainingCount -= product.quantity;
+          await creditInventory.save();
+        }
 
         const basePrice = parseFloat(product.sellingPrice)/(1 + (inventory.gstPercentage/100));
         const basePriceToSave = Number(basePrice.toFixed(2));
