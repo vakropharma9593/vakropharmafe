@@ -72,6 +72,13 @@ const AdminNavbar = () => {
         </button>
 
         <button
+          className={router.pathname === "/admin/payment" ? styles.active : ""}
+          onClick={() => router.push("/admin/payment")}
+        >
+          Payments
+        </button>
+
+        <button
           className={router.pathname === "/admin/contactus" ? styles.active : ""}
           onClick={() => router.push("/admin/contactus")}
         >

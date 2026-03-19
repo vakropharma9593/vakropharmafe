@@ -103,10 +103,12 @@ export default async function handler(
         0
       );
 
+      const finalTotalAmount = Number(totalAmount.toFixed(2));
+
       // 5️⃣ Save payment
       const payment = await Payment.create({
         orderId: order._id,
-        totalAmount,
+        finalTotalAmount,
         paymentType
       });
 
