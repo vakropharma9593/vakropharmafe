@@ -59,3 +59,23 @@ export const isLastRowEmpty = (products: Product[]) => {
       return true;
     }
 }
+
+export enum PurposeType {
+  PRODUCT = "Product",
+  SALARY = "Salary",
+  MARKETING = "Marketing",
+  RENT_ELECTRICITY = "Rent & Electricity",
+  OTHER = "Other"
+}
+
+export enum PaymentType {
+  CASH = "Cash",
+  UPI = "UPI",
+  BANK_TRANSFER = "Bank Transfer",
+  CHEQUE = "Cheque"
+}
+
+export const booleanToYesNo = (value: boolean) => {
+  if (value) return "Yes";
+  else return "No";
+}

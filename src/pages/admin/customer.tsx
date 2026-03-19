@@ -49,7 +49,11 @@ const Customers = () => {
     try {
       const res = await fetch("/api/customer");
       const data = await res.json();
-      setCustomers(data.data || []);
+      if (data.success) {
+        setCustomers(data.data || []);
+      } else {
+        toast.error(data.message);
+      }
     } catch {
       toast.error("Failed to load customers");
     } finally {
@@ -74,19 +78,22 @@ const Customers = () => {
         });
 
         const data = await res.json();
+        if (data.success){
+          if (isEdit) {
+            setCustomers((prev) =>
+              prev.map((c) => (c._id === formData._id ? data.data : c))
+            );
+          } else {
+            setCustomers((prev) => [...prev, data.data]);
+          }
 
-        if (isEdit) {
-          setCustomers((prev) =>
-            prev.map((c) => (c._id === formData._id ? data.data : c))
-          );
+          setShowModal(false);
+          setIsEdit(false);
+
+          toast.success(`Customer ${isEdit ? "updated" : "added"} successfully`);
         } else {
-          setCustomers((prev) => [...prev, data.data]);
+          toast.error(data.message);
         }
-
-        setShowModal(false);
-        setIsEdit(false);
-
-        toast.success(`Customer ${isEdit ? "updated" : "added"} successfully`);
       } catch {
         toast.error("Failed to save customer");
       } finally {

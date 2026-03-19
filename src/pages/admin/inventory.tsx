@@ -1,6 +1,6 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
-import { dateToShow, getExpiryClass } from "@/lib/utils";
+import { dateToShow } from "@/lib/utils";
 import ACTIONS from "@/store/actions";
 import { Context } from "@/store/context";
 import { useContext, useState } from "react";
@@ -68,13 +68,17 @@ const Inventory = () => {
         });
 
         const data = await res.json();
-        dispatch({
-          type: ACTIONS.SET_INVENTORY,
-          payload: [...inventory, data.data],
-        });
+        if (data.success) {
+          dispatch({
+            type: ACTIONS.SET_INVENTORY,
+            payload: [...inventory, data.data],
+          });
 
-        setShowModal(false);
-        toast.success("Inventory added successfully");
+          setShowModal(false);
+          toast.success("Inventory added successfully");
+        } else {
+          toast.error(data.message);
+        }
       } catch {
         toast.error("Failed to add inventory");
       } finally {

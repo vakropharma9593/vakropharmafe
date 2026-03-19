@@ -75,7 +75,7 @@ const FaceSerum = () => {
 
       <ProductPage
         title="Vakro Lite Brightening Face Serum"
-        price="699"
+        price="799"
         heroImage={faceserum}
         usageImage={faceserumusage}
         tagline="A lightweight serum formulated to brighten skin tone and restore natural glow."

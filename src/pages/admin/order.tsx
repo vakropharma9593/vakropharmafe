@@ -40,7 +40,11 @@ const Orders = () => {
       setLoader(true);
       const res = await fetch("/api/order");
       const data = await res.json();
-      setOrders(data.data || []);
+      if(data.success) {
+        setOrders(data.data || []);
+      } else {
+        toast.error(data.message);
+      }
     } catch {
       toast.error("Failed to fetch orders");
     } finally {
@@ -54,20 +58,24 @@ const Orders = () => {
     try {
       setLoader(true);
 
-      await fetch(`/api/order/${selectedOrder.id}`, {
+      const res = await fetch(`/api/order/${selectedOrder.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: statusUpdate }),
       });
 
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === selectedOrder.id ? { ...o, status: statusUpdate } : o
-        )
-      );
-
-      toast.success("Order status updated");
-      setShowStatusModal(false);
+      const data = await res.json();
+      if(data.success){
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.id === selectedOrder.id ? { ...o, status: statusUpdate } : o
+          )
+        );
+        toast.success("Order status updated");
+        setShowStatusModal(false);
+      } else {
+        toast.error(data.message);
+      }
     } catch {
       toast.error("Failed to update status");
     } finally {
