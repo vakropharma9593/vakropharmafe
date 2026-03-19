@@ -4,6 +4,7 @@ import Order from "@/models/Order";
 import Payment from "@/models/Payment";
 import Inventory from "@/models/Inventory";
 import CreditInventory from "@/models/CreditInventory";
+import "@/models/Customer"; 
 
 interface OrderWithCustomer {
   _id: string;

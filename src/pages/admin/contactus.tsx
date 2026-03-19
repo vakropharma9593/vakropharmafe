@@ -14,7 +14,11 @@ const ContactSubmissions = () => {
       try {
         const res = await fetch("/api/contactus");
         const data = await res.json();
-        setContactUs(data.data || []);
+        if(data.success) {
+          setContactUs(data.data || []);
+        } else {
+          toast.error(data.message);
+        }
       } catch (error) {
         toast(`Failed to get contacts details. Please try again. ${error}`, {
           position: "top-right",

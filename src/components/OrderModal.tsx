@@ -53,8 +53,12 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
         try {
             const res = await fetch("/api/inventory");
             const data = await res.json();
-            dispatch({ type: ACTIONS.SET_INVENTORY, payload: data.data || [] });
-            setShowOrderModal(false);
+            if(data.success) {
+                dispatch({ type: ACTIONS.SET_INVENTORY, payload: data.data || [] });
+                setShowOrderModal(false);
+            } else {
+                toast.error(data.message);
+            }
         } catch (error) {
          toast.error("Failed to get inventory");
         }
@@ -66,16 +70,22 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
         setLoader(true);
         if (orderFormData?.customerId !== "" && orderFormData?.customerName !== "" && orderFormData?.paymentType !== "" && orderFormData?.status && products?.length > 0 && !isLastRowEmpty(products)) {
           try {
-            await fetch("/api/order", {
+            const res = await fetch("/api/order", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ ...orderFormData, products, orderType: source === "creditInventory" ? "CREDIT" : "" }),
             });
+
+            const data = await res.json();
+            if (data.success) {
     
-            getInventory();
-            callAfterSave && callAfterSave();
-    
-            toast.success("Order created successfully");
+                getInventory();
+                callAfterSave && callAfterSave();
+        
+                toast.success("Order created successfully");
+            } else {
+                toast.error(data.message);
+            }
           } catch {
             toast.error("Failed to create order");
           } finally {
@@ -153,9 +163,13 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
         });
 
         const data = await res.json();
-        setOrderFormData({ ...orderFormData, customerPhone: phone, customerName: data.data.name, customerId: data.data?._id})
+        if(data.success) {
+            setOrderFormData({ ...orderFormData, customerPhone: phone, customerName: data.data.name, customerId: data.data?._id})
 
-        toast.success("Customer fetched successfully");
+            toast.success("Customer fetched successfully");
+        } else {
+            toast.error(data.message);
+        }
         } catch {
         toast.error("Failed to fetch customer details.");
         } finally {

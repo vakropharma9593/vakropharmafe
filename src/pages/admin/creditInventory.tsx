@@ -54,23 +54,27 @@ const CreditInventory = () => {
     const getCreditInventory = async () => {
       setLoader(true);
       try {
-          const res = await fetch("/api/inventory/credit");
+          const res = await fetch("/api/creditInventory");
 
           const data = await res.json();
-          const finalData = data.data;
-          const finalInventory = finalData?.map((each: { batch: string, itemName: string, totalCount: number, remainingCount: number, customerId: { _id: string, name: string, phone: number }, _id: string }) => {
-            return {
-              batch: each?.batch,
-              itemName: each?.itemName,
-              totalCount: each?.totalCount,
-              remainingCount: each?.remainingCount,
-              customerName: each?.customerId?.name,
-              customerId: each?.customerId?._id,
-              customerNumber: each?.customerId?.phone,
-              id: each?._id,
-            }
-          });
-          setCreditInventory(finalInventory);
+          if(data.success){
+            const finalData = data.data;
+            const finalInventory = finalData?.map((each: { batch: string, itemName: string, totalCount: number, remainingCount: number, customerId: { _id: string, name: string, phone: number }, _id: string }) => {
+              return {
+                batch: each?.batch,
+                itemName: each?.itemName,
+                totalCount: each?.totalCount,
+                remainingCount: each?.remainingCount,
+                customerName: each?.customerId?.name,
+                customerId: each?.customerId?._id,
+                customerNumber: each?.customerId?.phone,
+                id: each?._id,
+              }
+            });
+            setCreditInventory(finalInventory);
+          } else {
+            toast.error(data.message);
+          }
 
       } catch (error) {
           toast(`Failed to get inventory details. Please try again. ${error}`, {
@@ -106,29 +110,33 @@ const CreditInventory = () => {
     setLoader(true);
     if (formData?.batch !== "" && formData?.itemName !== "" && formData?.totalCount !== "" && formData?.remainingCount !== "" && formData?.customerId !== "" && formData?.customerName !== "") {
       try {
-        const res = await fetch("/api/inventory/credit", {
+        const res = await fetch("/api/creditInventory", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         });
 
         const data = await res.json();
-        const finalData = data.data;
-        const finalInventory = {
-          batch: finalData?.batch,
-          itemName: finalData?.itemName,
-          totalCount: finalData?.totalCount,
-          remainingCount: finalData?.remainingCount,
-          customerName: finalData?.customerId?.name,
-          customerId: finalData?.customerId?._id,
-          customerNumber: finalData?.customerId?.phone,
-          id: finalData?._id,
-        }
-        const finalCreditInventory = [...creditInventory, finalInventory];
-        setCreditInventory(finalCreditInventory);
+        if(data.success) {
+          const finalData = data.data;
+          const finalInventory = {
+            batch: finalData?.batch,
+            itemName: finalData?.itemName,
+            totalCount: finalData?.totalCount,
+            remainingCount: finalData?.remainingCount,
+            customerName: finalData?.customerId?.name,
+            customerId: finalData?.customerId?._id,
+            customerNumber: finalData?.customerId?.phone,
+            id: finalData?._id,
+          }
+          const finalCreditInventory = [...creditInventory, finalInventory];
+          setCreditInventory(finalCreditInventory);
 
-        setShowModal(false);
-        toast.success("Credit Inventory added successfully");
+          setShowModal(false);
+          toast.success("Credit Inventory added successfully");
+        } else {
+          toast.error(data.message);
+        }
       } catch {
         toast.error("Failed to add credit inventory");
       } finally {
@@ -149,9 +157,13 @@ const CreditInventory = () => {
       });
 
       const data = await res.json();
-      setFormData({ ...formData, customerNumber: phone, customerName: data.data.name, customerId: data.data?._id})
+      if (data.success) {
+        setFormData({ ...formData, customerNumber: phone, customerName: data.data.name, customerId: data.data?._id})
 
-      toast.success("Customer fetched successfully");
+        toast.success("Customer fetched successfully");
+      } else {
+        toast.error(data.message);
+      }
     } catch {
       toast.error("Failed to fetch customer details.");
     } finally {
@@ -178,7 +190,7 @@ const CreditInventory = () => {
         <div className={styles.header}>
           <h1>
             Credit Inventory
-            <span>{creditInventory.length}</span>
+            <span>{creditInventory?.length}</span>
           </h1>
 
           <button onClick={() => setShowModal(true)}>
@@ -188,7 +200,7 @@ const CreditInventory = () => {
 
         {/* Table */}
         <div className={styles.tableWrapper}>
-          {creditInventory.length > 0 ? (
+          {creditInventory?.length > 0 ? (
             <table className={styles.table}>
               <thead>
                 <tr>

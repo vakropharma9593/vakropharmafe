@@ -18,7 +18,11 @@ const Admin = () => {
                 const res = await fetch("/api/inventory");
 
                 const data = await res.json();
-                dispatch({ type: ACTIONS.SET_INVENTORY, payload: data.data || [] })
+                if(data.success) {
+                    dispatch({ type: ACTIONS.SET_INVENTORY, payload: data.data || [] })
+                } else {
+                    toast.error(data.message);
+                }
             } catch (error) {
                 toast(`Failed to get inventory details. Please try again. ${error}`, {
                     position: "top-right",
