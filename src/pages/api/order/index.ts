@@ -85,7 +85,7 @@ export default async function handler(
 
         const basePrice = parseFloat(product.sellingPrice)/(1 + (inventory.gstPercentage/100));
         const basePriceToSave = Number(basePrice.toFixed(2));
-        const newProduct = { ...product, basePrice: basePriceToSave };
+        const newProduct = { ...product, basePrice: basePriceToSave, costPrice: inventory.costPrice };
         finalProducts.push(newProduct);
       }
       
@@ -108,7 +108,7 @@ export default async function handler(
       // 5️⃣ Save payment
       const payment = await Payment.create({
         orderId: order._id,
-        finalTotalAmount,
+        totalAmount: finalTotalAmount,
         paymentType
       });
 

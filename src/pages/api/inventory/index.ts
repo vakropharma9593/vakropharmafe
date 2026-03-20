@@ -20,6 +20,7 @@ export default async function handler(
         receivedDate,
         expiryDate,
         mrp,
+        costPrice,
         gstPercentage,
       } = req.body;
 
@@ -40,6 +41,7 @@ export default async function handler(
         receivedDate,
         expiryDate,
         mrp: mrpToSave,
+        costPrice: costPrice,
         basePrice: basePriceToSave,
         gstPercentage,
         gstAmount: gstAmountToSave

@@ -24,7 +24,6 @@ const AdminNavbar = () => {
       {/* LEFT */}
       <div className={styles.logo} onClick={() => router.push("/admin")}>
         <Image src={vakroLogo} alt="Vakro" width={80} height={80} style={{ transform: "scale(1.5)", transformOrigin: "center" }} />
-        Vakro Pharma
       </div>
 
       {/* CENTER LINKS */}

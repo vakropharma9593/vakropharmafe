@@ -45,7 +45,7 @@ const ExpenseSchema = new mongoose.Schema(
         required: true,
     },
     paymentDate: {
-        type: String,
+        type: Date,
         required: true,
     },
     paymentMode: {
@@ -63,6 +63,11 @@ const ExpenseSchema = new mongoose.Schema(
     settlementDate: {
         type: String,
     },
+    expenseCategory: {
+        type: String,
+        enum: ["Fixed", "Variable"],
+        default: "Variable"
+    }
   },
   { timestamps: true }
 );

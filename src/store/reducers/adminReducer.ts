@@ -14,6 +14,7 @@ export interface InventoryItem {
   expiryDate: string;
   mrp: number;
   basePrice: number;
+  costPrice: number;
   gstAmount: number;
   gstPercentage: number;
 }

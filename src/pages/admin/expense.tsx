@@ -17,6 +17,7 @@ export type ExpenseType = {
     isSettled: boolean,
     settlementDate: string,
     _id?: string,
+    expenseCategory?: string,
 }
 
 const Expense = () => {
@@ -178,6 +179,7 @@ const Expense = () => {
                   <th>Voucher</th>
                   <th>Paid To</th>
                   <th>Purpose</th>
+                  <th>Expense Category</th>
                   <th>Paid By</th>
                   <th>Amount Paid</th>
                   <th>Payment Date</th>
@@ -196,6 +198,7 @@ const Expense = () => {
                     <td>{item.voucher}</td>
                     <td>{item.paidTo}</td>
                     <td>{item.purpose}</td>
+                    <td>{item.expenseCategory}</td>
                     <td>{item.paidBy}</td>
                     <td>₹{Number(item.amountPaid).toFixed(2)}</td>
                     <td>{dateToShow(item.paymentDate)}</td>

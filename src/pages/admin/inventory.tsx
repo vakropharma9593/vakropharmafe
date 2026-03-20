@@ -26,6 +26,7 @@ const Inventory = () => {
     mrp: null,
     gstPercentage: null,
     basePrice: 0,
+    costPrice: 0,
     gstAmount: 0,
   });
 
@@ -41,7 +42,7 @@ const Inventory = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
-    let updated = { ...formData, [name]: value };
+    let updated = { ...formData, [name]: name === "costPrice" ? parseFloat(value) : value };
 
     if (name === "mrp" && updated.gstPercentage) {
       const calc = calculateValues(Number(value), Number(updated.gstPercentage));
@@ -59,7 +60,7 @@ const Inventory = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoader(true);
-    if (formData?.batch !== "" && formData?.itemName !== "" && formData?.totalCount !== "" && formData?.remainingCount !== "" && formData?.receivedDate !== "" && formData?.mfgDate !== "" && formData?.expiryDate !== "" && formData?.mrp !== "" && formData?.gstPercentage !== "") {
+    if (formData?.batch !== "" && formData?.itemName !== "" && formData?.totalCount !== "" && formData?.remainingCount !== "" && formData?.receivedDate !== "" && formData?.mfgDate !== "" && formData?.expiryDate !== "" && formData?.mrp !== "" && formData?.gstPercentage !== "" && formData?.basePrice > 0) {
       try {
         const res = await fetch("/api/inventory", {
           method: "POST",
@@ -136,7 +137,8 @@ const Inventory = () => {
                   <th>Mfg</th>
                   <th>Expiry</th>
                   <th>MRP</th>
-                  <th>Base</th>
+                  <th>Base (without GST)</th>
+                  <th>Cost Price</th>
                   <th>GST Amt</th>
                   <th>GST %</th>
                 </tr>
@@ -155,6 +157,7 @@ const Inventory = () => {
                     <td>{dateToShow(item.expiryDate)}</td>
                     <td>₹{item.mrp}</td>
                     <td>₹{item.basePrice}</td>
+                    <td>₹{item.costPrice}</td>
                     <td>₹{item.gstAmount}</td>
                     <td>{item.gstPercentage}%</td>
                   </tr>
@@ -198,6 +201,7 @@ const Inventory = () => {
 
               <label>Received</label>
               <input type="date" name="receivedDate" onChange={handleChange} />
+              <input type="number" name="costPrice" placeholder="Cost Price" step="0.01" onChange={handleChange} />
 
               <input type="number" name="mrp" placeholder="MRP" step="0.01" onChange={handleChange} />
               <input type="number" name="gstPercentage" placeholder="GST %" step="0.01" onChange={handleChange} />

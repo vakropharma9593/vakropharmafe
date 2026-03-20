@@ -45,6 +45,10 @@ const InventorySchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    costPrice: {
+      type: Number,
+      required: true,
+    },
     gstPercentage: {
       type: Number,
       required: true,

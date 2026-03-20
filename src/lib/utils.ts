@@ -79,3 +79,52 @@ export const booleanToYesNo = (value: boolean) => {
   if (value) return "Yes";
   else return "No";
 }
+
+type ProductInsight = {
+  quantity: number;
+  revenue: number;
+  profit: number;
+};
+
+type MonthlyData = {
+  revenue: number;
+  expense: number;
+  profit: number;
+};
+
+export type InsightsData = {
+  financial: {
+    totalRevenue: number;
+    totalNetRevenue: number;
+    totalGST: number;
+    totalExpense: number;
+    totalProfit: number;
+    totalProductProfit: number;
+    totalProfitWithInventoryCost: number;
+  };
+  inventory: {
+    inventoryValue: number;
+  };
+  products: Record<string, ProductInsight>;
+  trends: {
+    monthly: Record<string, MonthlyData>;
+  };
+  business: {
+    burnRate: number;
+  };
+  creditInventory: {
+    totalCount: number;
+    remainingCount: number;
+  };
+  expenseBreakdown: {
+    fixed: number;
+    variable: number;
+    marketing: number;
+  }
+};
+
+export type KpiProps = {
+  label: string;
+  value: number;
+  variant?: "green" | "gold";
+};
