@@ -76,6 +76,14 @@ const Admin = () => {
         getInventory();
     }, []);
 
+    // ===== Customers =====
+    const topCustomers = useMemo(() => data?.customers?.topCustomers || [], [data]);
+    const repeatCustomers = useMemo(() => data?.customers?.repeatCustomers || [], [data]);
+
+    // ===== Alerts =====
+    const reorderAlerts = data?.alerts?.reorder;
+    const inventoryAlerts = data?.alerts?.inventory;
+
   // ===== Monthly Data =====
   const monthly = useMemo(() => {
     if (!data) return [];
@@ -124,6 +132,7 @@ const Admin = () => {
         <Kpi label="Profit (After Inventory)" value={data.financial.totalProfitWithInventoryCost} variant="gold" />
         <Kpi label="GST Paid" value={data.financial.totalGST} />
         <Kpi label="Burn Rate" value={data.business.burnRate} variant="gold" />
+        <Kpi label="Revenue / Customer" value={data.customers.revenuePerCustomer} />
       </div>
 
       {/* ===== Monthly Trend ===== */}
@@ -185,6 +194,117 @@ const Admin = () => {
           </PieChart>
         </ResponsiveContainer>
       </div>
+
+      {/* ===== REORDER ALERTS ===== */}
+    <div className={styles.cardLarge}>
+        <h2 className={styles.subHeading}>Reorder Alerts</h2>
+
+        <div className={styles.gridThree}>
+            {[
+            { title: "1 Month Old", data: reorderAlerts?.oneMonth },
+            { title: "6 Months Old", data: reorderAlerts?.sixMonth },
+            { title: "1 Year Old", data: reorderAlerts?.oneYear },
+            ].map((section, idx) => (
+            <div key={idx} className={styles.alertBox}>
+                <h3 className={styles.alertTitle}>{section.title}</h3>
+
+                {section.data?.length ? (
+                section.data.map((item, i) => (
+                    <div key={i} className={styles.alertItem}>
+                    <div>
+                        <strong>{item.customerName}</strong>
+                        <p className={styles.muted}>{item.phone}</p>
+                    </div>
+                    <p className={styles.mutedSmall}>
+                        {item.products.join(", ")}
+                    </p>
+                    </div>
+                ))
+                ) : (
+                <p className={styles.muted}>No data</p>
+                )}
+            </div>
+            ))}
+        </div>
+    </div>
+
+    {/* ===== CUSTOMER INSIGHTS ===== */}
+    <div className={styles.gridTwo}>
+        <div className={styles.cardLarge}>
+            <h2 className={styles.subHeading}>Top Customers</h2>
+
+            {topCustomers.map((c, i) => (
+            <div key={i} className={styles.listItem}>
+                <span>{c.name}</span>
+                <span className={styles.gold}>₹{c.totalRevenue.toLocaleString()}</span>
+            </div>
+            ))}
+        </div>
+
+        <div className={styles.cardLarge}>
+            <h2 className={styles.subHeading}>Repeat Customers</h2>
+
+            {repeatCustomers.map((c, i) => (
+            <div key={i} className={styles.listItem}>
+                <span>{c.name}</span>
+                <span className={styles.muted}>{c.orderCount} orders</span>
+            </div>
+            ))}
+        </div>
+    </div>
+
+    {/* ===== ALERTS ===== */}
+    <div className={styles.gridTwo}>
+        {/* LOW STOCK */}
+        <div className={styles.cardLarge}>
+            <h2 className={styles.subHeading}>Low Stock</h2>
+
+            {inventoryAlerts?.lowStock?.length ? (
+                inventoryAlerts.lowStock.map((item, i) => (
+                    <div key={i} className={styles.listItem}>
+                    <span>{item.itemName}</span>
+                    <span className={styles.gold}>{item.remainingCount}</span>
+                    </div>
+                ))
+                ) : (
+                <p className={styles.muted}>All good</p>
+            )}
+        </div>
+
+        {/* EXPIRY */}
+        <div className={styles.cardLarge}>
+            <h2 className={styles.subHeading}>Expiry (30 days)</h2>
+
+            {inventoryAlerts?.expiry?.length ? (
+                inventoryAlerts.expiry.map((item, i) => (
+                    <div key={i} className={styles.listItem}>
+                    <span>{item.itemName}</span>
+                    <span className={styles.gold}>
+                        {item?.expiryDate ? new Date(item?.expiryDate).toLocaleDateString() : ""}
+                    </span>
+                    </div>
+                ))
+                ) : (
+                <p className={styles.muted}>No risk</p>
+            )}
+        </div>
+    </div>
+
+    {/* LOSS PRODUCTS */}
+    <div className={styles.cardLarge}>
+        <h2 className={styles.subHeading}>Loss Making Products</h2>
+
+        {inventoryAlerts?.lossMakingProducts?.length ? (
+            inventoryAlerts.lossMakingProducts.map((item, i) => (
+            <div key={i} className={styles.listItem}>
+                <span>{item.productName}</span>
+                <span className={styles.gold}>₹{item.profit}</span>
+            </div>
+            ))
+        ) : (
+            <p className={styles.muted}>No losses 🎉</p>
+        )}
+    </div>
 
       {/* ===== Inventory + Credit ===== */}
       <div className={styles.gridThree}>

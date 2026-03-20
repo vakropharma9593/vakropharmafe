@@ -92,6 +92,32 @@ type MonthlyData = {
   profit: number;
 };
 
+type AlertOrder = {
+  customerName: string;
+  phone: string;
+  products: string[];
+  lastOrderDate: Date;
+};
+
+type CustomerInsight = {
+  name: string;
+  phone: string;
+  totalRevenue: number;
+  orderCount: number;
+};
+
+type InventoryAlert = {
+  itemName: string;
+  batch: string;
+  remainingCount: number;
+  expiryDate?: string;
+};
+
+type LossAlert = {
+  productName: string;
+  profit: number;
+};
+
 export type InsightsData = {
   financial: {
     totalRevenue: number;
@@ -120,7 +146,24 @@ export type InsightsData = {
     fixed: number;
     variable: number;
     marketing: number;
-  }
+  },
+  alerts: {
+    reorder: {
+        oneMonth: AlertOrder[];
+        sixMonth: AlertOrder[];
+        oneYear: AlertOrder[];
+    };
+    inventory: {
+        lowStock: InventoryAlert[];
+        expiry: InventoryAlert[];
+        lossMakingProducts: LossAlert[];
+    };
+  };
+  customers: {
+      topCustomers: CustomerInsight[];
+      repeatCustomers: CustomerInsight[];
+      revenuePerCustomer: number;
+  };
 };
 
 export type KpiProps = {

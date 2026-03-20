@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/mongodb";
 
+import "@/models/Customer";
 import Order from "@/models/Order";
 import Expense from "@/models/Expense";
 import Inventory from "@/models/Inventory";
@@ -20,6 +21,11 @@ type Product = {
 
 type OrderType = {
   date: Date;
+  customerId: {
+    _id: string;
+    name: string;
+    phone: string;
+  };
   products: Product[];
 };
 
@@ -33,6 +39,9 @@ type ExpenseType = {
 type InventoryType = {
   remainingCount: number;
   costPrice: number;
+  itemName: string;
+  batch: string;
+  expiryDate: Date;
 };
 
 type MonthlyData = {
@@ -54,6 +63,32 @@ type CreditInventoryType = {
     remainingCount: number;
     customerId: string;
 }
+
+type AlertOrder = {
+  customerName: string;
+  phone: string;
+  products: string[];
+  lastOrderDate: Date;
+};
+
+type CustomerInsight = {
+  name: string;
+  phone: string;
+  totalRevenue: number;
+  orderCount: number;
+};
+
+type InventoryAlert = {
+  itemName: string;
+  batch: string;
+  remainingCount: number;
+  expiryDate?: Date;
+};
+
+type LossAlert = {
+  productName: string;
+  profit: number;
+};
 
 type InsightsResponse = {
   success: boolean;
@@ -86,6 +121,23 @@ type InsightsResponse = {
         variable: number;
         marketing: number;
     };
+    alerts: {
+        reorder: {
+            oneMonth: AlertOrder[];
+            sixMonth: AlertOrder[];
+            oneYear: AlertOrder[];
+        };
+        inventory: {
+            lowStock: InventoryAlert[];
+            expiry: InventoryAlert[];
+            lossMakingProducts: LossAlert[];
+        };
+    };
+    customers: {
+        topCustomers: CustomerInsight[];
+        repeatCustomers: CustomerInsight[];
+        revenuePerCustomer: number;
+    };
   };
 };
 
@@ -104,7 +156,9 @@ export default async function handler(
       return res.status(405).json({ message: "Method not allowed" });
     }
 
-    const orders = (await Order.find().lean()) as OrderType[];
+    const orders = await Order.find()
+                        .populate("customerId")
+                        .lean() as OrderType[];
     const expenses = (await Expense.find().lean()) as ExpenseType[];
     const inventory = (await Inventory.find().lean()) as InventoryType[];
     const creditInventory = (await CreditInventory.find().lean() as CreditInventoryType[]);
@@ -237,6 +291,134 @@ export default async function handler(
     });
 
     /** =========================
+     * ✅ REORDER ALERTS
+     ========================== */
+
+     const now = new Date();
+
+    const getDateRange = (monthsAgoStart: number, monthsAgoEnd: number) => {
+        const start = new Date();
+        start.setMonth(start.getMonth() - monthsAgoStart);
+
+        const end = new Date();
+        end.setMonth(end.getMonth() - monthsAgoEnd);
+
+        return { start, end };
+    };
+
+    const buildAlert = (ordersList: OrderType[]): AlertOrder[] => {
+        return ordersList.map((o) => ({
+            customerName: o.customerId?.name,
+            phone: o.customerId?.phone,
+            products: o.products.map((p) => p.productName),
+            lastOrderDate: o.date,
+        }));
+    };
+
+    const filterOrdersByRange = (start: Date, end: Date) => {
+        return orders.filter(
+            (o) => new Date(o.date) <= start && new Date(o.date) >= end
+        );
+    };
+
+    const oneMonthRange = getDateRange(1, 2);
+    const sixMonthRange = getDateRange(6, 7);
+    const oneYearRange = getDateRange(12, 13);
+
+    const reorderAlerts = {
+        oneMonth: buildAlert(filterOrdersByRange(oneMonthRange.start, oneMonthRange.end)),
+        sixMonth: buildAlert(filterOrdersByRange(sixMonthRange.start, sixMonthRange.end)),
+        oneYear: buildAlert(filterOrdersByRange(oneYearRange.start, oneYearRange.end)),
+    };
+
+    /** =========================
+     * ✅ CUSTOMER INSIGHTS
+     ========================== */
+
+    const customerMap: Record<string, CustomerInsight> = {};
+
+    orders.forEach((o) => {
+        const key = o.customerId?._id;
+
+        if (!customerMap[key]) {
+            customerMap[key] = {
+            name: o.customerId?.name,
+            phone: o.customerId?.phone,
+            totalRevenue: 0,
+            orderCount: 0,
+            };
+        }
+
+        let orderRevenue = 0;
+        o.products.forEach((p) => {
+            orderRevenue += p.basePrice * p.quantity;
+        });
+
+        customerMap[key].totalRevenue += orderRevenue;
+        customerMap[key].orderCount += 1;
+    });
+
+    const customersArray = Object.values(customerMap);
+
+    const topCustomers = [...customersArray]
+                        .sort((a, b) => b.totalRevenue - a.totalRevenue)
+                        .slice(0, 5);
+
+    const repeatCustomers = customersArray.filter((c) => c.orderCount > 1);
+
+    const revenuePerCustomer = customersArray.length > 0
+                            ? totalNetRevenue / customersArray.length
+                            : 0;
+
+     /** =========================
+     * ✅ INVENTORY ALERTS
+     ========================== */ 
+     
+    const lowStock: InventoryAlert[] = [];
+    const expiry: InventoryAlert[] = [];
+
+    const today = new Date();
+
+    inventory.forEach((item: InventoryType) => {
+        if (item.remainingCount < 10) {
+            lowStock.push({
+            itemName: item.itemName,
+            batch: item.batch,
+            remainingCount: item.remainingCount,
+            });
+        }
+
+        if (item.expiryDate) {
+            const expiryDate = new Date(item.expiryDate);
+            const diff = (expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+
+            if (diff < 30) {
+            expiry.push({
+                itemName: item.itemName,
+                batch: item.batch,
+                remainingCount: item.remainingCount,
+                expiryDate,
+            });
+            }
+        }
+    });
+
+     /** =========================
+     * ✅ LOSS ALERTS
+     ========================== */
+
+    const lossMakingProducts: LossAlert[] = [];
+
+    Object.keys(productMap).forEach((key) => {
+        if (productMap[key].profit < 0) {
+            lossMakingProducts.push({
+                productName: key,
+                profit: productMap[key].profit,
+            });
+        }
+    });
+
+    /** =========================
      * ✅ RESPONSE
      ========================== */
     return res.status(200).json({
@@ -269,6 +451,19 @@ export default async function handler(
             fixed: fixedExpense,
             variable: variableExpense,
             marketing: marketingExpense,
+        },
+        alerts: {
+            reorder: reorderAlerts,
+            inventory: {
+                lowStock,
+                expiry,
+                lossMakingProducts,
+            },
+        },
+        customers: {
+            topCustomers,
+            repeatCustomers,
+            revenuePerCustomer,
         },
       },
     });
