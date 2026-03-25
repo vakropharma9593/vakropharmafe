@@ -1,15 +1,5 @@
-import { PaymentModeType } from "@/lib/utils";
+import { ExpenseCategoryType, PaymentModeType } from "@/lib/utils";
 import mongoose from "mongoose";
-
-/**
- * Product Enum
- */
-export enum ExpenseCategoryType {
-  COGS = "COGS",
-  FIXED_OPEX = "Fixed Opex",
-  MARKETING = "Marketing",
-  VARIABLE = "Variable",
-}
 
 /**
  * Expense Schema
@@ -36,6 +26,7 @@ const ExpenseSchema = new mongoose.Schema(
     productId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
+        required: false,
     }, 
     amountPaid: {
         type: Number,

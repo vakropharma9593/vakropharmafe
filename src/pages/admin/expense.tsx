@@ -1,11 +1,10 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
-import { booleanToYesNo, dateToShow, PaymentType, ProductType, PurposeType } from "@/lib/utils";
+import { booleanToYesNo, dateToShow, ExpenseCategoryType, PaymentType, ProductType } from "@/lib/utils";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/inventory.module.css";
 import { Context } from "@/store/context";
-import { ExpenseCategoryType } from "@/models/Expense";
 
 export type ExpenseType = {
     voucher: string,
@@ -124,7 +123,7 @@ const Expense = () => {
     setLoader(true);
     if (formData?.voucher !== "" && formData?.paidTo !== "" && formData?.purpose && formData?.amountPaid > 0 && formData?.paidBy !== "" && formData?.paymentDate !== "" && formData?.paymentMode) {
       try {
-        const finalDataToSend = { ...formData, settlementDate: formData?.isSettled ? formData?.settlementDate : "" }
+        const finalDataToSend = { ...formData, productId: formData.expenseCategory === ExpenseCategoryType.COGS ? formData?.productId : "", settlementDate: formData?.isSettled ? formData?.settlementDate : "" }
         const res = await fetch("/api/expense", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -252,6 +251,13 @@ const Expense = () => {
             <div className={styles.modalHeader}>
               <h2>Add Expenses</h2>
               <button onClick={() => setShowModal(false)}>✕</button>
+            </div>
+            <div className={styles.expenseCategoryInfo} >
+              <h3>Expense Category</h3>
+              <p><span>COGS</span>: Ingredients, manufacturing, packaging. </p>
+              <p><span>Fixed Opex</span>: Salaries, rent, electricity bill, website related expense.</p>
+              <p><span>Marketing</span>: CAC, online spends on ads and influencers</p>
+              <p><span>Variable</span>: shipping cost, delivery boxes, payment fee, etc</p>
             </div>
 
             <form onSubmit={handleSubmit} className={styles.form}>

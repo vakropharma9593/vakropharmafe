@@ -369,3 +369,26 @@
   border: none;
   cursor: pointer;
 }
+
+ /* expense category info */
+.expenseCategoryInfo {
+  margin-top: -10px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.expenseCategoryInfo h3 {
+  font-size: 14px;
+}
+
+.expenseCategoryInfo p {
+  font-size: 12px;
+  color: #C9A25E;
+  font-weight: 500;
+}
+.expenseCategoryInfo span {
+  font-size: 12px;
+  color: #C9A25E;
+  font-weight: 700;
+}

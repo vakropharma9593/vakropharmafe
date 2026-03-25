@@ -1,68 +1,47 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/mongodb";
-import mongoose, { Types } from "mongoose";
-
-import Order from "@/models/Order";
 import Product from "@/models/Product";
-import Expense from "@/models/Expense";
 import Inventory from "@/models/Inventory";
-import CreditInventory from "@/models/CreditInventory";
-import Customer from "@/models/Customer";
+import { Types } from "mongoose";
+import Expense from "@/models/Expense";
+import { ExpenseCategoryType } from "@/lib/utils";
 
 /** =========================
  * TYPES
  ========================== */
 
-type OrderProduct = {
-  productId: Types.ObjectId;
-  quantity: number;
-  sellingPrice: number;
-  basePrice: number;
+type BatchInfo = {
+  batch: string;
+  totalCount: number;
+  remainingCount: number;
+  inventoryValue: number;
+  expiryDate: Date;
 };
 
-type OrderType = {
-  totalAmount: number;
-  date: Date;
-  customerId: { _id: Types.ObjectId };
-  products: OrderProduct[];
+type ProductInventory = {
+  batches: BatchInfo[];
+  totalInventoryValue: number;
+  totalRemaining: number;
 };
+
+type ExpiryAlert = {
+  productName: string;
+  batch: string;
+  remainingCount: number;
+  expiryDate: Date;
+};
+
 
 type ProductType = {
   _id: Types.ObjectId;
   costPrice: number;
+  name: string;
   mrp: number;
+  gstPercentage: number;
 };
-
-type ExpenseType = {
-  amountPaid: number;
-  expenseCategory: "Fixed" | "Variable";
-  purpose?: string;
-};
-
-type InventoryType = {
-  productId: {
-    _id: Types.ObjectId;
-  };
-  remainingCount: number;
-  totalCount: number;
-  expiryDate: Date;
-};
-
-type CreditInventoryType = {
-  totalCount: number;
-  remainingCount: number;
-};
-
-type MonthlyType = Record<
-  string,
-  {
-    revenue: number;
-    orders: number;
-  }
->;
 
 /** =========================
- * HANDLER
+ * HANDLER for overall
  ========================== */
 
 export default async function getInsights(
@@ -80,25 +59,20 @@ export default async function getInsights(
      * FETCH DATA
      ========================== */
     const [
-      orders,
-      expenses,
       inventories,
-      creditInventories,
       products,
-      customers,
+      expenses,
     ] = await Promise.all([
-      Order.find().populate("customerId"),
-      Expense.find(),
-      Inventory.find().populate("productId"),
-      CreditInventory.find(),
+      Inventory.find()
+        .populate({
+            path: "productId",
+            select: "name costPrice",
+        })
+        .lean(),
       Product.find(),
-      Customer.find(),
+      Expense.find(),
     ]);
 
-    const typedOrders = orders as unknown as OrderType[];
-    const typedExpenses = expenses as ExpenseType[];
-    const typedInventories = inventories as InventoryType[];
-    const typedCreditInventories = creditInventories as CreditInventoryType[];
     const typedProducts = products as ProductType[];
 
     /** =========================
@@ -110,247 +84,163 @@ export default async function getInsights(
     });
 
     /** =========================
-     * FINANCIALS
-     ========================== */
-    let totalRevenue = 0;
-    let totalNetRevenue = 0;
-    let totalGST = 0;
-    let totalProductProfit = 0;
-    let totalCost = 0;
-
-    typedOrders.forEach((order) => {
-      totalRevenue += order.totalAmount;
-
-      order.products.forEach((item) => {
-        const product = productMap[item.productId.toString()];
-        if (!product) return;
-
-        const revenue = item.sellingPrice * item.quantity;
-        const base = item.basePrice * item.quantity;
-        const gst = revenue - base;
-        const cost = product.costPrice * item.quantity;
-
-        totalNetRevenue += base;
-        totalGST += gst;
-        totalCost += cost;
-        totalProductProfit += base - cost;
-      });
-    });
-
-    const totalExpense = typedExpenses.reduce(
-      (sum, e) => sum + e.amountPaid,
-      0
-    );
-
-    const totalProfit = totalRevenue - totalExpense;
-    const totalProfitWithInventoryCost = totalProductProfit - totalExpense;
-
-    const grossProfit = totalNetRevenue - totalCost;
-    const netProfit = grossProfit - totalExpense;
-
-    const realProfitAfterGST =
-      totalRevenue - totalGST - totalCost - totalExpense;
-
-    const realMargin =
-      totalRevenue > 0 ? (realProfitAfterGST / totalRevenue) * 100 : 0;
-
-    /** =========================
-     * UNIT ECONOMICS
-     ========================== */
-    let totalUnits = 0;
-    let totalSelling = 0;
-    let totalCostUnit = 0;
-
-    typedOrders.forEach((order) => {
-      order.products.forEach((item) => {
-        const product = productMap[item.productId.toString()];
-        if (!product) return;
-
-        totalUnits += item.quantity;
-        totalSelling += item.sellingPrice * item.quantity;
-        totalCostUnit += product.costPrice * item.quantity;
-      });
-    });
-
-    const sellingPrice = totalUnits ? totalSelling / totalUnits : 0;
-    const costPrice = totalUnits ? totalCostUnit / totalUnits : 0;
-    const profitPerUnit = sellingPrice - costPrice;
-    const margin = sellingPrice
-      ? (profitPerUnit / sellingPrice) * 100
-      : 0;
-
-    /** =========================
-     * CREDIT
-     ========================== */
-    let totalCredit = 0;
-    let outstandingCredit = 0;
-
-    typedCreditInventories.forEach((c) => {
-      totalCredit += c.totalCount;
-      outstandingCredit += c.remainingCount;
-    });
-
-    /** =========================
      * INVENTORY
      ========================== */
-    let inventoryValue = 0;
-    const lowStock: InventoryType[] = [];
-    const expiry: InventoryType[] = [];
+    const productWiseInventory: Record<string, ProductInventory> = {};
+    let totalInventoryValue = 0;
 
-    const now = new Date();
+    const today = new Date();
+    const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 
-    typedInventories.forEach((inv) => {
-      const product = productMap[inv.productId._id.toString()];
-      if (!product) return;
+    const expiryAlerts: ExpiryAlert[] = [];
 
-      inventoryValue += inv.remainingCount * product.costPrice;
+    for (const inv of inventories) {
+        const productId = inv.productId?._id;
+        const costPrice = inv.productId?.costPrice || 0;
 
-      if (inv.remainingCount < inv.totalCount * 0.2) {
-        lowStock.push(inv);
+        if (!productId) continue;
+
+        const inventoryValue = inv.remainingCount * costPrice;
+
+        // Initialize product bucket
+        if (!productWiseInventory[productId]) {
+            productWiseInventory[productId] = {
+            batches: [],
+            totalInventoryValue: 0,
+            totalRemaining: 0,
+            };
+        }
+
+        // Push batch data
+        productWiseInventory[productId].batches.push({
+            batch: inv.batch,
+            totalCount: inv.totalCount,
+            remainingCount: inv.remainingCount,
+            inventoryValue,
+            expiryDate: inv.expiryDate,
+        });
+
+        // Aggregate per product
+        productWiseInventory[productId].totalInventoryValue += inventoryValue;
+        productWiseInventory[productId].totalRemaining += inv.remainingCount;
+
+        // Aggregate overall
+        totalInventoryValue += inventoryValue;
+
+        // ✅ Expiry Alert Logic
+        if (new Date(inv.expiryDate).getTime() - today.getTime() <= THIRTY_DAYS) {
+            expiryAlerts.push({
+              productName: productId?.name,
+              batch: inv.batch,
+              remainingCount: inv.remainingCount,
+              expiryDate: inv.expiryDate,
+            });
+        }
+    }
+
+    /** =========================
+     * Expenses
+     ========================== */
+    
+    const totalExpenses = {
+      cogs: 0,
+      fixedOpex: 0,
+      marketing: 0,
+      variable: 0,
+    };
+
+    expenses.forEach((exp) => {
+      switch (exp.expenseCategory) {
+        case ExpenseCategoryType.COGS:
+          totalExpenses.cogs += exp.amountPaid;
+          break;
+
+        case ExpenseCategoryType.MARKETING:
+          totalExpenses.marketing += exp.amountPaid;
+          break;
+
+        case ExpenseCategoryType.FIXED_OPEX:
+          totalExpenses.fixedOpex += exp.amountPaid;
+          break;
+
+        case ExpenseCategoryType.VARIABLE:
+          totalExpenses.variable += exp.amountPaid;
+          break;
       }
+    });
 
-      const diffDays =
-        (new Date(inv.expiryDate).getTime() - now.getTime()) /
-        (1000 * 60 * 60 * 24);
+    const totalExpensesAmount = Object.values(totalExpenses)?.reduce((sum: number, item: number) => {
+      sum += item;
+      return sum;
+    },0)
 
-      if (diffDays < 30) {
-        expiry.push(inv);
+    const productWiseExpenses: Record<
+      string,
+      {
+        name: string;
+        cogs: number;
+        marketing: number;
+        fixedOpex: number;
+        variable: number;
       }
-    });
-
-    /** =========================
-     * EXPENSE
-     ========================== */
-    let fixedExpense = 0;
-    let variableExpense = 0;
-    let marketingExpense = 0;
-
-    typedExpenses.forEach((e) => {
-      if (e.expenseCategory === "Fixed") fixedExpense += e.amountPaid;
-      else variableExpense += e.amountPaid;
-
-      if (e.purpose === "Marketing") marketingExpense += e.amountPaid;
-    });
-
-    /** =========================
-     * MONTHLY
-     ========================== */
-    const monthly: MonthlyType = {};
-
-    typedOrders.forEach((order) => {
-      const key = new Date(order.date).toISOString().slice(0, 7);
-
-      if (!monthly[key]) {
-        monthly[key] = { revenue: 0, orders: 0 };
-      }
-
-      monthly[key].revenue += order.totalAmount;
-      monthly[key].orders += 1;
-    });
-
-    /** =========================
-     * BUSINESS
-     ========================== */
-    const months = Object.keys(monthly).length || 1;
-    const burnRate = totalExpense / months;
-
-    /** =========================
-     * CUSTOMER INSIGHTS
-     ========================== */
-    const customerRevenue: Record<string, number> = {};
-    const customerOrders: Record<string, number> = {};
-
-    typedOrders.forEach((o) => {
-      const id = o.customerId._id.toString();
-
-      customerRevenue[id] = (customerRevenue[id] || 0) + o.totalAmount;
-      customerOrders[id] = (customerOrders[id] || 0) + 1;
-    });
-
-    const topCustomers = Object.entries(customerRevenue)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-
-    const repeatCustomers = Object.entries(customerOrders).filter(
-      ([, count]) => count > 1
-    );
-
-    const revenuePerCustomer =
-      Object.keys(customerRevenue).length > 0
-        ? totalRevenue / Object.keys(customerRevenue).length
-        : 0;
-
-    /** =========================
-     * ALERTS
-     ========================== */
-    const reorderAlerts = lowStock;
-
-    const lossMakingProducts: ProductType[] = [];
+    > = {};
 
     typedProducts.forEach((p) => {
-      if (p.costPrice > p.mrp) {
-        lossMakingProducts.push(p);
+      productWiseExpenses[p._id.toString()] = {
+        name: p.name,
+        cogs: 0,
+        marketing: 0,
+        fixedOpex: 0,
+        variable: 0,
+      };
+    });
+
+    expenses.forEach((exp) => {
+      if (exp.expenseCategory === "COGS" && exp.productId) {
+        const pid = exp.productId.toString();
+        if (productWiseExpenses[pid]) {
+          productWiseExpenses[pid].cogs += exp.amountPaid;
+        }
       }
     });
 
-    /** =========================
-     * RESPONSE
-     ========================== */
-    return res.status(200).json({
-      financial: {
-        totalRevenue,
-        totalNetRevenue,
-        totalGST,
-        totalExpense,
-        totalProfit,
-        totalProductProfit,
-        totalProfitWithInventoryCost,
-        grossProfit,
-        netProfit,
-        realProfitAfterGST,
-        realMargin,
-      },
-      unitEconomics: {
-        sellingPrice,
-        costPrice,
-        profitPerUnit,
-        margin,
-      },
-      credit: {
-        totalCredit,
-        outstandingCredit,
-      },
-      inventory: {
-        inventoryValue,
-      },
-      products: productMap,
-      trends: {
-        monthly,
-      },
-      business: {
-        burnRate,
-      },
-      expenseBreakdown: {
-        fixed: fixedExpense,
-        variable: variableExpense,
-        marketing: marketingExpense,
-      },
-      alerts: {
-        reorder: reorderAlerts,
-        inventory: {
-          lowStock,
-          expiry,
-          lossMakingProducts,
-        },
-      },
-      customers: {
-        topCustomers,
-        repeatCustomers,
-        revenuePerCustomer,
-      },
+    const totalProducts = typedProducts.length;
+
+    const marketingPerProduct = totalExpenses.marketing / totalProducts;
+    const fixedPerProduct = totalExpenses.fixedOpex / totalProducts;
+    const variablePerProduct = totalExpenses.variable / totalProducts;
+
+    Object.keys(productWiseExpenses).forEach((pid) => {
+      productWiseExpenses[pid].marketing = marketingPerProduct;
+      productWiseExpenses[pid].fixedOpex = fixedPerProduct;
+      productWiseExpenses[pid].variable = variablePerProduct;
     });
+
+    return res.status(200).json({
+        success: true,
+        data: {
+          inventory: {
+            productWiseInventory,
+            totalInventoryValue,
+          },
+          alerts: {
+            inventory: {
+              expiryAlerts,
+            },
+          },
+          expenses: {
+            totalExpensesAmount,
+            totalExpenses,
+            productWiseExpenses
+          }
+        },
+      });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Failed to fetch insights" });
+    console.error("Insight API ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error"
+    });
   }
 }

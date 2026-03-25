@@ -1,104 +1,47 @@
 "use client";
 
-import AdminNavbar from "@/components/AdminNavbar";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { toast, Bounce } from "react-toastify";
-import { Context } from "@/store/context";
-import ACTIONS from "@/store/actions";
 import styles from "../../styles/admin.module.css";
-import {
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  BarChart,
-  Bar,
-} from "recharts";
+import { InsightsResponse, ProductType } from "@/lib/utils";
+import { Context } from "@/store/context";
+import { toast, Bounce } from "react-toastify";
+import ACTIONS from "@/store/actions";
 import Loader from "@/components/Loader";
+import AdminNavbar from "@/components/AdminNavbar";
+import { InventoryItem } from "@/store/reducers/adminReducer";
 
-const COLORS = ["#173F36", "#2E5E52", "#C9A25E", "#E1C88A"];
-
-type MonthlyTrend = {
-  revenue: number;
-  orders: number;
-};
-
-type InsightData = {
-  financial: {
-    totalRevenue: number;
-    totalNetRevenue: number;
-    totalGST: number;
-    totalExpense: number;
-    grossProfit: number;
-    netProfit: number;
-    realProfitAfterGST: number;
-    realMargin: number;
-  };
-  trends: {
-    monthly: Record<string, MonthlyTrend>;
-  };
-  expenseBreakdown: {
-    fixed: number;
-    variable: number;
-    marketing: number;
-  };
-  credit: {
-    totalCredit: number;
-    outstandingCredit: number;
-  };
-  inventory: {
-    inventoryValue: number;
-  };
-  business: {
-    burnRate: number;
-  };
-  customers: {
-    topCustomers: [string, number][];
-  };
-  alerts: {
-    inventory: {
-      lowStock: unknown[];
-      expiry: unknown[];
-    };
-  };
-};
-
-const Admin = () => {
-  const { dispatch } = useContext(Context);
-  const [data, setData] = useState<InsightData | null>(null);
+const InsightsPage = () => {
+  const [data, setData] = useState<InsightsResponse | null>(null);
   const [loader, setLoader] = useState(false);
+  const { dispatch, state } = useContext(Context);
+  const stateInventory = state.adminData.inventory;
+  const stateProducts = state.adminData.products;
 
-  /** =========================
-   * FETCH INSIGHTS
-   ========================== */
   useEffect(() => {
     const getInsights = async () => {
       setLoader(true);
       try {
         const res = await fetch("/api/insight");
-        const json = await res.json();
-        setData(json);
-      } catch {
-        toast.error("Failed to fetch insights");
+        const data = await res.json();
+        if(data.success) {
+          setData(data.data);
+        } else {
+          toast.error("Error during getting insights", data.message);
+        }
+      } catch (error) {
+        toast(`Insight error: ${error}`, { type: "error", transition: Bounce });
       } finally {
         setLoader(false);
       }
-    };
+    }
+
     getInsights();
   }, []);
 
-  /** =========================
-   * KEEP EXISTING CALLS
-   ========================== */
   useEffect(() => {
     const getInventory = async () => {
       try {
+        setLoader(true);
         const res = await fetch("/api/inventory");
         const data = await res.json();
 
@@ -107,9 +50,13 @@ const Admin = () => {
             type: ACTIONS.SET_INVENTORY,
             payload: data.data || [],
           });
+        } else {
+
         }
       } catch (error) {
         toast(`Inventory error: ${error}`, { type: "error", transition: Bounce });
+      } finally {
+        setLoader(false);
       }
     };
 
@@ -126,6 +73,8 @@ const Admin = () => {
         }
       } catch {
         toast.error("Failed to fetch products");
+      }  finally {
+        setLoader(false);
       }
     };
 
@@ -133,168 +82,199 @@ const Admin = () => {
     getProducts();
   }, []);
 
-  /** =========================
-   * MONTHLY DATA
-   ========================== */
-  const monthly = useMemo(() => {
-    if (!data?.trends?.monthly) return [];
+  const metrics = useMemo(() => {
+    if (!data) return null;
 
-    return Object.keys(data.trends.monthly)
-      .sort()
-      .map((key) => ({
-        month: key,
-        revenue: data.trends.monthly[key].revenue,
-        orders: data.trends.monthly[key].orders,
-      }));
+    const products = Object.values(data?.inventory?.productWiseInventory || {});
+
+    const totalProducts = products.length;
+
+    let remainingUnits = 0;
+    let lowStock = 0;
+
+    products.forEach((p) => {
+      remainingUnits += p.totalRemaining;
+      if (p.totalRemaining < 20) lowStock++; // threshold
+    });
+
+    return {
+      totalProducts,
+      remainingUnits,
+      lowStock,
+      expiryCount: data?.alerts?.inventory?.expiryAlerts?.length,
+    };
   }, [data]);
 
-  /** =========================
-   * EXPENSE PIE
-   ========================== */
-  const expenseData = useMemo(() => {
-    if (!data?.expenseBreakdown) return [];
-    return [
-      { name: "Fixed", value: data.expenseBreakdown.fixed },
-      { name: "Variable", value: data.expenseBreakdown.variable },
-      { name: "Marketing", value: data.expenseBreakdown.marketing },
-    ];
+  const expenseMetrics = useMemo(() => {
+    if (!data?.expenses) return null;
+
+    const total = data?.expenses.totalExpensesAmount;
+    const breakdown = data?.expenses.totalExpenses;
+
+    return {
+      total,
+      cogs: breakdown.cogs,
+      marketing: breakdown.marketing,
+      fixedOpex: breakdown.fixedOpex,
+      variable: breakdown.variable,
+    };
   }, [data]);
 
-  if (!data) return <div className={styles.loader}>Loading...</div>;
+  const inventoryMetric = useMemo(() => {
+    if (!stateInventory) return null;
+    const totalUnitCount = stateInventory.reduce((final: number, current: InventoryItem) => {
+      final += current.totalCount;
+      return final;
+    },0)
+    return {
+      totalUnits: totalUnitCount,
+    };
+  },[stateInventory])
 
-  const f = data.financial;
+  if (loader) return <Loader />;
 
   return (
     <div className={styles.container}>
       <AdminNavbar />
-      <h1 className={styles.heading}>Investor Dashboard</h1>
+      <h1 className={styles.heading}>Business Insights</h1>
 
-      {/* ================= KPI ================= */}
-      <div className={styles.grid}>
-        <Kpi label="Revenue" value={f.totalRevenue} />
-        <Kpi label="Net Revenue" value={f.totalNetRevenue} />
-        <Kpi label="GST" value={f.totalGST} />
-        <Kpi label="Expense" value={f.totalExpense} />
+      {/* KPI SECTION */}
+      <div className={styles.kpiGrid}>
+        <div className={styles.kpiCard}>
+          <span>Total Inventory Value</span>
+          <strong>₹{data?.inventory?.totalInventoryValue}</strong>
+        </div>
 
-        <Kpi label="Gross Profit" value={f.grossProfit} variant="green" />
-        <Kpi label="Net Profit" value={f.netProfit} variant="green" />
-        <Kpi label="Real Profit" value={f.realProfitAfterGST} variant="green" />
-        <Kpi label="Margin %" value={f.realMargin} variant="gold" />
+        <div className={styles.kpiCard}>
+          <span>Total Products</span>
+          <strong>{metrics?.totalProducts}</strong>
+        </div>
+
+        <div className={styles.kpiCard}>
+          <span>Unit Metric</span>
+          <strong>{metrics?.remainingUnits}/{inventoryMetric?.totalUnits}</strong>
+        </div>
+
+        <div className={styles.kpiCard}>
+          <span>Total Expenses</span>
+          <strong>₹{expenseMetrics?.total}</strong>
+        </div>
+
+        <div className={styles.kpiCard}>
+          <span>COGS</span>
+          <strong>₹{expenseMetrics?.cogs}</strong>
+        </div>
+
+        <div className={styles.kpiCard}>
+          <span>Marketing</span>
+          <strong>₹{expenseMetrics?.marketing}</strong>
+        </div>
+
+        <div className={styles.kpiCardAlert}>
+          <span>Expiry Alerts</span>
+          <strong>{metrics?.expiryCount}</strong>
+        </div>
+
+
       </div>
 
-      {/* ================= TREND ================= */}
-      <div className={styles.cardLarge}>
-        <h2 className={styles.subHeading}>Monthly Revenue</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={monthly}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="revenue" stroke="#2E5E52" />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      <div className={styles.expenseSection}>
+        <h2>💸 Expense Breakdown</h2>
 
-      {/* ================= ORDERS ================= */}
-      <div className={styles.cardLarge}>
-        <h2 className={styles.subHeading}>Orders Trend</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={monthly}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="orders" fill="#C9A25E" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* ================= EXPENSE ================= */}
-      <div className={styles.cardLarge}>
-        <h2 className={styles.subHeading}>Expense Breakdown</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie data={expenseData} dataKey="value" outerRadius={100} label>
-              {expenseData.map((_, i) => (
-                <Cell key={i} fill={COLORS[i % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* ================= CREDIT ================= */}
-      <div className={styles.grid}>
-        <Kpi label="Total Credit" value={data.credit.totalCredit} />
-        <Kpi label="Outstanding" value={data.credit.outstandingCredit} variant="gold" />
-      </div>
-
-      {/* ================= INVENTORY ================= */}
-      <div className={styles.grid}>
-        <Kpi label="Inventory Value" value={data.inventory.inventoryValue} />
-        <Kpi label="Burn Rate" value={data.business.burnRate} />
-      </div>
-
-      {/* ================= CUSTOMER ================= */}
-      <div className={styles.cardLarge}>
-        <h2 className={styles.subHeading}>Top Customers</h2>
-        {data.customers.topCustomers.map((c: [string, number], i: number) => (
-          <div key={i} className={styles.listItem}>
-            <span>{c[0]}</span>
-            <span>₹{c[1]}</span>
+        <div className={styles.expenseGrid}>
+          <div className={styles.expenseCard}>
+            <span>COGS:</span>
+            <strong> ₹{expenseMetrics?.cogs}</strong>
           </div>
-        ))}
-      </div>
 
-      {/* ================= ALERTS ================= */}
-      <div className={styles.cardLarge}>
-        <h2 className={styles.subHeading}>Alerts</h2>
+          <div className={styles.expenseCard}>
+            <span>Marketing:</span>
+            <strong> ₹{expenseMetrics?.marketing}</strong>
+          </div>
 
-        <div className={styles.alertBox}>
-          <p className={styles.alertTitle}>Low Stock</p>
-          {data.alerts.inventory.lowStock.length === 0 && (
-            <p className={styles.mutedSmall}>No issues</p>
-          )}
-        </div>
+          <div className={styles.expenseCard}>
+            <span>Fixed Opex:</span>
+            <strong> ₹{expenseMetrics?.fixedOpex}</strong>
+          </div>
 
-        <div className={styles.alertBox}>
-          <p className={styles.alertTitle}>Expiring Soon</p>
-          {data.alerts.inventory.expiry.length === 0 && (
-            <p className={styles.mutedSmall}>No issues</p>
-          )}
+          <div className={styles.expenseCard}>
+            <span>Variable:</span>
+            <strong> ₹{expenseMetrics?.variable}</strong>
+          </div>
         </div>
       </div>
 
-      {loader && <Loader />}
-    </div>
-  );
-};
+      {/* PRODUCT INVENTORY */}
+      <h2>Product wise</h2>
+      <div className={styles.grid}>
+        {Object.entries(data?.inventory?.productWiseInventory || {})?.map(
+          ([productId, details]) => {
+            const productName = stateProducts.find((item: ProductType) => item?._id === productId)?.name;
+            const productExpense = Object.values(
+              data?.expenses?.productWiseExpenses || {}
+            ).find((p) => p.name === productName);
+            return (
+              <div key={productId} className={styles.productCard}>
+              <h3>{productName}</h3>
+              <p>Total Remaining: {details.totalRemaining}</p>
+              <p>Value: ₹{details.totalInventoryValue}</p>
+              <div className={styles.expenseBox}>
+                <p>COGS: ₹{productExpense?.cogs || 0}</p>
+              </div>
 
-type KpiProps = {
-  label: string;
-  value: number | string;
-  variant?: "green" | "gold";
-};
+              <div className={styles.progressBar}>
+                <div
+                  style={{
+                    width: `${Math.min(
+                      (details.totalRemaining / 100) * 100,
+                      100
+                    )}%`,
+                  }}
+                  className={styles.progress}
+                />
+              </div>
 
-function Kpi({ label, value, variant }: KpiProps) {
-  return (
-    <div className={styles.card}>
-      <p className={styles.label}>{label}</p>
-      <h2
-        className={
-          variant === "green"
-            ? styles.valueGreen
-            : variant === "gold"
-            ? styles.valueGold
-            : styles.value
-        }
-      >
-        ₹{typeof value === "number" ? value.toFixed(1) : value}
-      </h2>
+              <div className={styles.batchList}>
+                {details.batches.map((batch) => (
+                  <div key={batch.batch} className={styles.batchItem}>
+                    <span>Batch: {batch.batch}</span>
+                    <span>Units: {batch.remainingCount}/{batch.totalCount}</span>
+                    <span>
+                      Exp: {new Date(batch.expiryDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            )
+          }
+        )}
+        
+      </div>
+
+      {/* EXPIRY ALERTS */}
+      <div className={styles.alertSection}>
+        <h2>⚠ Expiry Alerts (30 Days)</h2>
+
+        {data?.alerts?.inventory?.expiryAlerts?.length === 0 ? (
+          <p>No alerts 🎉</p>
+        ) : (
+          <div className={styles.alertList}>
+            {data?.alerts?.inventory?.expiryAlerts?.map((alert, i) => (
+              <div key={i} className={styles.alertItem}>
+                <strong>{alert.productName}</strong>
+                <span>Batch: {alert.batch}</span>
+                <span>Remaining: {alert.remainingCount}</span>
+                <span>
+                  Expiry: {new Date(alert.expiryDate).toLocaleDateString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-export default Admin;
+export default InsightsPage;

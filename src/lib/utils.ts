@@ -196,3 +196,63 @@ export enum PaymentModeType {
     BANK_TRANSFER = "Bank Transfer",
     CHEQUE = "Cheque",
 }
+
+export enum ExpenseCategoryType {
+  COGS = "COGS",
+  FIXED_OPEX = "Fixed Opex",
+  MARKETING = "Marketing",
+  VARIABLE = "Variable",
+}
+
+// Insight types 
+export type BatchInfo = {
+  batch: string;
+  totalCount: number;
+  remainingCount: number;
+  inventoryValue: number;
+  expiryDate: string;
+};
+
+export type ProductInventory = {
+  batches: BatchInfo[];
+  totalInventoryValue: number;
+  totalRemaining: number;
+};
+
+export type ExpiryAlert = {
+  productName: string;
+  batch: string;
+  remainingCount: number;
+  expiryDate: string;
+};
+
+export type InsightsResponse = {
+  inventory: {
+    productWiseInventory: Record<string, ProductInventory>;
+    totalInventoryValue: number;
+  };
+  alerts: {
+    inventory: {
+      expiryAlerts: ExpiryAlert[];
+    };
+  };
+  expenses: {
+    totalExpensesAmount: number;
+    totalExpenses: {
+      cogs: number;
+      fixedOpex: number;
+      marketing: number;
+      variable: number
+    },
+    productWiseExpenses: Record<
+      string,
+      {
+        name: string;
+        cogs: number;
+        marketing: number;
+        fixedOpex: number;
+        variable: number;
+      }
+    >
+  }
+};
