@@ -1,3 +1,4 @@
+import { OrderStatusType } from "@/lib/utils";
 import mongoose from "mongoose";
 
 /**
@@ -51,14 +52,8 @@ const OrderSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: [
-        "Payment_Pending",
-        "Payment_Done",
-        "Preparing",
-        "Dispatched",
-        "Delivered",
-      ],
-      default: "Payment_Pending",
+      enum: Object.values(OrderStatusType),
+      default: OrderStatusType.PAYMENT_PENDING,
     },
 
     totalAmount: {

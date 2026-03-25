@@ -197,6 +197,14 @@ export enum PaymentModeType {
     CHEQUE = "Cheque",
 }
 
+export enum OrderStatusType  {
+  PAYMENT_PENDING = "Payment Pending",
+  PAYMENT_DONE = "Payment Done",
+  PREPARING = "Preparing",
+  DISPATCHED = "Dispatched",
+  DELIVERED = "Delivered",
+}
+
 export enum ExpenseCategoryType {
   COGS = "COGS",
   FIXED_OPEX = "Fixed Opex",

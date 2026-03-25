@@ -77,7 +77,7 @@ const Payments = () => {
                       {payment.products.map((p, i) => (
                         <div key={i} className={styles.productItem}>
                           <div>{p.productName} × {p.quantity}</div>
-                          <div>Total Price: {p.totalPrice}</div>
+                          <div>Total Price: {p.totalPrice}*{p.quantity} :: {p.totalPrice*p.quantity}</div>
                         </div>
                       ))}
                     </td>

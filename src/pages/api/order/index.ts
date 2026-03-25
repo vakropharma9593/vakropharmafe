@@ -6,6 +6,7 @@ import Inventory from "@/models/Inventory";
 import CreditInventory from "@/models/CreditInventory";
 import "@/models/Customer"; 
 import Product from "@/models/Product";
+import { OrderStatusType } from "@/lib/utils";
 
 interface OrderWithCustomer {
   _id: string;
@@ -20,6 +21,7 @@ interface OrderWithCustomer {
     productId: {
       _id: string;
       name: string;
+      mrp: number;
     },
     batchId: {
       batch: string;
@@ -28,6 +30,7 @@ interface OrderWithCustomer {
     sellingPrice: number;
     batch: string;
     quantity: number;
+    totalPrice: number;
   }[];
 }
 
@@ -96,7 +99,7 @@ export default async function handler(
 
       // Calculate payment amount
       const totalAmount = products.reduce(
-        (sum: number, p: { sellingPrice: number, quantity: number }) => sum + p.sellingPrice * p.quantity,
+        (sum: number, p: { totalPrice: number, quantity: number }) => sum + p.totalPrice * p.quantity,
         0
       );
 
@@ -111,7 +114,7 @@ export default async function handler(
         totalAmount: finalTotalAmount
       });
 
-      if (status !== "Payment_Pending") {
+      if (status !== OrderStatusType.PAYMENT_PENDING) {
         // Save payment if order is paid or above status
         await Payment.create({
           orderId: order._id,
@@ -126,7 +129,6 @@ export default async function handler(
             status: order.status,
             products: order.products,
             totalAmountPaid: finalTotalAmount,
-            paymentType: paymentType,
         };
 
       return res.status(201).json({
@@ -139,7 +141,7 @@ export default async function handler(
     if (req.method === "GET") {
       const orders = await Order.find()
         .populate("customerId", "name phone")
-        .populate("products.productId", "name")
+        .populate("products.productId", "name mrp")
         .populate("products.batchId", "batch")
         .lean();
 
@@ -171,7 +173,9 @@ export default async function handler(
                         productName: p?.productId?.name,
                         batch: p.batchId?.batch,
                         quantity: p.quantity,
+                        totalPrice: p.totalPrice,
                         sellingPrice: p.sellingPrice,
+                        discountPercentage: Number((((p?.productId?.mrp - p.totalPrice)/p?.productId?.mrp)*100).toFixed(2))
                       })),
             totalAmountPaid: o?.totalAmount || 0,
             paymentType: payment?.paymentType || null,

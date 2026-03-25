@@ -1,6 +1,6 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
-import { dateToShow, formatStatus, PaymentModeType, Product, ProductType } from "@/lib/utils";
+import { dateToShow, formatStatus, OrderStatusType, PaymentModeType, Product, ProductType } from "@/lib/utils";
 import { Context } from "@/store/context";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -86,12 +86,35 @@ const Orders = () => {
   };
 
   const STATUS_COLORS: Record<string, string> = {
-    Payment_Pending: styles.pending,
-    Payment_Done: styles.paid,
-    Preparing: styles.preparing,
-    Dispatched: styles.dispatched,
-    Delivered: styles.delivered,
+    [OrderStatusType.PAYMENT_PENDING]: styles.pending,
+    [OrderStatusType.PAYMENT_DONE]: styles.paid,
+    [OrderStatusType.PREPARING]: styles.preparing,
+    [OrderStatusType.DISPATCHED]: styles.dispatched,
+    [OrderStatusType.DELIVERED]: styles.delivered,
   };
+
+  const isStatusAllowed = (item: string) => {
+    switch (selectedOrder?.status) {
+      case OrderStatusType.PAYMENT_PENDING:
+        return true;
+        break;
+      case OrderStatusType.PAYMENT_DONE:
+        if (item === OrderStatusType.PAYMENT_DONE || item === OrderStatusType.PREPARING || item === OrderStatusType.DISPATCHED || item === OrderStatusType.DELIVERED) return true;
+        break;
+      case OrderStatusType.PREPARING:
+        if (item === OrderStatusType.PREPARING || item === OrderStatusType.DISPATCHED || item === OrderStatusType.DELIVERED) return true;
+        break;
+      case OrderStatusType.DISPATCHED:
+        if (item === OrderStatusType.DISPATCHED || item === OrderStatusType.DELIVERED) return true;
+        break;
+      case OrderStatusType.DELIVERED:
+        if (item === OrderStatusType.DELIVERED) return true;
+        break;
+      default:
+        break;
+    }
+    return false;
+  }
 
   return (
     <div className={styles.container}>
@@ -203,11 +226,12 @@ const Orders = () => {
                 value={statusUpdate}
                 onChange={(e) => setStatusUpdate(e.target.value)}
               >
-                <option value="Payment_Pending">Payment Pending</option>
-                <option value="Payment_Done">Payment Done</option>
-                <option value="Preparing">Preparing</option>
-                <option value="Dispatched">Dispatched</option>
-                <option value="Delivered">Delivered</option>
+                {Object.values(OrderStatusType)?.map((item: string) => {
+                  if (!isStatusAllowed(item)) return null;
+                  return (
+                    <option key={item} value={item} >{item}</option>
+                  )
+                })}
               </select>
 
               {statusUpdate === "Payment_Done" && <select name="paymentType" onChange={(e) => setPaymentModeForUpdate(e.target.value)}>
@@ -272,8 +296,8 @@ const Orders = () => {
                   <div>Batch</div>
                   <div>MRP</div>
                   <div>Discount %</div>
-                  <div>Selling Price</div>
                   <div>Total Price</div>
+                  <div>Selling Price</div>
                   <div>Qty</div>
                   <div>Total</div>
                 </div>
@@ -290,8 +314,8 @@ const Orders = () => {
                       <div>{p.batch}</div>
                       <div>₹{mrp}</div>
                       <div>{Number(((mrp - p.totalPrice)/mrp)*100).toFixed(2)}%</div>
-                      <div>₹{Number(sellingPrice.toFixed(2))}</div>
                       <div>₹{p.totalPrice}</div>
+                      <div>₹{Number(sellingPrice.toFixed(2))}</div>
                       <div>{p.quantity}</div>
                       <div>₹{p.totalPrice * p.quantity}</div>
                     </div>
