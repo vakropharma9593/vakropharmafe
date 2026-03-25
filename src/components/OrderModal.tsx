@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import styles from "../styles/orderModal.module.css";
-import { isLastRowEmpty, PaymentModeType, Product, ProductType } from "@/lib/utils";
+import { isLastRowEmpty, OrderStatusType, PaymentModeType, Product, ProductType } from "@/lib/utils";
 import { Context } from "@/store/context";
 import { toast } from "react-toastify";
 import ACTIONS from "@/store/actions";
@@ -13,7 +13,7 @@ type Order = {
     customerName: string,
     date: string, 
     status: string, 
-    paymentType: string,
+    paymentType?: string,
     creditId?: string,
     selectedProductId?: string,
 }
@@ -35,8 +35,8 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
         customerId: "",
         customerName: "",
         date: "",
-        status: "Payment_Pending",
-        paymentType: "UPI",
+        status: "",
+        paymentType: "",
         selectedProductId: "",
         creditId: ""
     });
@@ -75,10 +75,14 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
         setLoader(true);
         if (orderFormData?.customerId !== "" && orderFormData?.date !== "" && orderFormData?.paymentType !== "" && orderFormData?.status && products?.length > 0 && !isLastRowEmpty(products)) {
           try {
+            const dataToSend = { ...orderFormData, products, orderType: source === "creditInventory" ? "CREDIT" : "" }
+            if (orderFormData.status === OrderStatusType.PAYMENT_PENDING) {
+                delete dataToSend.paymentType;
+            }
             const res = await fetch("/api/order", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ ...orderFormData, products, orderType: source === "creditInventory" ? "CREDIT" : "" }),
+              body: JSON.stringify(dataToSend),
             });
 
             const data = await res.json();
@@ -252,20 +256,22 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
               <input type="date" name="date" onChange={handleOrderChange} />
 
               <select name="status" onChange={handleOrderChange}>
-                <option>Payment_Pending</option>
-                <option>Payment_Done</option>
-                <option>Preparing</option>
-                <option>Dispatched</option>
-                <option>Delivered</option>
+                <option value="">Select Status</option>
+                {Object.values(OrderStatusType)?.map((item: string) => {
+                    return (
+                        <option key={item} >{item}</option>
+                    )
+                })}
               </select>
 
-              <select name="paymentType" onChange={handleOrderChange}>
+              {(orderFormData.status === OrderStatusType.PAYMENT_DONE || orderFormData.status === OrderStatusType.PREPARING || orderFormData.status === OrderStatusType.DISPATCHED || orderFormData.status === OrderStatusType.DELIVERED) && <select name="paymentType" onChange={handleOrderChange}>
+                <option value="">Payment Mode</option>
                 {Object.values(PaymentModeType)?.map((item: string) => {
                     return (
                          <option key={item}>{item}</option>
                     )
                 })}
-              </select>
+              </select>}
 
               <h4>Products</h4>
 

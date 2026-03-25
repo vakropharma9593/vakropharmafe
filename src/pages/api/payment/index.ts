@@ -31,7 +31,7 @@ export default async function handler(
         .sort({ createdAt: -1 });
 
       // ✅ Format response cleanly
-      const result = payments.map((p: { totalAmount: number, _id: string, paymentType: string, orderId: { customerId: { phone:  number}, products: {productId: {name: string}, sellingPrice: number, quantity: number}[], date: string } }) => {
+      const result = payments.map((p: { totalAmount: number, _id: string, paymentType: string, orderId: { customerId: { phone:  number}, products: {productId: {name: string}, totalPrice: number, quantity: number}[], date: string } }) => {
         return {
           totalAmount: p.totalAmount,
           paymentType: p.paymentType,
@@ -39,7 +39,7 @@ export default async function handler(
           products: p.orderId?.products?.map((item) => {
             return {
               productName: item?.productId?.name,
-              sellingPrice: item?.sellingPrice,
+              totalPrice: item?.totalPrice,
               quantity: item?.quantity
             }
           }),
