@@ -14,13 +14,24 @@ export default async function handler(
       const { id } = req.query;
       const { status, paymentType } = req.body;
 
+      const existing = await Order.findById(id);
+      if (!existing) {
+          return res.status(404).json({
+          success: false,
+          message: "Order not found",
+          });
+      }
+            
+      
+      const alreadyProcessed = existing.status === "Payment_Done";
+
       const order = await Order.findByIdAndUpdate(
         id,
         { status },
         { new: true }
       );
 
-      if (status === "Payment_Done") {
+      if (status === "Payment_Done" && !alreadyProcessed) {
         await Payment.create({
           orderId: order._id,
           totalAmount: order.totalAmount,

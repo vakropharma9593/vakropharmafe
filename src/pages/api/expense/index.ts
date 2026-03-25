@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/mongodb";
 import Expense from "@/models/Expense";
+import { ExpenseCategoryType } from "@/lib/utils";
+import { Types } from "mongoose";
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,14 +14,24 @@ export default async function handler(
     // CREATE Expense
     if (req.method === "POST") {
       const { voucher, paidTo, purpose, expenseCategory, productId, amountPaid, paidBy, paymentDate, paymentMode, authorizedByDirector, isSettled, settlementDate = "" } = req.body;
-
-      // 5️⃣ Save Expense
-      const expense = await Expense.create({
+      let finalDataToSave: {
+        voucher: string,
+        paidTo: string,
+        purpose: string,
+        expenseCategory:  ExpenseCategoryType,
+        amountPaid: number,
+        paidBy: string,
+        paymentDate: Date,
+        paymentMode: string,
+        authorizedByDirector: boolean,
+        isSettled: boolean,
+        settlementDate: Date,
+        productId?: Types.ObjectId,
+      } = {
         voucher,
         paidTo,
         purpose,
         expenseCategory,
-        productId,
         amountPaid,
         paidBy,
         paymentDate,
@@ -27,7 +39,15 @@ export default async function handler(
         authorizedByDirector,
         isSettled,
         settlementDate,
-      });
+      }
+      if (expenseCategory === ExpenseCategoryType.COGS) {
+        finalDataToSave = {
+          ...finalDataToSave,
+          productId: productId
+        }
+      }
+      // 5️⃣ Save Expense
+      const expense = await Expense.create(finalDataToSave);
 
       return res.status(201).json({
         success: true,
@@ -37,7 +57,8 @@ export default async function handler(
 
     // GET Expenses
     if (req.method === "GET") {
-        const inventory = await Expense.find().sort({ createdAt: -1 });
+      console.info("asdfas");
+        const inventory = await Expense.find().lean();
       
         return res.status(200).json({
             success: true,
