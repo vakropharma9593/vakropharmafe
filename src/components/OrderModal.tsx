@@ -79,7 +79,11 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
             if (orderFormData.status === OrderStatusType.PAYMENT_PENDING) {
                 delete dataToSend.paymentType;
             }
-            const res = await fetch("/api/order", {
+            let url = "/api/order";
+            if (source === "patientOrderPage") {
+                url = "/api/patientorder";
+            }
+            const res = await fetch(url, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(dataToSend),
@@ -221,7 +225,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
             </div>
 
             <form className={styles.form} onSubmit={handleOrderSubmit}>
-              {source === "orderPage" ? 
+              {source === "orderPage" || source === "patientOrderPage" ? 
                 <>
                     <input
                         placeholder="Customer Phone"

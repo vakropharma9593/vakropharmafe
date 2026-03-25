@@ -57,13 +57,6 @@ const AdminNavbar = () => {
         </button>
 
         <button
-          className={router.pathname === "/admin/creditInventory" ? styles.active : ""}
-          onClick={() => router.push("/admin/creditInventory")}
-        >
-          Credit Inventory
-        </button>
-
-        <button
           className={router.pathname === "/admin/expense" ? styles.active : ""}
           onClick={() => router.push("/admin/expense")}
         >
@@ -75,6 +68,20 @@ const AdminNavbar = () => {
           onClick={() => router.push("/admin/payment")}
         >
           Payments
+        </button>
+
+        <button
+          className={router.pathname === "/admin/creditInventory" ? styles.active : ""}
+          onClick={() => router.push("/admin/creditInventory")}
+        >
+          Credit Inventory
+        </button>
+
+        <button
+          className={router.pathname === "/admin/patientOrder" ? styles.active : ""}
+          onClick={() => router.push("/admin/patientOrder")}
+        >
+          Patient Order
         </button>
 
         <button
