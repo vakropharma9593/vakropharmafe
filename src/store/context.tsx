@@ -15,7 +15,7 @@ const ContextProvider: React.FC<ReactChild> = ({ children }) => {
   const [state, dispatch] = useCombinedReducer({
     app: useReducer(appReducer, initialState.app),
     auth: useReducer(authReducer, initialState.auth),
-    inventory: useReducer(adminReducer, initialState.inventory),
+    adminData: useReducer(adminReducer, initialState.adminData),
   });
 
   const {

@@ -11,14 +11,15 @@ export default async function handler(
 
     // CREATE Expense
     if (req.method === "POST") {
-      const { voucher, paidTo, purpose, amountPaid, paidBy, paymentDate, paymentMode, authorizedByDirector, isSettled, settlementDate = "" } = req.body;
-
+      const { voucher, paidTo, purpose, expenseCategory, productId, amountPaid, paidBy, paymentDate, paymentMode, authorizedByDirector, isSettled, settlementDate = "" } = req.body;
 
       // 5️⃣ Save Expense
       const expense = await Expense.create({
         voucher,
         paidTo,
         purpose,
+        expenseCategory,
+        productId,
         amountPaid,
         paidBy,
         paymentDate,

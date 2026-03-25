@@ -5,46 +5,51 @@ import { toast, Bounce } from "react-toastify";
 import styles from "../../styles/inventory.module.css";
 import { Context } from "@/store/context";
 import OrderModal from "@/components/OrderModal";
+import { ProductType } from "@/lib/utils";
+import { InventoryItem } from "@/store/reducers/adminReducer";
 
 type CreditInventoryItem = {
+  _id?: string;
+  batchId: string;
   batch: string;
-  itemName: string;
+  productId: string;
+  productName: string;
   totalCount: number;
   remainingCount: number;
   customerName: string;
   customerId: string;
-  customerNumber: number;
-  id: string;
+  customerPhone: number;
 }
 
 const CreditInventory = () => {
   const { state } = useContext(Context);
-  const stateInventory = state.inventory;
+  const stateInventory = state?.adminData?.inventory;
+  const products = state?.adminData?.products;
   const [loader, setLoader] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [creditInventory, setCreditInventory] = useState<CreditInventoryItem[]>([]);
   const [errors, setErrors] = useState({ customerNumber: "" });
-  const [batches, setBatches] = useState<{batch: string, mrp: number}[]>([]);
+  const [batches, setBatches] = useState<{batch: string, _id: string}[]>([]);
 
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [orderFormData, setOrderFormData] = useState({
-    customerPhone: "",
+    customerPhone: "", // to show
     customerId: "",
-    customerName: "",
+    customerName: "", // to show
     date: "",
     status: "Payment_Pending",
     paymentType: "UPI",
-    selectedProduct: "",
+    selectedProductId: "",
+    creditId: "",
   });
 
   const [formData, setFormData] = useState({
-    batch: "",
-    itemName: "",
-    totalCount: "",
-    remainingCount: "",
-    customerNumber: "",
+    batchId: "",
+    productId: "",
+    totalCount: 0,
     customerId: "",
-    customerName: "",
+    customerNumber: "",
+    customerName: ""
   });
 
   useEffect(() => {
@@ -59,19 +64,7 @@ const CreditInventory = () => {
           const data = await res.json();
           if(data.success){
             const finalData = data.data;
-            const finalInventory = finalData?.map((each: { batch: string, itemName: string, totalCount: number, remainingCount: number, customerId: { _id: string, name: string, phone: number }, _id: string }) => {
-              return {
-                batch: each?.batch,
-                itemName: each?.itemName,
-                totalCount: each?.totalCount,
-                remainingCount: each?.remainingCount,
-                customerName: each?.customerId?.name,
-                customerId: each?.customerId?._id,
-                customerNumber: each?.customerId?.phone,
-                id: each?._id,
-              }
-            });
-            setCreditInventory(finalInventory);
+            setCreditInventory(finalData);
           } else {
             toast.error(data.message);
           }
@@ -99,16 +92,22 @@ const CreditInventory = () => {
 
     const updated = { ...formData, [name]: value };
     setFormData(updated);
-    if (name === "itemName") {
-      const allbatches = stateInventory?.filter((item: { batch: string, itemName: string }) => item?.itemName === value).map((inventory: { batch: string, mrp: number }) => { return {batch: inventory.batch, mrp: inventory.mrp}});
-      setBatches(allbatches);
+    if (name === "productId") {
+      console.info(stateInventory);
+      const allBatchesOfProduct = stateInventory?.filter((item: InventoryItem) => item?.productId === value)?.map((item: InventoryItem) => {
+        return {
+          _id: item?._id || "",
+          batch: item?.batch
+        }
+      });
+      setBatches(allBatchesOfProduct);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoader(true);
-    if (formData?.batch !== "" && formData?.itemName !== "" && formData?.totalCount !== "" && formData?.remainingCount !== "" && formData?.customerId !== "" && formData?.customerName !== "") {
+    if (formData?.batchId !== "" && formData?.productId !== "" && formData?.totalCount > 0 && formData?.customerId !== "") {
       try {
         const res = await fetch("/api/creditInventory", {
           method: "POST",
@@ -118,22 +117,9 @@ const CreditInventory = () => {
 
         const data = await res.json();
         if(data.success) {
-          const finalData = data.data;
-          const finalInventory = {
-            batch: finalData?.batch,
-            itemName: finalData?.itemName,
-            totalCount: finalData?.totalCount,
-            remainingCount: finalData?.remainingCount,
-            customerName: finalData?.customerId?.name,
-            customerId: finalData?.customerId?._id,
-            customerNumber: finalData?.customerId?.phone,
-            id: finalData?._id,
-          }
-          const finalCreditInventory = [...creditInventory, finalInventory];
-          setCreditInventory(finalCreditInventory);
-
           setShowModal(false);
           toast.success("Credit Inventory added successfully");
+          getCreditInventory();
         } else {
           toast.error(data.message);
         }
@@ -186,7 +172,6 @@ const CreditInventory = () => {
       <AdminNavbar />
 
       <div className={styles.content}>
-        {/* Header */}
         <div className={styles.header}>
           <h1>
             Credit Inventory
@@ -206,7 +191,7 @@ const CreditInventory = () => {
                 <tr>
                   <th>#</th>
                   <th>Batch</th>
-                  <th>Item</th>
+                  <th>Product</th>
                   <th>Total</th>
                   <th>Remaining</th>
                   <th>Customer Name</th>
@@ -217,17 +202,17 @@ const CreditInventory = () => {
 
               <tbody>
                 {creditInventory.map((item: CreditInventoryItem, i: number) => (
-                  <tr key={item.id}>
+                  <tr key={item._id}>
                     <td>{i + 1}</td>
                     <td>{item.batch}</td>
-                    <td>{item.itemName}</td>
+                    <td>{item.productName}</td>
                     <td>{item.totalCount}</td>
                     <td>{item.remainingCount}</td>
                     <td>{item?.customerName}</td>
-                    <td>{item?.customerNumber}</td>
+                    <td>{item?.customerPhone}</td>
                     <td className={styles.actions}>
                       <button onClick={() => {
-                        setOrderFormData({ ...orderFormData, customerPhone: JSON.stringify(item?.customerNumber), customerName: item?.customerName, customerId: item?.customerId || "", selectedProduct: item?.itemName });
+                        setOrderFormData({ ...orderFormData, customerPhone: JSON.stringify(item?.customerPhone), customerName: item?.customerName, customerId: item?.customerId || "", selectedProductId: item?.productId, creditId: item?._id || "" });
                         setShowOrderModal(true);
                       }}>
                         Place Order
@@ -277,29 +262,27 @@ const CreditInventory = () => {
 
               {formData?.customerName && <h4>Customer Details :: {formData?.customerName}</h4>}
 
-              {/* <input name="batch" placeholder="Batch" onChange={handleChange} required /> */}
-
-              <select name="itemName" onChange={handleChange}>
+              <select name="productId" onChange={handleChange}>
                 <option value="">Select Product</option>
-                <option value="Facewash">Facewash</option>
-                <option value="Face_Serum">Face Serum</option>
-                <option value="Face_Moisturizer">Moisturizer</option>
-                <option value="Sunscreen">Sunscreen</option>
+                {products?.map((item: ProductType) => {
+                  return (
+                    <option key={item?._id} value={item?._id}>{item?.name}</option>
+                  )
+                })}
               </select>
 
               <select
-                name="batch"
-                value={formData.batch}
+                name="batchId"
+                value={formData.batchId}
                 onChange={handleChange}
               >
                 <option value="">Batch</option>
                 {batches.map((b) => (
-                  <option key={b.batch}>{b.batch}</option>
+                  <option key={b._id} value={b._id}>{b.batch}</option>
                 ))}
               </select>
 
               <input type="number" name="totalCount" placeholder="Total Count" onChange={handleChange} />
-              <input type="number" name="remainingCount" placeholder="Remaining Count" onChange={handleChange} />
 
               <button type="submit">Submit</button>
             </form>
@@ -307,7 +290,7 @@ const CreditInventory = () => {
         </div>
       )}
 
-      {showOrderModal && <OrderModal setShowOrderModal={setShowOrderModal} orderData={orderFormData} source="creditInventory" callAfterSave={getCreditInventory} allowedProducts={[{ name: orderFormData?.selectedProduct, value: orderFormData?.selectedProduct }]} />}
+      {showOrderModal && <OrderModal setShowOrderModal={setShowOrderModal} orderData={orderFormData} source="creditInventory" callAfterSave={getCreditInventory} />}
 
       {loader && <Loader />}
     </div>

@@ -1,21 +1,14 @@
+import { PaymentModeType } from "@/lib/utils";
 import mongoose from "mongoose";
 
 /**
  * Product Enum
  */
-export enum PurposeType {
-  PRODUCT = "Product",
-  SALARY = "Salary",
+export enum ExpenseCategoryType {
+  COGS = "COGS",
+  FIXED_OPEX = "Fixed Opex",
   MARKETING = "Marketing",
-  RENT_ELECTRICITY = "Rent & Electricity",
-  OTHER = "Other"
-}
-
-export enum PaymentModeType {
-    CASH = "Cash",
-    UPI = "UPI",
-    BANK_TRANSFER = "Bank Transfer",
-    CHEQUE = "Cheque",
+  VARIABLE = "Variable",
 }
 
 /**
@@ -31,11 +24,19 @@ const ExpenseSchema = new mongoose.Schema(
         type: String,
         required: true,
     },
-    purpose: {
+    expenseCategory: {
         type: String,
-        enum: Object.values(PurposeType),
+        enum: Object.values(ExpenseCategoryType),
         required: true,
     },
+    purpose: {
+        type: String,
+        required: true,
+    },
+    productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+    }, 
     amountPaid: {
         type: Number,
         required: true,
@@ -45,7 +46,7 @@ const ExpenseSchema = new mongoose.Schema(
         required: true,
     },
     paymentDate: {
-        type: String,
+        type: Date,
         required: true,
     },
     paymentMode: {

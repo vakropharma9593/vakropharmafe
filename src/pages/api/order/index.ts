@@ -5,15 +5,25 @@ import Payment from "@/models/Payment";
 import Inventory from "@/models/Inventory";
 import CreditInventory from "@/models/CreditInventory";
 import "@/models/Customer"; 
+import Product from "@/models/Product";
 
 interface OrderWithCustomer {
   _id: string;
   customerId?: {
     name: string;
+    phone: string;
   };
   date: Date;
   status: string;
+  totalAmount: number;
   products: {
+    productId: {
+      _id: string;
+      name: string;
+    },
+    batchId: {
+      batch: string;
+    };
     productName: string;
     sellingPrice: number;
     batch: string;
@@ -30,21 +40,20 @@ export default async function handler(
 
     // CREATE ORDER
     if (req.method === "POST") {
-      const { customerId, customerName, date, status, products, paymentType, orderType } = req.body;
+      const { customerId, date, status, products, paymentType, orderType, creditId } = req.body;
 
        const finalProducts = [];
 
       // 2️⃣ Check inventory & deduct stock
       for (const product of products) {
         const inventory = await Inventory.findOne({
-          batch: product.batch,
-          itemName: product.productName
+          _id: product.batchId,
         });
 
         if (!inventory) {
           return res.status(400).json({
             success: false,
-            message: `Inventory not found for batch ${product.batch}`
+            message: `Inventory not found for batch ${product.batchId}`
           });
         }
 
@@ -60,17 +69,8 @@ export default async function handler(
 
         if (orderType === "CREDIT") {
           const creditInventory = await CreditInventory.findOne({
-            batch: product.batch,
-            itemName: product.productName,
-            customerId: customerId
+            _id: creditId
           });
-
-          if (!creditInventory) {
-            return res.status(400).json({
-              success: false,
-              message: `Credit inventory not found for ${product.productName} (batch ${product.batch}) for this customer`
-            });
-          }
 
           if (creditInventory.remainingCount < product.quantity) {
             return res.status(400).json({
@@ -83,41 +83,50 @@ export default async function handler(
           await creditInventory.save();
         }
 
-        const basePrice = parseFloat(product.sellingPrice)/(1 + (inventory.gstPercentage/100));
-        const basePriceToSave = Number(basePrice.toFixed(2));
-        const newProduct = { ...product, basePrice: basePriceToSave };
+        const productData = await Product.findOne({
+          _id: product.productId,
+        });
+
+        const sellingPrice = parseFloat(product.totalPrice)/(1 + (productData.gstPercentage/100));
+        const sellingPriceToSave = Number(sellingPrice.toFixed(2));
+        const profit = sellingPriceToSave - productData?.costPrice;
+        const newProduct = { ...product, sellingPrice: sellingPriceToSave, costPrice: productData.costPrice, profit };
         finalProducts.push(newProduct);
       }
-      
-      // 3️⃣ Create order
-      const order = await Order.create({
-        customerId: customerId,
-        date,
-        status,
-        products: finalProducts,
-      });
 
-      // 4️⃣ Calculate payment amount
+      // Calculate payment amount
       const totalAmount = products.reduce(
         (sum: number, p: { sellingPrice: number, quantity: number }) => sum + p.sellingPrice * p.quantity,
         0
       );
 
-      // 5️⃣ Save payment
-      const payment = await Payment.create({
-        orderId: order._id,
-        totalAmount,
-        paymentType
+      const finalTotalAmount = Number(totalAmount.toFixed(2));
+      
+      // Create order
+      const order = await Order.create({
+        customerId: customerId,
+        date,
+        status,
+        products: finalProducts,
+        totalAmount: finalTotalAmount
       });
+
+      if (status !== "Payment_Pending") {
+        // Save payment if order is paid or above status
+        await Payment.create({
+          orderId: order._id,
+          totalAmount: finalTotalAmount,
+          paymentType
+        });
+      }
 
       const result = {
             id: order._id,
-            customerName: customerName,
             date: order.date,
             status: order.status,
             products: order.products,
-            totalAmountPaid: payment?.totalAmount || 0,
-            paymentType: payment?.paymentType || null,
+            totalAmountPaid: finalTotalAmount,
+            paymentType: paymentType,
         };
 
       return res.status(201).json({
@@ -129,7 +138,9 @@ export default async function handler(
     // GET ORDERS
     if (req.method === "GET") {
       const orders = await Order.find()
-        .populate("customerId", "name")
+        .populate("customerId", "name phone")
+        .populate("products.productId", "name")
+        .populate("products.batchId", "batch")
         .lean();
 
       const payments = await Payment.find();
@@ -149,12 +160,20 @@ export default async function handler(
         const payment = paymentMap.get(o._id.toString());
 
         return {
-            id: o._id,
+            _id: o._id,
+            customerId: o.customerId,
             customerName: o.customerId?.name,
+            customerPhone: o.customerId?.phone,
             date: o.date,
             status: o.status,
-            products: o.products,
-            totalAmountPaid: payment?.totalAmount || 0,
+            products: o.products.map((p) => ({
+                        productId: p?.productId?._id,
+                        productName: p?.productId?.name,
+                        batch: p.batchId?.batch,
+                        quantity: p.quantity,
+                        sellingPrice: p.sellingPrice,
+                      })),
+            totalAmountPaid: o?.totalAmount || 0,
             paymentType: payment?.paymentType || null,
         };
       });

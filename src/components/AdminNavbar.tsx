@@ -24,16 +24,15 @@ const AdminNavbar = () => {
       {/* LEFT */}
       <div className={styles.logo} onClick={() => router.push("/admin")}>
         <Image src={vakroLogo} alt="Vakro" width={80} height={80} style={{ transform: "scale(1.5)", transformOrigin: "center" }} />
-        Vakro Pharma
       </div>
 
       {/* CENTER LINKS */}
       <div className={styles.links}>
         <button
-          className={router.pathname === "/admin" ? styles.active : ""}
-          onClick={() => router.push("/admin")}
+          className={router.pathname === "/admin/product" ? styles.active : ""}
+          onClick={() => router.push("/admin/product")}
         >
-          Dashboard
+          Products
         </button>
 
         <button
@@ -69,6 +68,13 @@ const AdminNavbar = () => {
           onClick={() => router.push("/admin/expense")}
         >
           Expenses
+        </button>
+
+        <button
+          className={router.pathname === "/admin/payment" ? styles.active : ""}
+          onClick={() => router.push("/admin/payment")}
+        >
+          Payments
         </button>
 
         <button

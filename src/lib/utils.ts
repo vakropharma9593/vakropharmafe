@@ -44,16 +44,18 @@ export const formatStatus = (status: string) =>
   status.replace(/_/g, " ");
 
 export type Product = {
+  productId: string;
   productName: string;
-  sellingPrice: number;
+  totalPrice: number;
   batch: string;
+  batchId: string;
   quantity: number;
   discountPercentage: number;
 };
 
 export const isLastRowEmpty = (products: Product[]) => {
   const lastProduct = products[products?.length - 1];
-    if (lastProduct.productName && lastProduct?.batch && lastProduct?.discountPercentage && lastProduct?.sellingPrice && lastProduct?.quantity) {
+    if (lastProduct.productName && lastProduct?.batch && lastProduct?.discountPercentage && lastProduct?.totalPrice && lastProduct?.quantity) {
       return false;
     } else {
       return true;
@@ -78,4 +80,119 @@ export enum PaymentType {
 export const booleanToYesNo = (value: boolean) => {
   if (value) return "Yes";
   else return "No";
+}
+
+type ProductInsight = {
+  quantity: number;
+  revenue: number;
+  profit: number;
+};
+
+type MonthlyData = {
+  revenue: number;
+  expense: number;
+  profit: number;
+};
+
+type AlertOrder = {
+  customerName: string;
+  phone: string;
+  products: string[];
+  lastOrderDate: Date;
+};
+
+type CustomerInsight = {
+  name: string;
+  phone: string;
+  totalRevenue: number;
+  orderCount: number;
+};
+
+type InventoryAlert = {
+  itemName: string;
+  batch: string;
+  remainingCount: number;
+  expiryDate?: string;
+};
+
+type LossAlert = {
+  productName: string;
+  profit: number;
+};
+
+export type InsightsData = {
+  financial: {
+    totalRevenue: number;
+    totalNetRevenue: number;
+    totalGST: number;
+    totalExpense: number;
+    totalProfit: number;
+    totalProductProfit: number;
+    totalProfitWithInventoryCost: number;
+  };
+  inventory: {
+    inventoryValue: number;
+  };
+  products: Record<string, ProductInsight>;
+  unitEconomics:Record<
+      string,
+      {
+        sellingPrice: number;
+        costPrice: number;
+        profitPerUnit: number;
+        margin: number;
+      }>;
+  trends: {
+    monthly: Record<string, MonthlyData>;
+  };
+  business: {
+    burnRate: number;
+  };
+  creditInventory: {
+    totalCount: number;
+    remainingCount: number;
+  };
+  expenseBreakdown: {
+    fixed: number;
+    variable: number;
+    marketing: number;
+  },
+  alerts: {
+    reorder: {
+        oneMonth: AlertOrder[];
+        sixMonth: AlertOrder[];
+        oneYear: AlertOrder[];
+    };
+    inventory: {
+        lowStock: InventoryAlert[];
+        expiry: InventoryAlert[];
+        lossMakingProducts: LossAlert[];
+    };
+  };
+  customers: {
+      topCustomers: CustomerInsight[];
+      repeatCustomers: CustomerInsight[];
+      revenuePerCustomer: number;
+  };
+};
+
+export type KpiProps = {
+  label: string;
+  value: number;
+  variant?: "green" | "gold";
+};
+
+export type ProductType = {
+  _id?: string;
+  name: string;
+  mrp: number;
+  costPrice: number;
+  gstPercentage: number;
+}
+
+export enum PaymentModeType {
+    CASH = "Cash",
+    UPI = "UPI",
+    BANK_TRANSFER = "Bank Transfer",
+    CHEQUE = "Cheque",
 }

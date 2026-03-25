@@ -2,20 +2,15 @@ import mongoose from "mongoose";
 
 const CreditInventorySchema = new mongoose.Schema(
   {
-    batch: {
-      type: String,
+    batchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Inventory",
       required: true,
-      unique: true,
     },
-    itemName: {
-      type: String,
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
       required: true,
-      enum: [
-        "Facewash",
-        "Face_Serum",
-        "Face_Moisturizer",
-        "Sunscreen",
-      ],
     },
     totalCount: {
       type: Number,

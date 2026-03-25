@@ -1,0 +1,163 @@
+.container {
+  background: #F4EFE7;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.heading {
+  color: #173F36;
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.subHeading {
+  color: #173F36;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+/* GRID SYSTEM */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.gridTwo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.gridThree {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+@media (min-width: 900px) {
+  .gridTwo {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* CARDS */
+.card {
+  background: #FFFFFF;
+  border: 1px solid #EAE6DF;
+  border-radius: 14px;
+  padding: 16px;
+  transition: 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+.cardLarge {
+  background: #FFFFFF;
+  border: 1px solid #EAE6DF;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+/* TEXT */
+.label {
+  font-size: 13px;
+  color: #6B6B6B;
+}
+
+.value {
+  font-size: 22px;
+  font-weight: bold;
+  color: #173F36;
+}
+
+.valueGreen {
+  font-size: 22px;
+  font-weight: bold;
+  color: #2E5E52;
+}
+
+.valueGold {
+  font-size: 22px;
+  font-weight: bold;
+  color: #C9A25E;
+}
+
+/* EXTRA */
+.loader {
+  padding: 20px;
+  text-align: center;
+}
+
+.alertBox {
+  border: 1px solid #EAE6DF;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fff;
+}
+
+.alertTitle {
+  font-size: 14px;
+  color: #173F36;
+  margin-bottom: 8px;
+}
+
+.alertItem {
+  border-bottom: 1px solid #EAE6DF;
+  padding: 6px 0;
+}
+
+.mutedSmall {
+  font-size: 12px;
+  color: #6B6B6B;
+}
+
+.listItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #EAE6DF;
+}
+
+.gold {
+  color: #C9A25E;
+  font-weight: bold;
+}
+
+.detailsHeader,
+.detailsRow {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 0.8fr 1fr 0.8fr;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 13px;
+}
+
+.detailsHeader {
+  font-weight: bold;
+  border-bottom: 1px solid #EAE6DF;
+}
+
+.detailsRow {
+  border-bottom: 1px solid #F1ECE5;
+}
+
+/* ADD THESE ONLY (rest keep same) */
+
+.listItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #EAE6DF;
+  font-size: 14px;
+}
+
+.alertBox {
+  margin-bottom: 12px;
+}

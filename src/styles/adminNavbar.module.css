@@ -31,7 +31,7 @@
 /* LINKS */
 .links {
   display: flex;
-  gap: 20px;
+  gap: 12px;
 }
 
 .links button {
@@ -40,7 +40,7 @@
   color: #b7dcd5;
   font-size: 14px;
   cursor: pointer;
-  padding: 6px 10px;
+  padding: 4px 6px;
   border-radius: 8px;
   transition: all 0.2s ease;
 }
@@ -66,8 +66,8 @@
   background: #173f36;
   border: none;
   color: white;
-  padding: 8px 14px;
-  border-radius: 10px;
+  padding: 6px 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -79,7 +79,7 @@
 /* MOBILE */
 @media (max-width: 768px) {
   .navbar {
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
     gap: 10px;
   }
@@ -87,11 +87,13 @@
   .links {
     width: 100%;
     justify-content: space-between;
+    gap: 4px;
   }
 
   .links button {
     flex: 1;
     text-align: center;
+    font-size: 11px;
   }
 
   .actions {

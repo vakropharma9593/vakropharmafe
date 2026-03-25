@@ -54,6 +54,10 @@ const Sunscreen = () => {
     {
       name: "Aloe Extract",
       description: "Soothes skin and prevents dryness caused by sun exposure."
+    },
+    {
+      name: "4-butyl resorcinol",
+      description: "Strong tyrosinase inhibitor, reduce melanin production, reduce dark spots, improve uneven skin tone."
     }
   ];
 
@@ -103,7 +107,7 @@ const Sunscreen = () => {
       <Navbar source="product" />
 
       <ProductPage
-        title="Vakro Lite SPF 50 Sunscreen"
+        title="Vakro-Lite Anti-Pigmentation SPF 50 Fluid Sunscreen"
         price="549"
         heroImage={sunscreenImg}
         usageImage={sunscreenUse}

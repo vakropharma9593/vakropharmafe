@@ -25,7 +25,7 @@ const products = [
     productLink: "/products/faceserum",
   },
   {
-    name: "Face Mositurizer Gel",
+    name: "Face Moisturizer Gel",
     description:
       "Experience advanced hydration with powerful sun defense in one lightweight formula.",
     category: "Face Care",

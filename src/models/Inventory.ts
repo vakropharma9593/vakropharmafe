@@ -7,15 +7,10 @@ const InventorySchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    itemName: {
-      type: String,
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
       required: true,
-      enum: [
-        "Facewash",
-        "Face_Serum",
-        "Face_Moisturizer",
-        "Sunscreen",
-      ],
     },
     totalCount: {
       type: Number,
@@ -35,22 +30,6 @@ const InventorySchema = new mongoose.Schema(
     },
     expiryDate: {
       type: Date,
-      required: true,
-    },
-    mrp: {
-      type: Number,
-      required: true,
-    },
-    basePrice: {
-      type: Number,
-      required: true,
-    },
-    gstPercentage: {
-      type: Number,
-      required: true,
-    },
-    gstAmount: {
-      type: Number,
       required: true,
     }
   },

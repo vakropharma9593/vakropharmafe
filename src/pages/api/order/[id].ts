@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/mongodb";
 import Order from "@/models/Order";
+import Payment from "@/models/Payment";
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,13 +12,21 @@ export default async function handler(
 
     if (req.method === "PATCH") {
       const { id } = req.query;
-      const { status } = req.body;
+      const { status, paymentType } = req.body;
 
       const order = await Order.findByIdAndUpdate(
         id,
         { status },
         { new: true }
       );
+
+      if (status === "Payment_Done") {
+        await Payment.create({
+          orderId: order._id,
+          totalAmount: order.totalAmount,
+          paymentType
+        });
+      }
 
       return res.status(200).json({
         success: true,
