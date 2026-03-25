@@ -1,4 +1,5 @@
 
+import { ProductType } from "@/lib/utils";
 import { InventoryItem } from "./reducers/adminReducer";
 import { AppType } from "./reducers/appReducer";
 import { LoginDetails } from "./reducers/authReducer";
@@ -7,7 +8,10 @@ import { actionType } from "./useCombineReducer";
 export interface StateType {
   app: AppType;
   auth: LoginDetails;
-  inventory: InventoryItem[]
+  adminData: {
+   inventory: InventoryItem[];
+    products: ProductType[]; 
+  }
 }
 
 export type ContextType = {
@@ -27,5 +31,8 @@ export const initialState = {
     severity: "",
     message: "",
   },
-  inventory: []
+  adminData: {
+    inventory: [],
+    products: [],
+  }
 };

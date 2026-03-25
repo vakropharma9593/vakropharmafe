@@ -1,34 +1,57 @@
 import { Reducer } from "react";
-
 import ACTIONS from "../actions";
-import { ActionMap } from "@/lib/utils";
+import { ActionMap, ProductType } from "@/lib/utils";
 
 export interface InventoryItem {
-  id: string;
+  _id?: string;
   batch: string;
-  itemName: string;
+  productId: string;
+  productName?: string;
   totalCount: number;
-  remainingCount: number;
+  remainingCount?: number;
   receivedDate: string;
   mfgDate: string;
   expiryDate: string;
-  mrp: number;
-  basePrice: number;
-  costPrice: number;
-  gstAmount: number;
-  gstPercentage: number;
+  mrp?: number;
+  costPrice?: number;
+  gstPercentage?: number;
+}
+
+export interface AdminState {
+  inventory: InventoryItem[];
+  products: ProductType[];
 }
 
 export type AdminPayload = {
   [ACTIONS.SET_INVENTORY]: InventoryItem[];
+  [ACTIONS.SET_PRODUCTS]: ProductType[];
 };
 
-export type AuthAction = ActionMap<AdminPayload>[keyof ActionMap<AdminPayload>];
+export type AdminAction =
+  ActionMap<AdminPayload>[keyof ActionMap<AdminPayload>];
 
-const adminReducer: Reducer<InventoryItem[], AuthAction> = (state, action) => {
+const initialState: AdminState = {
+  inventory: [],
+  products: [],
+};
+
+const adminReducer: Reducer<AdminState, AdminAction> = (
+  state = initialState,
+  action
+) => {
   switch (action.type) {
     case ACTIONS.SET_INVENTORY:
-      return [ ...action.payload ];
+      return {
+        ...state,
+        inventory: action.payload,
+      };
+
+    case ACTIONS.SET_PRODUCTS:
+      return {
+        ...state,
+        products: action.payload,
+      };
+
     default:
       return state;
   }

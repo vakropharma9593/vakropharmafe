@@ -262,7 +262,7 @@ const Customers = () => {
       )}
 
       {showOrderModal && (
-        <OrderModal setShowOrderModal={setShowOrderModal} orderData={orderFormData} source="customerPage" allowedProducts={[{ name: "Facewash", value: "Facewash" }, { name: "Face Serum", value : "Face_Serum" }, { name: "Face Moisturizer", value: "Face_Moisturizer" }, { name: "Sunscreen", value: "Sunscreen" }]} />
+        <OrderModal setShowOrderModal={setShowOrderModal} orderData={orderFormData} source="customerPage" />
       )}
 
       {loader && <Loader />}

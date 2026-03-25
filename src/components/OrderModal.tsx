@@ -1,10 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import styles from "../styles/orderModal.module.css";
-import { isLastRowEmpty, Product } from "@/lib/utils";
+import { isLastRowEmpty, PaymentModeType, Product, ProductType } from "@/lib/utils";
 import { Context } from "@/store/context";
 import { toast } from "react-toastify";
 import ACTIONS from "@/store/actions";
 import Loader from "./Loader";
+import { InventoryItem } from "@/store/reducers/adminReducer";
 
 type Order = {
     customerPhone: string,
@@ -13,19 +14,21 @@ type Order = {
     date: string, 
     status: string, 
     paymentType: string,
+    creditId?: string,
+    selectedProductId?: string,
 }
 
 interface OrderModalInterface {
     setShowOrderModal: (value: boolean) => void;
     orderData?: Order;
     source: string;
-    allowedProducts: { name: string, value: string }[];
     callAfterSave?: () => void;
 }
 
-const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData, source, allowedProducts, callAfterSave }) => {
+const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData, source, callAfterSave }) => {
     const { state, dispatch } = useContext(Context);
-    const stateInventory = state.inventory;
+    const stateInventory = state.adminData.inventory;
+    const stateProducts = state.adminData.products;
 
     const [orderFormData, setOrderFormData] = useState<Order>({
         customerPhone: "",
@@ -34,12 +37,14 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
         date: "",
         status: "Payment_Pending",
         paymentType: "UPI",
+        selectedProductId: "",
+        creditId: ""
     });
     const [loader, setLoader] = useState(false);
     const [totalAmountPaid, setTotalAmountPaid] = useState<number>(0);
 
     const [products, setProducts] = useState<Product[]>([
-          { productName: "", sellingPrice: 0, batch: "", quantity: 1, discountPercentage: 0 },
+          { productId: "", productName: "", totalPrice: 0, batch: "", quantity: 1, discountPercentage: 0, batchId: "" },
     ]);
     const [errors, setErrors] = useState({ customerPhone: "" });
 
@@ -68,7 +73,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
     const handleOrderSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoader(true);
-        if (orderFormData?.customerId !== "" && orderFormData?.customerName !== "" && orderFormData?.paymentType !== "" && orderFormData?.status && products?.length > 0 && !isLastRowEmpty(products)) {
+        if (orderFormData?.customerId !== "" && orderFormData?.date !== "" && orderFormData?.paymentType !== "" && orderFormData?.status && products?.length > 0 && !isLastRowEmpty(products)) {
           try {
             const res = await fetch("/api/order", {
               method: "POST",
@@ -104,7 +109,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
 
     const calculateTotal = (products: Product[]) => {
         return products.reduce(
-        (total, product) => total + product.sellingPrice * product.quantity,
+        (total, product) => total + product.totalPrice * product.quantity,
         0
         );
     };
@@ -112,7 +117,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
     const addProduct = () => {
         setProducts([
             ...products,
-            { productName: "", sellingPrice: 0, batch: "", quantity: 1, discountPercentage: 0 },
+            { productId:  "", productName: "", totalPrice: 0, batch: "", quantity: 1, discountPercentage: 0, batchId: "" },
         ]);
     };
 
@@ -121,7 +126,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
         field: K,
         value: Product[K],
         p?: Product,
-        batches?: { batch: string, mrp: number }[],
+        allBatchesOfProduct?: InventoryItem[],
     ) => {
         const updated = [...products];
 
@@ -130,18 +135,34 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
             [field]: value,
         };
 
+        if (field === "productId") {
+            const productName = stateProducts.find((item: ProductType) => item?._id === value)?.name || "";
+            updated[index] = {
+                ...updated[index],
+                productName: productName,
+            };
+        }
+
+        if (field === "batchId") {
+            const batchName = allBatchesOfProduct?.find((item: InventoryItem) => item?._id === value)?.batch || "";
+            updated[index] = {
+                ...updated[index],
+                batch: batchName,
+            };
+        }
+
         setProducts(updated);
 
         const total = calculateTotal(updated);
 
         setTotalAmountPaid(total);
         // update batches based on product
-        if (field === "discountPercentage" && p && batches) {
-            const mrp = batches?.filter((b: {batch: string, mrp: number}) => b.batch === p.batch)[0].mrp;
-            const sellingPrice = mrp*(1 - parseFloat(value as string)/ 100);
+        if (field === "discountPercentage" && p) {
+            const mrp = stateProducts?.filter((b: ProductType) => b._id === p.productId)[0].mrp;
+            const totalPrice = mrp*(1 - parseFloat(value as string)/ 100);
             updated[index] = {
                 ...updated[index],
-                sellingPrice: Number(sellingPrice.toFixed(2)),
+                totalPrice: Number(totalPrice.toFixed(2)),
             };
         }
     };
@@ -239,9 +260,11 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
               </select>
 
               <select name="paymentType" onChange={handleOrderChange}>
-                <option>UPI</option>
-                <option>Cash</option>
-                <option>Bank Transfer</option>
+                {Object.values(PaymentModeType)?.map((item: string) => {
+                    return (
+                         <option key={item}>{item}</option>
+                    )
+                })}
               </select>
 
               <h4>Products</h4>
@@ -257,37 +280,31 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
               </div>
 
               {products.map((p, index) => {
-                const allbatches = stateInventory?.filter((item: { batch: string, itemName: string }) => item?.itemName === p.productName);
-                const allbatchesObject = allbatches.map((inventory: { batch: string, mrp: number }) => { return {batch: inventory.batch, mrp: inventory.mrp}});
-                // const selecteBatch = allbatches?.filter((b) => b.batch === p.batch)[0];
-
+                const allBatchesOfProduct = stateInventory?.filter((item: InventoryItem) => item?.productId === p.productId);
+                let productList = stateProducts;
+                if (orderFormData?.selectedProductId && orderFormData?.selectedProductId !== "") {
+                    productList = stateProducts?.filter((item: ProductType) => item?._id === orderFormData?.selectedProductId);
+                }
                 return (
                     <div key={index} className={styles.productRow}>
                     {/* PRODUCT */}
-                    <select
-                        value={p.productName}
-                        onChange={(e) =>
-                        handleProductChange(index, "productName", e.target.value)
-                        }
-                    >
-                        <option value="">Select</option>
-                        {allowedProducts?.map((eachProduct: {name: string, value: string })=> {
+                    <select value={p.productId} onChange={(e) => handleProductChange(index, "productId", e.target.value)}>
+                        <option value="">Select Product</option>
+                        {productList?.map((item: ProductType) => {
                             return (
-                                <option key={eachProduct?.value} value={eachProduct?.value}>{eachProduct?.name}</option>
-                            );
+                            <option key={item?._id} value={item?._id}>{item?.name}</option>
+                            )
                         })}
                     </select>
 
                     {/* BATCH */}
                     <select
-                        value={p.batch}
-                        onChange={(e) =>
-                        handleProductChange(index, "batch", e.target.value)
-                        }
+                         value={p.batchId}
+                        onChange={(e) => handleProductChange(index, "batchId", e.target.value, undefined, allBatchesOfProduct)}
                     >
                         <option value="">Batch</option>
-                        {allbatchesObject.map((b) => (
-                            <option key={b.batch}>{b.batch}</option>
+                        {allBatchesOfProduct.map((b) => (
+                            <option key={b._id} value={b._id}>{b.batch}</option>
                         ))}
                     </select>
 
@@ -295,7 +312,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                     <div className={styles.infoBox}>
                         <span>MRP</span>
                         ₹{
-                            allbatchesObject?.filter((b) => b.batch === p.batch)[0]?.mrp || 0
+                            stateProducts?.filter((b) => b._id === p.productId)[0]?.mrp || 0
                         }
                     </div>
 
@@ -310,15 +327,14 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                             "discountPercentage",
                             Number(e.target.value),
                             p,
-                            allbatchesObject
                         )
                         }
                     />
 
                     {/* SELLING PRICE */}
                     <div className={styles.infoBox}>
-                        <span>Selling</span>
-                        ₹{p.sellingPrice}
+                        <span>Total ₹</span>
+                        ₹{p.totalPrice}
                     </div>
 
                     {/* QTY */}
@@ -345,9 +361,9 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                 )
               })}
 
-              <button type="button" disabled={isLastRowEmpty(products)} onClick={addProduct}>
+              {orderFormData?.selectedProductId && orderFormData?.selectedProductId !== "" ? null : <button type="button" disabled={isLastRowEmpty(products)} onClick={addProduct}>
                 + Add Product
-              </button>
+              </button>}
 
               <div className={styles.total}>
                 Total: ₹{Number(totalAmountPaid.toFixed(2))}

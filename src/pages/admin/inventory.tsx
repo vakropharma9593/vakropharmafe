@@ -1,6 +1,6 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
-import { dateToShow } from "@/lib/utils";
+import { dateToShow, ProductType } from "@/lib/utils";
 import ACTIONS from "@/store/actions";
 import { Context } from "@/store/context";
 import { useContext, useState } from "react";
@@ -10,57 +10,55 @@ import { InventoryItem } from "@/store/reducers/adminReducer";
 
 const Inventory = () => {
   const { state, dispatch } = useContext(Context);
-  const inventory = state.inventory;
+  const inventory = state?.adminData?.inventory;
+  const products = state?.adminData?.products;
 
   const [loader, setLoader] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<InventoryItem>({
     batch: "",
-    itemName: "",
-    totalCount: "",
-    remainingCount: "",
+    productId: "",
+    totalCount: 0,
     receivedDate: "",
     mfgDate: "",
-    expiryDate: "",
-    mrp: null,
-    gstPercentage: null,
-    basePrice: 0,
-    costPrice: 0,
-    gstAmount: 0,
+    expiryDate: ""
   });
 
-  const calculateValues = (mrp: number, gst: number) => {
-    const basePrice = mrp / (1 + gst / 100);
-    const gstAmount = mrp - basePrice;
-    return {
-      basePrice: Number(basePrice.toFixed(2)),
-      gstAmount: Number(gstAmount.toFixed(2)),
-    };
-  };
+  const getInventory = async () => {
+    setLoader(true);
+    try {
+      const res = await fetch("/api/inventory", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await res.json();
+      if(data?.success) {
+        dispatch({
+          type: ACTIONS.SET_INVENTORY,
+          payload: data.data,
+        });
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error("Failed to get inventory");
+    } finally {
+      setLoader(false);
+    }
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-
-    let updated = { ...formData, [name]: name === "costPrice" ? parseFloat(value) : value };
-
-    if (name === "mrp" && updated.gstPercentage) {
-      const calc = calculateValues(Number(value), Number(updated.gstPercentage));
-      updated = { ...updated, ...calc };
-    }
-
-    if (name === "gstPercentage" && updated.mrp) {
-      const calc = calculateValues(Number(updated.mrp), Number(value));
-      updated = { ...updated, ...calc };
-    }
-
+    const updated = { ...formData, [name]: name === "totalCount" ? parseInt(value) : value };
     setFormData(updated);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoader(true);
-    if (formData?.batch !== "" && formData?.itemName !== "" && formData?.totalCount !== "" && formData?.remainingCount !== "" && formData?.receivedDate !== "" && formData?.mfgDate !== "" && formData?.expiryDate !== "" && formData?.mrp !== "" && formData?.gstPercentage !== "" && formData?.basePrice > 0) {
+    if (formData?.batch !== "" && formData?.productId !== "" && formData?.totalCount > 0 && formData?.receivedDate !== "" && formData?.mfgDate !== "" && formData?.expiryDate !== "") {
       try {
         const res = await fetch("/api/inventory", {
           method: "POST",
@@ -70,13 +68,9 @@ const Inventory = () => {
 
         const data = await res.json();
         if (data.success) {
-          dispatch({
-            type: ACTIONS.SET_INVENTORY,
-            payload: [...inventory, data.data],
-          });
-
           setShowModal(false);
           toast.success("Inventory added successfully");
+          getInventory();
         } else {
           toast.error(data.message);
         }
@@ -110,7 +104,6 @@ const Inventory = () => {
       <AdminNavbar />
 
       <div className={styles.content}>
-        {/* Header */}
         <div className={styles.header}>
           <h1>
             Inventory
@@ -130,35 +123,31 @@ const Inventory = () => {
                 <tr>
                   <th>#</th>
                   <th>Batch</th>
-                  <th>Item</th>
+                  <th>Product</th>
                   <th>Total</th>
                   <th>Remaining</th>
-                  <th>Received</th>
+                  <th>Received On</th>
                   <th>Mfg</th>
                   <th>Expiry</th>
-                  <th>MRP</th>
-                  <th>Base (without GST)</th>
                   <th>Cost Price</th>
-                  <th>GST Amt</th>
+                  <th>MRP</th>
                   <th>GST %</th>
                 </tr>
               </thead>
 
               <tbody>
                 {inventory.map((item: InventoryItem, i: number) => (
-                  <tr key={item.id} className={getExpiryClass(item.expiryDate)}>
+                  <tr key={item?._id} className={getExpiryClass(item.expiryDate)}>
                     <td>{i + 1}</td>
                     <td>{item.batch}</td>
-                    <td>{item.itemName}</td>
+                    <td>{item?.productName}</td>
                     <td>{item.totalCount}</td>
                     <td>{item.remainingCount}</td>
                     <td>{dateToShow(item.receivedDate)}</td>
                     <td>{dateToShow(item.mfgDate)}</td>
                     <td>{dateToShow(item.expiryDate)}</td>
-                    <td>₹{item.mrp}</td>
-                    <td>₹{item.basePrice}</td>
                     <td>₹{item.costPrice}</td>
-                    <td>₹{item.gstAmount}</td>
+                    <td>₹{item?.mrp}</td>
                     <td>{item.gstPercentage}%</td>
                   </tr>
                 ))}
@@ -182,16 +171,16 @@ const Inventory = () => {
             <form onSubmit={handleSubmit} className={styles.form}>
               <input name="batch" placeholder="Batch" onChange={handleChange} required />
 
-              <select name="itemName" onChange={handleChange}>
+              <select name="productId" onChange={handleChange}>
                 <option value="">Select Product</option>
-                <option value="Facewash">Facewash</option>
-                <option value="Face_Serum">Face Serum</option>
-                <option value="Face_Moisturizer">Moisturizer</option>
-                <option value="Sunscreen">Sunscreen</option>
+                {products?.map((item: ProductType) => {
+                  return (
+                    <option key={item?._id} value={item?._id}>{item?.name}</option>
+                  )
+                })}
               </select>
 
               <input type="number" name="totalCount" placeholder="Total Count" onChange={handleChange} />
-              <input type="number" name="remainingCount" placeholder="Remaining Count" onChange={handleChange} />
 
               <label>MFG</label>
               <input type="date" name="mfgDate" onChange={handleChange} />
@@ -201,15 +190,6 @@ const Inventory = () => {
 
               <label>Received</label>
               <input type="date" name="receivedDate" onChange={handleChange} />
-              <input type="number" name="costPrice" placeholder="Cost Price" step="0.01" onChange={handleChange} />
-
-              <input type="number" name="mrp" placeholder="MRP" step="0.01" onChange={handleChange} />
-              <input type="number" name="gstPercentage" placeholder="GST %" step="0.01" onChange={handleChange} />
-
-              <div className={styles.calculation}>
-                <p>Base: ₹{formData.basePrice}</p>
-                <p>GST: ₹{formData.gstAmount}</p>
-              </div>
 
               <button type="submit">Submit</button>
             </form>

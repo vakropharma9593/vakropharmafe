@@ -29,10 +29,10 @@ const AdminNavbar = () => {
       {/* CENTER LINKS */}
       <div className={styles.links}>
         <button
-          className={router.pathname === "/admin" ? styles.active : ""}
-          onClick={() => router.push("/admin")}
+          className={router.pathname === "/admin/product" ? styles.active : ""}
+          onClick={() => router.push("/admin/product")}
         >
-          Dashboard
+          Products
         </button>
 
         <button

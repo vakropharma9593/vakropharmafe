@@ -129,3 +129,35 @@
   color: #C9A25E;
   font-weight: bold;
 }
+
+.detailsHeader,
+.detailsRow {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 0.8fr 1fr 0.8fr;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 13px;
+}
+
+.detailsHeader {
+  font-weight: bold;
+  border-bottom: 1px solid #EAE6DF;
+}
+
+.detailsRow {
+  border-bottom: 1px solid #F1ECE5;
+}
+
+/* ADD THESE ONLY (rest keep same) */
+
+.listItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #EAE6DF;
+  font-size: 14px;
+}
+
+.alertBox {
+  margin-bottom: 12px;
+}

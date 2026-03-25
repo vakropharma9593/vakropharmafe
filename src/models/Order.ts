@@ -1,30 +1,21 @@
 import mongoose from "mongoose";
 
 /**
- * Product Enum
- */
-export enum ProductName {
-  FACEWASH = "Facewash",
-  FACE_SERUM = "Face_Serum",
-  FACE_MOISTURIZER = "Face_Moisturizer",
-  SUNSCREEN = "Sunscreen",
-}
-
-/**
  * Product Schema
  */
 const ProductSchema = new mongoose.Schema({
-  productName: {
-    type: String,
-    enum: Object.values(ProductName),
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
     required: true,
   },
-  sellingPrice: {
+  totalPrice: {
     type: Number,
     required: true,
   },
-  batch: {
-    type: String,
+  batchId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Inventory",
     required: true,
   },
   quantity: {
@@ -32,11 +23,14 @@ const ProductSchema = new mongoose.Schema({
     required: true,
     min: 1,
   },
-  basePrice: {
+  sellingPrice: {
     type: Number,
     required: true,
   },
-  costPrice: { type: Number, required: true }
+  profit: {
+    type: Number,
+    required: true,
+  }
 });
 
 /**
@@ -65,6 +59,11 @@ const OrderSchema = new mongoose.Schema(
         "Delivered",
       ],
       default: "Payment_Pending",
+    },
+
+    totalAmount: {
+      type: Number,
+      required: true,
     },
 
     products: {

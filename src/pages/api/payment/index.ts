@@ -17,22 +17,36 @@ export default async function handler(
         .populate({
           path: "orderId",
           select: "products customerId date",
-          populate: {
-            path: "customerId",
-            select: "phone",
-          },
+          populate: [
+            {
+              path: "customerId",
+              select: "phone",
+            },
+            {
+              path: "products.productId",
+              select: "name",
+            },
+          ],
         })
         .sort({ createdAt: -1 });
 
       // ✅ Format response cleanly
-      const result = payments.map((p: { totalAmount: number, _id: string, paymentType: string, orderId: { customerId: { phone:  number}, products: unknown[], date: string } }) => ({
-        totalAmount: p.totalAmount,
-        paymentType: p.paymentType,
-        customerNumber: p.orderId?.customerId?.phone || "",
-        products: p.orderId?.products || [],
-        date: p.orderId?.date,
-        _id: p._id,
-      }));
+      const result = payments.map((p: { totalAmount: number, _id: string, paymentType: string, orderId: { customerId: { phone:  number}, products: {productId: {name: string}, sellingPrice: number, quantity: number}[], date: string } }) => {
+        return {
+          totalAmount: p.totalAmount,
+          paymentType: p.paymentType,
+          customerNumber: p.orderId?.customerId?.phone || "",
+          products: p.orderId?.products?.map((item) => {
+            return {
+              productName: item?.productId?.name,
+              sellingPrice: item?.sellingPrice,
+              quantity: item?.quantity
+            }
+          }),
+          date: p.orderId?.date,
+          _id: p._id,
+        }
+      });
 
       return res.status(200).json({
         success: true,

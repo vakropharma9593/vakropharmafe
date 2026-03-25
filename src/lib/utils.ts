@@ -44,16 +44,18 @@ export const formatStatus = (status: string) =>
   status.replace(/_/g, " ");
 
 export type Product = {
+  productId: string;
   productName: string;
-  sellingPrice: number;
+  totalPrice: number;
   batch: string;
+  batchId: string;
   quantity: number;
   discountPercentage: number;
 };
 
 export const isLastRowEmpty = (products: Product[]) => {
   const lastProduct = products[products?.length - 1];
-    if (lastProduct.productName && lastProduct?.batch && lastProduct?.discountPercentage && lastProduct?.sellingPrice && lastProduct?.quantity) {
+    if (lastProduct.productName && lastProduct?.batch && lastProduct?.discountPercentage && lastProduct?.totalPrice && lastProduct?.quantity) {
       return false;
     } else {
       return true;
@@ -132,6 +134,14 @@ export type InsightsData = {
     inventoryValue: number;
   };
   products: Record<string, ProductInsight>;
+  unitEconomics:Record<
+      string,
+      {
+        sellingPrice: number;
+        costPrice: number;
+        profitPerUnit: number;
+        margin: number;
+      }>;
   trends: {
     monthly: Record<string, MonthlyData>;
   };
@@ -171,3 +181,18 @@ export type KpiProps = {
   value: number;
   variant?: "green" | "gold";
 };
+
+export type ProductType = {
+  _id?: string;
+  name: string;
+  mrp: number;
+  costPrice: number;
+  gstPercentage: number;
+}
+
+export enum PaymentModeType {
+    CASH = "Cash",
+    UPI = "UPI",
+    BANK_TRANSFER = "Bank Transfer",
+    CHEQUE = "Cheque",
+}

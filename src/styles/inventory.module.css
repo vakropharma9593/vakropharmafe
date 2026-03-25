@@ -322,6 +322,7 @@
 
 /* RADIO GROUP */
 .radioGroup {
+  margin-left: 2px;
   display: flex;
   flex-direction: column;
   gap: 6px;

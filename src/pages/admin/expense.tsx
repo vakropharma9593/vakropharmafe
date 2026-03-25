@@ -1,14 +1,18 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
-import { booleanToYesNo, dateToShow, PaymentType, PurposeType } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { booleanToYesNo, dateToShow, PaymentType, ProductType, PurposeType } from "@/lib/utils";
+import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/inventory.module.css";
+import { Context } from "@/store/context";
+import { ExpenseCategoryType } from "@/models/Expense";
 
 export type ExpenseType = {
     voucher: string,
     paidTo: string,
-    purpose: PurposeType,
+    purpose: string,
+    expenseCategory: ExpenseCategoryType,
+    productId?: string,
     amountPaid: number,
     paidBy: string,
     paymentDate: string,
@@ -17,10 +21,11 @@ export type ExpenseType = {
     isSettled: boolean,
     settlementDate: string,
     _id?: string,
-    expenseCategory?: string,
 }
 
 const Expense = () => {
+  const { state } = useContext(Context);
+  const stateProducts = state.adminData.products;
   const [expenses, setExpenses] = useState<ExpenseType[]>([]);
   const [loader, setLoader] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -30,7 +35,9 @@ const Expense = () => {
   const [formData, setFormData] = useState<ExpenseType>({
     voucher: "",
     paidTo: "",
-    purpose: PurposeType.PRODUCT,
+    expenseCategory: ExpenseCategoryType.VARIABLE,
+    purpose: "",
+    productId: "",
     amountPaid: 0,
     paidBy: "",
     paymentDate: "",
@@ -46,41 +53,46 @@ const Expense = () => {
 
     const updateOrderStatus = async () => {
         if (!selectedExpense) return;
+        if ((formData?.isSettled && formData?.settlementDate) || !formData?.isSettled) { 
+          try {
+              setLoader(true);
 
-        try {
-            setLoader(true);
+              const res = await fetch(`/api/expense/${selectedExpense._id}`, {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ isSettled: formData?.isSettled, settlementDate: formData?.isSettled ? formData?.settlementDate : ""}),
+              });
 
-            const res = await fetch(`/api/expense/${selectedExpense._id}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ isSettled: formData?.isSettled, settlementDate: formData?.isSettled ? formData?.settlementDate : ""}),
-            });
+              const data = await res.json();
+              if (data.success) {
+                  setFormData({
+                      voucher: "",
+                      paidTo: "",
+                      expenseCategory: ExpenseCategoryType.VARIABLE,
+                      purpose: "",
+                      productId: "",
+                      amountPaid: 0,
+                      paidBy: "",
+                      paymentDate: "",
+                      paymentMode: PaymentType.CASH,
+                      authorizedByDirector: false,
+                      isSettled: false,
+                      settlementDate: "",
+                  });
 
-            const data = await res.json();
-            if (data.success) {
-                setFormData({
-                    voucher: "",
-                    paidTo: "",
-                    purpose: PurposeType.PRODUCT,
-                    amountPaid: 0,
-                    paidBy: "",
-                    paymentDate: "",
-                    paymentMode: PaymentType.CASH,
-                    authorizedByDirector: false,
-                    isSettled: false,
-                    settlementDate: "",
-                });
-
-                toast.success("Order status updated");
-                setShowStatusModal(false);
-                getExpenses();
-            } else {
-                toast.error(data.message);
-            }
-        } catch {
-            toast.error("Failed to update status");
-        } finally {
-            setLoader(false);
+                  toast.success("Order status updated");
+                  setShowStatusModal(false);
+                  getExpenses();
+              } else {
+                  toast.error(data.message);
+              }
+          } catch {
+              toast.error("Failed to update status");
+          } finally {
+              setLoader(false);
+          }
+        } else {
+          toast.error("Please fill all fields");
         }
     };
 
@@ -125,7 +137,9 @@ const Expense = () => {
             setFormData({
                 voucher: "",
                 paidTo: "",
-                purpose: PurposeType.PRODUCT,
+                expenseCategory: ExpenseCategoryType.VARIABLE,
+                purpose: "",
+                productId: "",
                 amountPaid: 0,
                 paidBy: "",
                 paymentDate: "",
@@ -198,7 +212,7 @@ const Expense = () => {
                     <td>{item.voucher}</td>
                     <td>{item.paidTo}</td>
                     <td>{item.purpose}</td>
-                    <td>{item.expenseCategory}</td>
+                    <td>{item.expenseCategory}<br></br>{item?.expenseCategory === ExpenseCategoryType.COGS && "(" + stateProducts?.find((product: ProductType) => product._id === item.productId)?.name + ")"} </td>
                     <td>{item.paidBy}</td>
                     <td>₹{Number(item.amountPaid).toFixed(2)}</td>
                     <td>{dateToShow(item.paymentDate)}</td>
@@ -215,6 +229,8 @@ const Expense = () => {
                           setFormData(item);
                           setShowStatusModal(true);
                         }}
+                        disabled={item?.isSettled}
+                        style={{ cursor: item?.isSettled ? "not-allowed" : "pointer"}}
                       >
                         Update
                       </button>
@@ -241,14 +257,25 @@ const Expense = () => {
             <form onSubmit={handleSubmit} className={styles.form}>
               <input name="voucher" placeholder="Voucher" onChange={handleChange} required />
               <input name="paidTo" placeholder="Paid To" onChange={handleChange} required />
-              <select name="purpose" onChange={handleChange}>
-                <option value="">Select Purpose</option>
-                {Object.values(PurposeType)?.map((purpose: string) => {
+              <input name="purpose" placeholder="Purpose" onChange={handleChange} required />
+              <select name="expenseCategory" onChange={handleChange}>
+                <option value="">Select Category</option>
+                {Object.values(ExpenseCategoryType)?.map((category: string) => {
                     return (
-                        <option key={purpose} value={purpose}>{purpose}</option>
+                        <option key={category} value={category}>{category}</option>
                     );
                 })};
               </select>
+              {formData?.expenseCategory === ExpenseCategoryType.COGS &&
+                <select value={formData?.productId} name="productId" onChange={handleChange}>
+                    <option value="">Select Product</option>
+                    {stateProducts?.map((item: ProductType) => {
+                        return (
+                        <option key={item?._id} value={item?._id}>{item?.name}</option>
+                        )
+                    })}
+                </select>
+              }
               <input name="paidBy" placeholder="Paid By" onChange={handleChange} required />
               <input type="number" name="amountPaid" placeholder="Amount Paid" step="0.01" onChange={handleChange} />
               <label>Payment Date</label>

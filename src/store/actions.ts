@@ -9,6 +9,7 @@ enum ACTIONS {
     HIDE_TOAST,
 
     SET_INVENTORY,
+    SET_PRODUCTS,
 }
 
 export default ACTIONS;
