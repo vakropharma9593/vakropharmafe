@@ -13,6 +13,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { UnitEconomicsBarChart } from "@/components/UnitEconomicsBarChart";
+import AdminNavbar from "@/components/AdminNavbar";
+import { ExpensePieChart } from "@/components/ExpensePieChart";
 
 type ProductData = {
   name: string;
@@ -23,6 +25,9 @@ type ProductData = {
     totalUnits: number;
     batches: {
       batch: string;
+      totalCount: number;
+      remainingCount: number;
+      inventoryValue: number;
       expiryDate: string;
       isLowStock: boolean;
       isExpiringSoon: boolean;
@@ -44,8 +49,6 @@ type ProductData = {
     finalProfit: number;
   };
 };
-
-type UnitKey = "cm1" | "cm2" | "cm3" | "finalProfit";
 
 type RevenueType = {
   totalRevenue: number;
@@ -105,7 +108,6 @@ export default function InsightPage() {
         setLoader(true);
         const res = await fetch("/api/inventory");
         const data = await res.json();
-
         if (data.success) {
           dispatch({
             type: ACTIONS.SET_INVENTORY,
@@ -123,7 +125,6 @@ export default function InsightPage() {
       try {
         const res = await fetch("api/product");
         const data = await res.json();
-
         if (data.success) {
           dispatch({
             type: ACTIONS.SET_PRODUCTS,
@@ -148,7 +149,6 @@ export default function InsightPage() {
         setLoader(true);
         const res = await fetch("/api/insight");
         const json = await res.json();
-
         if (json.success) setData(json.data);
       } catch {
         toast.error("Failed to fetch insights");
@@ -160,8 +160,70 @@ export default function InsightPage() {
     getInsights();
   }, []);
 
-  /* CHART DATA */
-  const chartData = useMemo(() => {
+    const unitChartData = useMemo(() => {
+      if (!data) return [];
+
+      return [
+        {
+          name: "Net Revenue",
+          value: data.unitEconomics.netRevenue,
+          percentage: Number(((data.unitEconomics.netRevenue/data.unitEconomics.totalRevenue)*100).toFixed(2)),
+        },
+        {
+          name: "CM1",
+          value: data.unitEconomics.cm1.value,
+          percentage: data.unitEconomics.cm1.percentage,
+        },
+        {
+          name: "CM2",
+          value: data.unitEconomics.cm2.value,
+          percentage: data.unitEconomics.cm2.percentage,
+        },
+        {
+          name: "CM3",
+          value: data.unitEconomics.cm3.value,
+          percentage: data.unitEconomics.cm3.percentage,
+        },
+        {
+          name: "Profit",
+          value: data.unitEconomics.finalProfit.value,
+          percentage: data.unitEconomics.finalProfit.percentage,
+        },
+      ];
+    }, [data]);
+
+    const overAllChartData = useMemo(() => {
+      if (!data) return [];
+
+      return [
+        {
+          name: "Total Revenue",
+          value: data.revenues.totalRevenue,
+        },
+        {
+          name: "Net Revenue",
+          value: data.revenues.netRevenue,
+        },
+        {
+          name: "CM1",
+          value: data.revenues.cm1,
+        },
+        {
+          name: "CM2",
+          value: data.revenues.cm2,
+        },
+        {
+          name: "CM3",
+          value: data.revenues.cm3,
+        },
+        {
+          name: "Profit",
+          value: data.revenues.finalProfit,
+        },
+      ];
+    }, [data]);
+
+   const chartData = useMemo(() => {
     if (!data) return [];
     return Object.values(data.productWiseData).map((p) => ({
       name: p.name,
@@ -169,144 +231,196 @@ export default function InsightPage() {
     }));
   }, [data]);
 
-  const unitChartData = useMemo(() => {
+  const expenseChartData = useMemo(() => {
     if (!data) return [];
-
     return [
-      {
-        name: "Net Revenue",
-        value: data.unitEconomics.netRevenue,
-        percentage: Number(((data.unitEconomics.netRevenue/data.unitEconomics.totalRevenue)*100).toFixed(2)),
-      },
-      {
-        name: "CM1",
-        value: data.unitEconomics.cm1.value,
-        percentage: data.unitEconomics.cm1.percentage,
-      },
-      {
-        name: "CM2",
-        value: data.unitEconomics.cm2.value,
-        percentage: data.unitEconomics.cm2.percentage,
-      },
-      {
-        name: "CM3",
-        value: data.unitEconomics.cm3.value,
-        percentage: data.unitEconomics.cm3.percentage,
-      },
-      {
-        name: "Profit",
-        value: data.unitEconomics.finalProfit.value,
-        percentage: data.unitEconomics.finalProfit.percentage,
-      },
+      { name: "COGS", value: data.expenses.totalExpenses.cogs },
+      { name: "Fixed", value: data.expenses.totalExpenses.fixedOpex },
+      { name: "Marketing", value: data.expenses.totalExpenses.marketing },
+      { name: "Variable", value: data.expenses.totalExpenses.variable },
     ];
-  }, [data]);
+  },[data]);
 
   if (!data || loader) return <div className={styles.loader}>Loading...</div>;
 
+  const products = Object.values(data.productWiseData);
+
+  /* -------- INSIGHTS -------- */
+
+  const topProduct = products.reduce((a, b) =>
+    a.sales.finalProfit > b.sales.finalProfit ? a : b
+  );
+
+  const highestCostProduct = products.reduce((a, b) =>
+    a.expense.cogs > b.expense.cogs ? a : b
+  );
+
+  const lowestMarginProduct = products.reduce((a, b) =>
+    a.sales.cm3 < b.sales.cm3 ? a : b
+  );
+
+  const healthScore = Math.round(
+    (data.unitEconomics.finalProfit.percentage +
+      data.unitEconomics.cm3.percentage) /
+      2
+  );
+
+  const isProfitable = data.cac < data.unitEconomics.finalProfit.value;
+
+  const totalProfit = products.reduce(
+    (sum, p) => sum + p.sales.finalProfit,
+    0
+  );
+
+  const lowStockProducts = products.filter((p) =>
+    p.inventory.batches.some((b) => b.isLowStock)
+  );
+
+  const expiringProducts = products.filter((p) =>
+    p.inventory.batches.some((b) => b.isExpiringSoon)
+  );
+
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>Business Insights</h1>
+    <div>
+      <AdminNavbar />
+      <div className={styles.container}>
+        <h1 className={styles.title}>Business Insights</h1>
 
-      {/* TOP METRICS */}
-      <div className={styles.grid}>
-        <Card title="Revenue" value={data.revenues.totalRevenue} isAmount={true} />
-        <Card title="Profit" value={data.revenues.finalProfit} isAmount={true} highlight />
-        <Card title="Inventory" value={data.inventory.totalInventoryValue} isAmount={true} />
-        <Card title="Orders" value={data.totalOrders} isAmount={false} />
-        <Card title="CAC" value={data.cac} isAmount={true} />
-        <Card title="Units / Order" value={data.unitsPerOrder} isAmount={false} />
-      </div>
+        {/* INSIGHTS */}
+        <div className={styles.insightBox}>
+          <p>💰 Best Product: <strong>{topProduct.name}</strong></p>
+          <p>⚠️ Highest Cost: <strong>{highestCostProduct.name}</strong></p>
+          <p>📉 Lowest Margin: <strong>{lowestMarginProduct.name}</strong></p>
+          <p>{isProfitable ? "🟢 Profitable Ads" : "🔴 Losing on Ads"}</p>
+        </div>
 
-      {/* PROFIT CHART */}
-      <div className={styles.chartBox}>
-        <h2>Profit by Product</h2>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={chartData}>
-            <XAxis dataKey="name" />
-            <Tooltip />
-            <Bar dataKey="profit" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+        {/* TOP METRICS */}
+        <div className={styles.grid}>
+          <Card title="Revenue" value={data.revenues.totalRevenue} isAmount />
+          <Card title="Profit" value={data.revenues.finalProfit} isAmount highlight />
+          <Card title="Total Expenses" value={data.expenses.totalExpensesAmount} isAmount highlight />
+          <Card title="Inventory Value" value={data.inventory.totalInventoryValue} isAmount highlight />
+          <Card title="Health Score" value={healthScore} />
+          <Card title="Orders" value={data.totalOrders} />
+          <Card title="CAC" value={data.cac} isAmount />
+        </div>
 
-      {/* UNIT ECONOMICS */}
+        {/* Overall ECONOMICS */}
+        <div className={styles.unitBox}>
+          <h2>Current Economics</h2>
+          <UnitEconomicsBarChart data={overAllChartData} />
+        </div>
 
-      <div className={styles.unitBox}>
-        <h2>Unit Economics</h2>
+        {/* UNIT ECONOMICS */}
+        <div className={styles.unitBox}>
+          <h2>Unit Economics</h2>
+          <UnitEconomicsBarChart data={unitChartData} />
+        </div>
 
-        {/* BAR CHART */}
-        <UnitEconomicsBarChart data={unitChartData} />
-
-        {/* PIE CHART */}
-        {/* <div className={styles.chartInner}>
+        {/* CHART */}
+        <div className={styles.chartBox}>
+          <h2>Profit by Product</h2>
           <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={unitChartData}
-                dataKey="percentage"
-                nameKey="name"
-                outerRadius={80}
-                label
-              >
-                {unitChartData.map((_, index) => (
-                  <Cell
-                    key={index}
-                    fill={
-                      ["#173F36", "#2E5E52", "#C9A25E", "#E1C88A"][index]
-                    }
-                  />
-                ))}
-              </Pie>
+            <BarChart data={chartData}>
+              <XAxis dataKey="name" />
               <Tooltip />
-            </PieChart>
+              <Bar dataKey="profit" />
+            </BarChart>
           </ResponsiveContainer>
-        </div> */}
+        </div>
 
-        {/* PROGRESS BARS (KEEP THIS) */}
-        {/* {unitChartData.map((item) => (
-          <div key={item.name} className={styles.barRow}>
-            <span>{item.name}</span>
-            <div className={styles.bar}>
-              <div
-                className={styles.fill}
-                style={{ width: `${item.percentage}%` }}
-              />
-            </div>
-            <span>{item.percentage}%</span>
-          </div>
-        ))} */}
-      </div>
+        {/* ALERTS */}
+        <div className={styles.riskBox}>
+          <h2>Inventory Alerts</h2>
+          {lowStockProducts.map((p) => (
+            <p key={p.name}>⚠️ Low Stock: {p.name}</p>
+          ))}
+          {expiringProducts.map((p) => (
+            <p key={p.name}>⏳ Expiring: {p.name}</p>
+          ))}
+        </div>
 
-      {/* PRODUCTS */}
-      <h2 className={styles.sectionTitle}>All Products</h2>
-      <div className={styles.productGrid}>
-        {Object.entries(data.productWiseData).map(([id, product]) => (
-          <div key={id} className={styles.productCard}>
-            <h3>{product.name}</h3>
+        <div>
+          <h2>Expenses Chart</h2>
+          <ExpensePieChart data={expenseChartData} />
+        </div>
 
-            <div className={styles.badges}>
-              {product.inventory.batches.some((b) => b.isLowStock) && (
-                <span className={styles.low}>Low Stock</span>
-              )}
-              {product.inventory.batches.some((b) => b.isExpiringSoon) && (
-                <span className={styles.expiry}>Expiring</span>
-              )}
-            </div>
+        {/* PRODUCTS */}
+        <h2 className={styles.sectionTitle}>All Products</h2>
+        <div className={styles.productGrid}>
+          {products.map((product) => {
+            const contribution = (
+              (product.sales.finalProfit / totalProfit) *
+              100
+            ).toFixed(1);
 
-            <p>Sold: {product.sales.unitCount}</p>
-            <p>Left: {product.inventory.totalRemaining}</p>
+            return (
+              <div key={product.name} className={styles.productCard}>
+                <h3>{product.name}</h3>
 
-            <div className={styles.divider} />
+                <p>Sold: {product.sales.unitCount}</p>
+                <p>Left: {product.inventory.totalRemaining}</p>
 
-            <p>Revenue: ₹{product.sales.totalSale}</p>
-            <p>Profit: ₹{product.sales.finalProfit}</p>
+                <div className={styles.divider} />
 
-            <div className={styles.divider} />
+                <p>Revenue: ₹{product.sales.totalSale}</p>
+                <p className={styles.profit}>
+                  Profit: ₹{product.sales.finalProfit}
+                </p>
+                <p className={styles.muted}>
+                  Contribution: {contribution}%
+                </p>
 
-            <p className={styles.muted}>COGS: ₹{product.expense.cogs}</p>
-            <p className={styles.muted}>Marketing: ₹{product.expense.marketing}</p>
-          </div>
-        ))}
+                <div className={styles.divider} />
+
+                <p className={styles.muted}>
+                  COGS: ₹{product.expense.cogs}
+                </p>
+
+                <div className={styles.divider} />
+
+                {/* ===== BATCHES ===== */}
+                <div className={styles.batchSection}>
+                  <p className={styles.batchTitle}>Batches</p>
+
+                  {product.inventory.batches.map((batch) => (
+                    <div key={batch.batch} className={styles.batchCard}>
+                      <div className={styles.batchHeader}>
+                        <span className={styles.batchName}>
+                          {batch.batch}
+                        </span>
+
+                        <div className={styles.badges}>
+                          {batch.isLowStock && (
+                            <span className={styles.low}>Low Stock</span>
+                          )}
+                          {batch.isExpiringSoon && (
+                            <span className={styles.expiry}>
+                              Expiring Soon
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className={styles.batchInfo}>
+                        <p>
+                          Stock: {batch.remainingCount} / {batch.totalCount}
+                        </p>
+                        <p>
+                          Value: ₹{batch.inventoryValue}
+                        </p>
+                        <p>
+                          Expiry:{" "}
+                          {new Date(batch.expiryDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -322,12 +436,12 @@ function Card({
   title: string;
   value: number;
   highlight?: boolean;
-  isAmount: boolean;
+  isAmount?: boolean;
 }) {
   return (
     <div className={`${styles.card} ${highlight ? styles.highlight : ""}`}>
       <p>{title}</p>
-      <h3>{isAmount && "₹"} {value}</h3>
+      <h3>{isAmount ? `₹ ${value}` : value}</h3>
     </div>
   );
 }

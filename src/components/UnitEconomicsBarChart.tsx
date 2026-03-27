@@ -16,7 +16,7 @@ import type {
 type UnitChartItem = {
   name: string;
   value: number;
-  percentage: number;
+  percentage?: number;
 };
 
 /* ================= COLORS ================= */
@@ -47,7 +47,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
       >
         <p><strong>{data.name}</strong></p>
         <p>₹ {data.value}</p>
-        <p>{data.percentage}%</p>
+        {data?.percentage && <p>{data.percentage}%</p>}
       </div>
     );
   }
