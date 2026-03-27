@@ -64,6 +64,10 @@
   color: var(--vakro-green);
 }
 
+.highlight p {
+  color: black;
+}
+
 /* ================= CHART ================= */
 .chartBox {
   margin-top: 30px;
@@ -203,4 +207,77 @@
 
 .chartInner {
   margin: 20px 0;
+}
+
+/* new */
+.insightBox {
+  background: #fff;
+  border: 1px solid #EFEAE2;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.riskBox {
+  background: #fff;
+  border: 1px solid #EFEAE2;
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 30px;
+}
+
+.goldTag {
+  background: #C9A25E;
+  color: #173F36;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+}
+
+.badTag {
+  background: #ffe5e5;
+  color: red;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+}
+
+/* ===== BATCH SECTION ===== */
+.batchSection {
+  margin-top: 10px;
+}
+
+.batchTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #173F36;
+  margin-bottom: 8px;
+}
+
+/* ===== BATCH CARD ===== */
+.batchCard {
+  border: 1px solid #EFEAE2;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 8px;
+  background: #faf9f6;
+}
+
+/* HEADER */
+.batchHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.batchName {
+  font-weight: 600;
+  color: #2E5E52;
+}
+
+/* INFO */
+.batchInfo p {
+  font-size: 12px;
+  color: #6B6B6B;
+  margin: 2px 0;
 }
