@@ -1,137 +1,206 @@
+/* ================= ROOT THEME ================= */
+:root {
+  --vakro-green: #173F36;
+  --vakro-green-dark: #0F2F29;
+  --vakro-green-light: #2E5E52;
+  --vakro-gold: #C9A25E;
+  --vakro-gold-light: #E1C88A;
+  --vakro-cream: #F4EFE7;
+
+  --text-primary: #1F1F1F;
+  --text-muted: #6B6B6B;
+
+  --border: #EFEAE2;
+}
+
+/* ================= LAYOUT ================= */
 .container {
   padding: 24px;
   background: var(--vakro-cream);
   min-height: 100vh;
 }
 
-.heading {
+.title {
   font-size: 28px;
+  font-weight: 600;
   color: var(--vakro-green);
   margin-bottom: 20px;
-  margin-top: 12px;
 }
 
-.kpiGrid {
+/* ================= GRID ================= */
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 30px;
 }
 
-.kpiCard {
-  background: white;
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-  display: flex;
-  flex-direction: column;
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  transition: 0.2s ease;
 }
 
-.kpiCard strong {
-  font-size: 22px;
+.card:hover {
+  transform: translateY(-3px);
+}
+
+.card p {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.card h3 {
+  margin-top: 6px;
+  font-size: 20px;
   color: var(--vakro-green);
 }
 
-.kpiCardAlert {
-  background: #fff4f4;
-  padding: 16px;
-  border-radius: 12px;
-  border-left: 4px solid #ff4d4f;
+.highlight {
+  background: var(--vakro-gold);
+  color: var(--vakro-green);
 }
 
-.grid {
+/* ================= CHART ================= */
+.chartBox {
+  margin-top: 30px;
+  background: #fff;
+  padding: 22px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+/* ================= UNIT ECONOMICS ================= */
+.unitBox {
+  margin-top: 30px;
+  background: #fff;
+  padding: 22px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+.barRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.bar {
+  flex: 1;
+  height: 8px;
+  background: #eee;
+  border-radius: 6px;
+}
+
+.fill {
+  height: 100%;
+  background: var(--vakro-gold);
+  border-radius: 6px;
+}
+
+/* ================= TOP PRODUCTS ================= */
+.topBox {
+  margin-top: 30px;
+  background: #fff;
+  padding: 22px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+.topItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-weight: 500;
+  color: var(--vakro-green);
+}
+
+/* ================= PRODUCTS ================= */
+.sectionTitle {
+  font-size: 22px;
+  margin-top: 30px;
+  margin-bottom: 16px;
+  color: var(--vakro-green);
+}
+
+.productGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 20px;
 }
 
 .productCard {
-  background: white;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid #EFEAE2;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  transition: 0.25s ease;
 }
 
-.progressBar {
-  height: 6px;
-  background: #eee;
-  border-radius: 6px;
-  margin: 8px 0;
+.productCard:hover {
+  transform: translateY(-5px);
 }
 
-.progress {
-  height: 100%;
-  background: var(--vakro-green-light);
-  border-radius: 6px;
+.productCard h3 {
+  color: var(--vakro-green);
+  margin-bottom: 8px;
 }
 
-.batchList {
-  margin-top: 10px;
-}
-
-.batchItem {
+/* ================= BADGES ================= */
+.badges {
   display: flex;
-  flex-direction: column;
-  font-size: 12px;
-  padding: 8px;
-  border-bottom: 1px solid #eee;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
-.alertSection {
-  margin-top: 30px;
+.low {
+  background: #FFE5E5;
+  color: #C0392B;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
 }
 
-.alertList {
-  display: grid;
-  gap: 12px;
+.expiry {
+  background: #FFF4D6;
+  color: #B9770E;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
 }
 
-.alertItem {
-  background: #fff4f4;
-  border-left: 4px solid #ff4d4f;
-  padding: 12px;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
+/* ================= TEXT ================= */
+.muted {
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 0;
+}
+
+.profit {
+  color: var(--vakro-gold);
+  font-weight: 600;
+}
+
+/* ================= LOADER ================= */
 .loader {
   padding: 50px;
   text-align: center;
   font-size: 18px;
-}
-
-
-/* EXPENSE KPI LOOK */
-.expenseSection {
-  margin-top: 30px;
-  margin-bottom: 20px;
-}
-
-.expenseGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
-}
-
-.expenseCard {
-  background: #fffaf3;
-  border-left: 4px solid var(--vakro-gold);
-  padding: 14px;
-  border-radius: 10px;
-}
-
-.expenseCard strong {
   color: var(--vakro-green);
-  font-size: 18px;
-  margin-left: 4px;
 }
 
-/* PRODUCT LEVEL EXPENSE */
-.expenseBox {
-  margin-top: 8px;
-  padding: 8px;
-  background: #fafafa;
-  border-radius: 8px;
-  font-size: 12px;
+.chartInner {
+  margin: 20px 0;
 }

@@ -1,43 +1,104 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useState } from "react";
 import styles from "../../styles/admin.module.css";
-import { InsightsResponse, ProductType } from "@/lib/utils";
+import { useEffect, useState, useContext, useMemo } from "react";
 import { Context } from "@/store/context";
-import { toast, Bounce } from "react-toastify";
 import ACTIONS from "@/store/actions";
-import Loader from "@/components/Loader";
-import AdminNavbar from "@/components/AdminNavbar";
-import { InventoryItem } from "@/store/reducers/adminReducer";
+import { toast, Bounce } from "react-toastify";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { UnitEconomicsBarChart } from "@/components/UnitEconomicsBarChart";
 
-const InsightsPage = () => {
-  const [data, setData] = useState<InsightsResponse | null>(null);
+type ProductData = {
+  name: string;
+  inventory: {
+    totalInventoryValue: number;
+    totalRemaining: number;
+    totalSoldUnits: number;
+    totalUnits: number;
+    batches: {
+      batch: string;
+      expiryDate: string;
+      isLowStock: boolean;
+      isExpiringSoon: boolean;
+    }[];
+  };
+  expense: {
+    cogs: number;
+    marketing: number;
+    fixedOpex: number;
+    variable: number;
+  };
+  sales: {
+    unitCount: number;
+    totalSale: number;
+    netSale: number;
+    cm1: number;
+    cm2: number;
+    cm3: number;
+    finalProfit: number;
+  };
+};
+
+type UnitKey = "cm1" | "cm2" | "cm3" | "finalProfit";
+
+type RevenueType = {
+  totalRevenue: number;
+  netRevenue: number;
+  cm1: number;
+  cm2: number;
+  cm3: number;
+  finalProfit: number;
+}
+
+type ExpenseType = {
+  totalExpensesAmount: number;
+  totalExpenses: {
+    cogs: number;
+    fixedOpex: number;
+    marketing: number;
+    variable: number;
+  };
+}
+
+type UnitEcoEach = {
+  value: number;
+  percentage: number;
+}
+
+type UnitEconomicsType = {
+  totalRevenue: number;
+  netRevenue: number;
+  cm1: UnitEcoEach;
+  cm2: UnitEcoEach;
+  cm3: UnitEcoEach;
+  finalProfit: UnitEcoEach;
+}
+
+type InsightResponse = {
+  productWiseData: Record<string, ProductData>;
+  revenues: RevenueType;
+  expenses: ExpenseType;
+  inventory: {
+    totalInventoryValue: number;
+  };
+  totalOrders: number;
+  unitEconomics: UnitEconomicsType;
+  cac: number;
+  unitsPerOrder: number;
+};
+
+export default function InsightPage() {
+  const { dispatch } = useContext(Context);
+  const [data, setData] = useState<InsightResponse | null>(null);
   const [loader, setLoader] = useState(false);
-  const { dispatch, state } = useContext(Context);
-  const stateInventory = state.adminData.inventory;
-  const stateProducts = state.adminData.products;
 
-  useEffect(() => {
-    const getInsights = async () => {
-      setLoader(true);
-      try {
-        const res = await fetch("/api/insight");
-        const data = await res.json();
-        if(data.success) {
-          setData(data.data);
-        } else {
-          toast.error("Error during getting insights", data.message);
-        }
-      } catch (error) {
-        toast(`Insight error: ${error}`, { type: "error", transition: Bounce });
-      } finally {
-        setLoader(false);
-      }
-    }
-
-    getInsights();
-  }, []);
-
+  /* REQUIRED CODE */
   useEffect(() => {
     const getInventory = async () => {
       try {
@@ -50,8 +111,6 @@ const InsightsPage = () => {
             type: ACTIONS.SET_INVENTORY,
             payload: data.data || [],
           });
-        } else {
-
         }
       } catch (error) {
         toast(`Inventory error: ${error}`, { type: "error", transition: Bounce });
@@ -73,7 +132,7 @@ const InsightsPage = () => {
         }
       } catch {
         toast.error("Failed to fetch products");
-      }  finally {
+      } finally {
         setLoader(false);
       }
     };
@@ -82,199 +141,193 @@ const InsightsPage = () => {
     getProducts();
   }, []);
 
-  const metrics = useMemo(() => {
-    if (!data) return null;
+  /* INSIGHT API */
+  useEffect(() => {
+    const getInsights = async () => {
+      try {
+        setLoader(true);
+        const res = await fetch("/api/insight");
+        const json = await res.json();
 
-    const products = Object.values(data?.inventory?.productWiseInventory || {});
-
-    const totalProducts = products.length;
-
-    let remainingUnits = 0;
-    let lowStock = 0;
-
-    products.forEach((p) => {
-      remainingUnits += p.totalRemaining;
-      if (p.totalRemaining < 20) lowStock++; // threshold
-    });
-
-    return {
-      totalProducts,
-      remainingUnits,
-      lowStock,
-      expiryCount: data?.alerts?.inventory?.expiryAlerts?.length,
+        if (json.success) setData(json.data);
+      } catch {
+        toast.error("Failed to fetch insights");
+      } finally {
+        setLoader(false);
+      }
     };
+
+    getInsights();
+  }, []);
+
+  /* CHART DATA */
+  const chartData = useMemo(() => {
+    if (!data) return [];
+    return Object.values(data.productWiseData).map((p) => ({
+      name: p.name,
+      profit: p.sales.finalProfit,
+    }));
   }, [data]);
 
-  const expenseMetrics = useMemo(() => {
-    if (!data?.expenses) return null;
+  const unitChartData = useMemo(() => {
+    if (!data) return [];
 
-    const total = data?.expenses.totalExpensesAmount;
-    const breakdown = data?.expenses.totalExpenses;
-
-    return {
-      total,
-      cogs: breakdown.cogs,
-      marketing: breakdown.marketing,
-      fixedOpex: breakdown.fixedOpex,
-      variable: breakdown.variable,
-    };
+    return [
+      {
+        name: "Net Revenue",
+        value: data.unitEconomics.netRevenue,
+        percentage: Number(((data.unitEconomics.netRevenue/data.unitEconomics.totalRevenue)*100).toFixed(2)),
+      },
+      {
+        name: "CM1",
+        value: data.unitEconomics.cm1.value,
+        percentage: data.unitEconomics.cm1.percentage,
+      },
+      {
+        name: "CM2",
+        value: data.unitEconomics.cm2.value,
+        percentage: data.unitEconomics.cm2.percentage,
+      },
+      {
+        name: "CM3",
+        value: data.unitEconomics.cm3.value,
+        percentage: data.unitEconomics.cm3.percentage,
+      },
+      {
+        name: "Profit",
+        value: data.unitEconomics.finalProfit.value,
+        percentage: data.unitEconomics.finalProfit.percentage,
+      },
+    ];
   }, [data]);
 
-  const inventoryMetric = useMemo(() => {
-    if (!stateInventory) return null;
-    const totalUnitCount = stateInventory.reduce((final: number, current: InventoryItem) => {
-      final += current.totalCount;
-      return final;
-    },0)
-    return {
-      totalUnits: totalUnitCount,
-    };
-  },[stateInventory])
-
-  if (loader) return <Loader />;
+  if (!data || loader) return <div className={styles.loader}>Loading...</div>;
 
   return (
     <div className={styles.container}>
-      <AdminNavbar />
-      <h1 className={styles.heading}>Business Insights</h1>
+      <h1 className={styles.title}>Business Insights</h1>
 
-      {/* KPI SECTION */}
-      <div className={styles.kpiGrid}>
-        <div className={styles.kpiCard}>
-          <span>Total Inventory Value</span>
-          <strong>₹{data?.inventory?.totalInventoryValue}</strong>
-        </div>
-
-        <div className={styles.kpiCard}>
-          <span>Total Products</span>
-          <strong>{metrics?.totalProducts}</strong>
-        </div>
-
-        <div className={styles.kpiCard}>
-          <span>Unit Metric</span>
-          <strong>{metrics?.remainingUnits}/{inventoryMetric?.totalUnits}</strong>
-        </div>
-
-        <div className={styles.kpiCard}>
-          <span>Total Expenses</span>
-          <strong>₹{expenseMetrics?.total}</strong>
-        </div>
-
-        <div className={styles.kpiCard}>
-          <span>COGS</span>
-          <strong>₹{expenseMetrics?.cogs}</strong>
-        </div>
-
-        <div className={styles.kpiCard}>
-          <span>Marketing</span>
-          <strong>₹{expenseMetrics?.marketing}</strong>
-        </div>
-
-        <div className={styles.kpiCardAlert}>
-          <span>Expiry Alerts</span>
-          <strong>{metrics?.expiryCount}</strong>
-        </div>
-
-
-      </div>
-
-      <div className={styles.expenseSection}>
-        <h2>💸 Expense Breakdown</h2>
-
-        <div className={styles.expenseGrid}>
-          <div className={styles.expenseCard}>
-            <span>COGS:</span>
-            <strong> ₹{expenseMetrics?.cogs}</strong>
-          </div>
-
-          <div className={styles.expenseCard}>
-            <span>Marketing:</span>
-            <strong> ₹{expenseMetrics?.marketing}</strong>
-          </div>
-
-          <div className={styles.expenseCard}>
-            <span>Fixed Opex:</span>
-            <strong> ₹{expenseMetrics?.fixedOpex}</strong>
-          </div>
-
-          <div className={styles.expenseCard}>
-            <span>Variable:</span>
-            <strong> ₹{expenseMetrics?.variable}</strong>
-          </div>
-        </div>
-      </div>
-
-      {/* PRODUCT INVENTORY */}
-      <h2>Product wise</h2>
+      {/* TOP METRICS */}
       <div className={styles.grid}>
-        {Object.entries(data?.inventory?.productWiseInventory || {})?.map(
-          ([productId, details]) => {
-            const productName = stateProducts.find((item: ProductType) => item?._id === productId)?.name;
-            const productExpense = Object.values(
-              data?.expenses?.productWiseExpenses || {}
-            ).find((p) => p.name === productName);
-            return (
-              <div key={productId} className={styles.productCard}>
-              <h3>{productName}</h3>
-              <p>Total Remaining: {details.totalRemaining}</p>
-              <p>Value: ₹{details.totalInventoryValue}</p>
-              <div className={styles.expenseBox}>
-                <p>COGS: ₹{productExpense?.cogs || 0}</p>
-              </div>
-
-              <div className={styles.progressBar}>
-                <div
-                  style={{
-                    width: `${Math.min(
-                      (details.totalRemaining / 100) * 100,
-                      100
-                    )}%`,
-                  }}
-                  className={styles.progress}
-                />
-              </div>
-
-              <div className={styles.batchList}>
-                {details.batches.map((batch) => (
-                  <div key={batch.batch} className={styles.batchItem}>
-                    <span>Batch: {batch.batch}</span>
-                    <span>Units: {batch.remainingCount}/{batch.totalCount}</span>
-                    <span>
-                      Exp: {new Date(batch.expiryDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            )
-          }
-        )}
-        
+        <Card title="Revenue" value={data.revenues.totalRevenue} isAmount={true} />
+        <Card title="Profit" value={data.revenues.finalProfit} isAmount={true} highlight />
+        <Card title="Inventory" value={data.inventory.totalInventoryValue} isAmount={true} />
+        <Card title="Orders" value={data.totalOrders} isAmount={false} />
+        <Card title="CAC" value={data.cac} isAmount={true} />
+        <Card title="Units / Order" value={data.unitsPerOrder} isAmount={false} />
       </div>
 
-      {/* EXPIRY ALERTS */}
-      <div className={styles.alertSection}>
-        <h2>⚠ Expiry Alerts (30 Days)</h2>
+      {/* PROFIT CHART */}
+      <div className={styles.chartBox}>
+        <h2>Profit by Product</h2>
+        <ResponsiveContainer width="100%" height={250}>
+          <BarChart data={chartData}>
+            <XAxis dataKey="name" />
+            <Tooltip />
+            <Bar dataKey="profit" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
-        {data?.alerts?.inventory?.expiryAlerts?.length === 0 ? (
-          <p>No alerts 🎉</p>
-        ) : (
-          <div className={styles.alertList}>
-            {data?.alerts?.inventory?.expiryAlerts?.map((alert, i) => (
-              <div key={i} className={styles.alertItem}>
-                <strong>{alert.productName}</strong>
-                <span>Batch: {alert.batch}</span>
-                <span>Remaining: {alert.remainingCount}</span>
-                <span>
-                  Expiry: {new Date(alert.expiryDate).toLocaleDateString()}
-                </span>
-              </div>
-            ))}
+      {/* UNIT ECONOMICS */}
+
+      <div className={styles.unitBox}>
+        <h2>Unit Economics</h2>
+
+        {/* BAR CHART */}
+        <UnitEconomicsBarChart data={unitChartData} />
+
+        {/* PIE CHART */}
+        {/* <div className={styles.chartInner}>
+          <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+              <Pie
+                data={unitChartData}
+                dataKey="percentage"
+                nameKey="name"
+                outerRadius={80}
+                label
+              >
+                {unitChartData.map((_, index) => (
+                  <Cell
+                    key={index}
+                    fill={
+                      ["#173F36", "#2E5E52", "#C9A25E", "#E1C88A"][index]
+                    }
+                  />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div> */}
+
+        {/* PROGRESS BARS (KEEP THIS) */}
+        {/* {unitChartData.map((item) => (
+          <div key={item.name} className={styles.barRow}>
+            <span>{item.name}</span>
+            <div className={styles.bar}>
+              <div
+                className={styles.fill}
+                style={{ width: `${item.percentage}%` }}
+              />
+            </div>
+            <span>{item.percentage}%</span>
           </div>
-        )}
+        ))} */}
+      </div>
+
+      {/* PRODUCTS */}
+      <h2 className={styles.sectionTitle}>All Products</h2>
+      <div className={styles.productGrid}>
+        {Object.entries(data.productWiseData).map(([id, product]) => (
+          <div key={id} className={styles.productCard}>
+            <h3>{product.name}</h3>
+
+            <div className={styles.badges}>
+              {product.inventory.batches.some((b) => b.isLowStock) && (
+                <span className={styles.low}>Low Stock</span>
+              )}
+              {product.inventory.batches.some((b) => b.isExpiringSoon) && (
+                <span className={styles.expiry}>Expiring</span>
+              )}
+            </div>
+
+            <p>Sold: {product.sales.unitCount}</p>
+            <p>Left: {product.inventory.totalRemaining}</p>
+
+            <div className={styles.divider} />
+
+            <p>Revenue: ₹{product.sales.totalSale}</p>
+            <p>Profit: ₹{product.sales.finalProfit}</p>
+
+            <div className={styles.divider} />
+
+            <p className={styles.muted}>COGS: ₹{product.expense.cogs}</p>
+            <p className={styles.muted}>Marketing: ₹{product.expense.marketing}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-export default InsightsPage;
+/* CARD */
+function Card({
+  title,
+  value,
+  highlight,
+  isAmount,
+}: {
+  title: string;
+  value: number;
+  highlight?: boolean;
+  isAmount: boolean;
+}) {
+  return (
+    <div className={`${styles.card} ${highlight ? styles.highlight : ""}`}>
+      <p>{title}</p>
+      <h3>{isAmount && "₹"} {value}</h3>
+    </div>
+  );
+}
