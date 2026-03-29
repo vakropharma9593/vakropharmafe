@@ -44,7 +44,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
     const [totalAmountPaid, setTotalAmountPaid] = useState<number>(0);
 
     const [products, setProducts] = useState<Product[]>([
-          { productId: "", productName: "", totalPrice: 0, batch: "", quantity: 1, discountPercentage: 0, batchId: "" },
+          { productId: "", productName: "", totalPrice: 0, accountTotalPrice: 0, batch: "", quantity: 1, discountPercentage: 0, batchId: "" },
     ]);
     const [errors, setErrors] = useState({ customerPhone: "" });
 
@@ -279,15 +279,16 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
 
               <h4>Products</h4>
 
-              <div className={styles.productHeader}>
+              {/* <div className={styles.productHeader}>
                 <div>Product</div>
                 <div>Batch</div>
                 <div>MRP</div>
                 <div>Discount %</div>
-                <div>Selling</div>
+                <div>Total Price</div>
+                {source === "patientOrderPage" && <div>Account Price</div>}
                 <div>Qty</div>
                 <div></div>
-              </div>
+              </div> */}
 
               {products.map((p, index) => {
                 const allBatchesOfProduct = stateInventory?.filter((item: InventoryItem) => item?.productId === p.productId);
@@ -296,77 +297,101 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                     productList = stateProducts?.filter((item: ProductType) => item?._id === orderFormData?.selectedProductId);
                 }
                 return (
-                    <div key={index} className={styles.productRow}>
-                    {/* PRODUCT */}
-                    <select value={p.productId} onChange={(e) => handleProductChange(index, "productId", e.target.value)}>
-                        <option value="">Select Product</option>
-                        {productList?.map((item: ProductType) => {
-                            return (
-                            <option key={item?._id} value={item?._id}>{item?.name}</option>
-                            )
-                        })}
-                    </select>
+                    <div key={index} className={styles.eachProduct}>
+                        <div className={styles.productRowOne} >
+                            {/* PRODUCT */}
+                            <select value={p.productId} onChange={(e) => handleProductChange(index, "productId", e.target.value)}>
+                                <option value="">Select Product</option>
+                                {productList?.map((item: ProductType) => {
+                                    return (
+                                    <option key={item?._id} value={item?._id}>{item?.name}</option>
+                                    )
+                                })}
+                            </select>
 
-                    {/* BATCH */}
-                    <select
-                         value={p.batchId}
-                        onChange={(e) => handleProductChange(index, "batchId", e.target.value, undefined, allBatchesOfProduct)}
-                    >
-                        <option value="">Batch</option>
-                        {allBatchesOfProduct.map((b) => (
-                            <option key={b._id} value={b._id}>{b.batch}</option>
-                        ))}
-                    </select>
+                            {/* BATCH */}
+                            <select
+                                value={p.batchId}
+                                className={styles.productRowOneBatch}
+                                onChange={(e) => handleProductChange(index, "batchId", e.target.value, undefined, allBatchesOfProduct)}
+                            >
+                                <option value="">Batch</option>
+                                {allBatchesOfProduct.map((b) => (
+                                    <option key={b._id} value={b._id}>{b.batch}</option>
+                                ))}
+                            </select>
+                        </div>
 
-                    {/* MRP */}
-                    <div className={styles.infoBox}>
-                        <span>MRP</span>
-                        ₹{
-                            stateProducts?.filter((b) => b._id === p.productId)[0]?.mrp || 0
-                        }
-                    </div>
+                        <div className={styles.productRow}>
+                            {/* MRP */}
+                            <div className={styles.infoBox}>
+                                <span>MRP</span>
+                                ₹{
+                                    stateProducts?.filter((b) => b._id === p.productId)[0]?.mrp || 0
+                                }
+                            </div>
 
-                    {/* DISCOUNT */}
-                    <input
-                        type="number"
-                        className={styles.smallInput}
-                        placeholder="%"
-                        onChange={(e) =>
-                        handleProductChange(
-                            index,
-                            "discountPercentage",
-                            Number(e.target.value),
-                            p,
-                        )
-                        }
-                    />
+                            {/* DISCOUNT */}
+                            <input
+                                type="number"
+                                className={styles.smallInput}
+                                placeholder="%"
+                                onChange={(e) =>
+                                handleProductChange(
+                                    index,
+                                    "discountPercentage",
+                                    Number(e.target.value),
+                                    p,
+                                )
+                                }
+                            />
 
-                    {/* SELLING PRICE */}
-                    <div className={styles.infoBox}>
-                        <span>Total ₹</span>
-                        ₹{p.totalPrice}
-                    </div>
+                            {/* Total PRICE */}
+                            <div className={styles.infoBox}>
+                                <span>Total ₹</span>
+                                ₹{p.totalPrice}
+                            </div>
 
-                    {/* QTY */}
-                    <input
-                        type="number"
-                        className={styles.smallInput}
-                        placeholder="Qty"
-                        onChange={(e) =>
-                        handleProductChange(
-                            index,
-                            "quantity",
-                            Number(e.target.value)
-                        )
-                        }
-                    />
-                    {!(index === 0 && products?.length === 1) && <button
-                        type="button"
-                        className={styles.deleteBtn}
-                        onClick={() => removeProduct(index)}
-                    >
-                        ✕
-                    </button>}
+                            {source === "patientOrderPage" && 
+                            <div className={styles.infoBox}>
+                                <span>Account ₹</span>
+                                <input
+                                    type="number"
+                                    className={styles.smallInput}
+                                    placeholder="₹"
+                                    onChange={(e) =>
+                                    handleProductChange(
+                                        index,
+                                        "accountTotalPrice",
+                                        Number(e.target.value),
+                                        p,
+                                    )
+                                    }
+                                />
+                            </div>
+                            }
+
+                            {/* QTY */}
+                            <input
+                                type="number"
+                                className={styles.smallInput}
+                                placeholder="Qty"
+                                onChange={(e) =>
+                                handleProductChange(
+                                    index,
+                                    "quantity",
+                                    Number(e.target.value)
+                                )
+                                }
+                            />
+                            {!(index === 0 && products?.length === 1) && <button
+                                type="button"
+                                className={styles.deleteBtn}
+                                onClick={() => removeProduct(index)}
+                            >
+                                ✕
+                            </button>}
+                        </div>
                     </div>
                 )
               })}
