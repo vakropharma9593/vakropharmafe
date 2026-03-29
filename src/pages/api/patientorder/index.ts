@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/mongodb";
 import "@/models/Customer"; 
-import Product from "@/models/Product";
+import "@/models/Product";
+import "@/models/Inventory";
 import { PaymentModeType } from "@/lib/utils";
 import PatientOrder from "@/models/PatientOrder";
 

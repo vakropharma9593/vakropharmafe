@@ -17,7 +17,6 @@ export interface StateType {
 export type ContextType = {
   state: StateType;
   dispatch: React.Dispatch<actionType>;
-  isAuthenticated: boolean;
 };
 
 export const initialState = {

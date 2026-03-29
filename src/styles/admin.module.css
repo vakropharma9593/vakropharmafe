@@ -281,3 +281,12 @@
   color: #6B6B6B;
   margin: 2px 0;
 }
+
+.insightButon {
+  padding: 6px 8px;
+  border: 1px solid #2E5E52;
+  background-color: #faf9f6;
+  border-radius: 20px;
+  width: max-content;
+  cursor: pointer;
+}

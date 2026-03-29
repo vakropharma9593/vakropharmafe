@@ -8,7 +8,6 @@ import { ReactChild } from "@/lib/utils";
 export const Context = createContext<ContextType>({
   state: initialState,
   dispatch: () => null,
-  isAuthenticated: false,
 });
 
 const ContextProvider: React.FC<ReactChild> = ({ children }) => {
@@ -24,7 +23,8 @@ const ContextProvider: React.FC<ReactChild> = ({ children }) => {
 
 
   const value = useMemo(() => {
-    return { state, dispatch, isAuthenticated: isLoggedIn, };
+    console.info("context logine", isLoggedIn);
+    return { state, dispatch };
   }, [state, dispatch, isLoggedIn]);
 
   return (
