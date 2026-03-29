@@ -19,6 +19,7 @@ const ProtectRoute = ({ children }) => {
 
     if (!isAuthorized) {
       dispatch({ type: ACTIONS.REMOVE_AUTH });
+      console.info("going back to login", router.isReady, isAuthenticated, router.pathname);
       router.replace("/login");
     }
   }, [router.isReady, isAuthorized]);
