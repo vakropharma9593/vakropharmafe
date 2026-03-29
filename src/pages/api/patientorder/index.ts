@@ -14,6 +14,7 @@ interface OrderWithCustomer {
   date: Date;
   status: string;
   totalAmount: number;
+  totalAccountAmount: number;
   paymentType: PaymentModeType;
   products: {
     productId: {
@@ -25,10 +26,11 @@ interface OrderWithCustomer {
       batch: string;
     };
     productName: string;
-    sellingPrice: number;
+    totalPrice: number;
     batch: string;
     quantity: number;
-    totalPrice: number;
+    accountTotalPrice: number;
+    discountPercentage: number;
   }[];
 }
 
@@ -42,25 +44,16 @@ export default async function handler(
     // CREATE ORDER
     if (req.method === "POST") {
       const { customerId, date, status, products, paymentType } = req.body;
-
-       const finalProducts = [];
-
-      // 2️⃣ Check inventory & deduct stock
-      for (const product of products) {
-
-        const productData = await Product.findOne({
-          _id: product.productId,
-        });
-        const sellingPrice = parseFloat(product.totalPrice)/(1 + (productData.gstPercentage/100));
-        const sellingPriceToSave = Number(sellingPrice.toFixed(2));
-        const profit = sellingPriceToSave - productData?.costPrice;
-        const newProduct = { ...product, sellingPrice: sellingPriceToSave, costPrice: productData.costPrice, profit };
-        finalProducts.push(newProduct);
-      }
+    
 
       // Calculate payment amount
       const totalAmount = products.reduce(
         (sum: number, p: { totalPrice: number, quantity: number }) => sum + p.totalPrice * p.quantity,
+        0
+      );
+
+      const totalAccountAmount = products.reduce(
+        (sum: number, p: { accountTotalPrice: number, quantity: number }) => sum + p.accountTotalPrice * p.quantity,
         0
       );
 
@@ -71,8 +64,9 @@ export default async function handler(
         customerId: customerId,
         date,
         status,
-        products: finalProducts,
+        products: products,
         totalAmount: finalTotalAmount,
+        totalAccountAmount,
         paymentType: paymentType,
       });
 
@@ -113,10 +107,11 @@ export default async function handler(
                         batch: p.batchId?.batch,
                         quantity: p.quantity,
                         totalPrice: p.totalPrice,
-                        sellingPrice: p.sellingPrice,
-                        discountPercentage: Number((((p?.productId?.mrp - p.totalPrice)/p?.productId?.mrp)*100).toFixed(2))
+                        accountTotalPrice: p.accountTotalPrice,
+                        discountPercentage: p.discountPercentage
                       })),
             totalAmountPaid: o?.totalAmount || 0,
+            totalAccountAmountPaid: o?.totalAccountAmount,
             paymentType: o?.paymentType || null,
         };
       });

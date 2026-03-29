@@ -24,11 +24,11 @@ const ProductSchema = new mongoose.Schema({
     required: true,
     min: 1,
   },
-  sellingPrice: {
+  accountTotalPrice: {
     type: Number,
     required: true,
   },
-  profit: {
+  discountPercentage: {
     type: Number,
     required: true,
   }
@@ -57,6 +57,11 @@ const PatientOrderSchema = new mongoose.Schema(
     },
 
     totalAmount: {
+      type: Number,
+      required: true,
+    },
+
+    totalAccountAmount: {
       type: Number,
       required: true,
     },

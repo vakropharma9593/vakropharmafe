@@ -15,6 +15,7 @@ import {
 import { UnitEconomicsBarChart } from "@/components/UnitEconomicsBarChart";
 import AdminNavbar from "@/components/AdminNavbar";
 import { ExpensePieChart } from "@/components/ExpensePieChart";
+import Loader from "@/components/Loader";
 
 type ProductData = {
   name: string;
@@ -113,9 +114,11 @@ export default function InsightPage() {
             type: ACTIONS.SET_INVENTORY,
             payload: data.data || [],
           });
+        } else {
+          toast.error("Failed to fetch inventory");
         }
       } catch (error) {
-        toast(`Inventory error: ${error}`, { type: "error", transition: Bounce });
+        toast.error(`Inventory error: ${error}`, { type: "error", transition: Bounce });
       } finally {
         setLoader(false);
       }
@@ -130,6 +133,8 @@ export default function InsightPage() {
             type: ACTIONS.SET_PRODUCTS,
             payload: data.data || [],
           });
+        } else {
+          toast.error("Failed to fetch products");
         }
       } catch {
         toast.error("Failed to fetch products");
@@ -150,8 +155,12 @@ export default function InsightPage() {
         const res = await fetch("/api/insight");
         const json = await res.json();
         if (json.success) setData(json.data);
+        else {
+          toast.error("Failed to fetch insights");
+        }
       } catch {
         toast.error("Failed to fetch insights");
+        setLoader(false);
       } finally {
         setLoader(false);
       }
@@ -241,43 +250,85 @@ export default function InsightPage() {
     ];
   },[data]);
 
-  if (!data || loader) return <div className={styles.loader}>Loading...</div>;
+  const {
+    products,
+    topProduct,
+    highestCostProduct,
+    lowestMarginProduct,
+    healthScore,
+    isProfitable,
+    totalProfit,
+    lowStockProducts,
+    expiringProducts,
+  } = useMemo(() => {
+    if (!data) {
+      return {
+        products: [],
+        topProduct: null,
+        highestCostProduct: null,
+        lowestMarginProduct: null,
+        healthScore: 0,
+        isProfitable: false,
+        totalProfit: 0,
+        lowStockProducts: [],
+        expiringProducts: [],
+      };
+    }
 
-  const products = Object.values(data.productWiseData);
+    const products = Object.values(data?.productWiseData) || [];
 
-  /* -------- INSIGHTS -------- */
+    const topProduct = products?.length > 0 && products?.reduce((a, b) =>
+      a.sales.finalProfit > b.sales.finalProfit ? a : b
+    );
 
-  const topProduct = products.reduce((a, b) =>
-    a.sales.finalProfit > b.sales.finalProfit ? a : b
-  );
+    const highestCostProduct = products?.length > 0 && products?.reduce((a, b) =>
+      a.expense.cogs > b.expense.cogs ? a : b
+    );
 
-  const highestCostProduct = products.reduce((a, b) =>
-    a.expense.cogs > b.expense.cogs ? a : b
-  );
+    const lowestMarginProduct = products?.length > 0 && products?.reduce((a, b) =>
+      a.sales.cm3 < b.sales.cm3 ? a : b
+    );
 
-  const lowestMarginProduct = products.reduce((a, b) =>
-    a.sales.cm3 < b.sales.cm3 ? a : b
-  );
+    const totalProfit = products?.length > 0 && products?.reduce(
+      (sum, p) => sum + p.sales.finalProfit,
+      0
+    );
 
-  const healthScore = Math.round(
-    (data.unitEconomics.finalProfit.percentage +
-      data.unitEconomics.cm3.percentage) /
-      2
-  );
+    const lowStockProducts = products?.filter((p) =>
+      p.inventory.batches.some((b) => b.isLowStock)
+    ) || [];
 
-  const isProfitable = data.cac < data.unitEconomics.finalProfit.value;
+    const expiringProducts = products?.filter((p) =>
+      p.inventory.batches.some((b) => b.isExpiringSoon)
+    ) || [];
 
-  const totalProfit = products.reduce(
-    (sum, p) => sum + p.sales.finalProfit,
-    0
-  );
+    const healthScore = Math.round(
+      (data?.unitEconomics?.finalProfit?.percentage +
+        data?.unitEconomics?.cm3?.percentage) /
+        2
+    ) || 0;
 
-  const lowStockProducts = products.filter((p) =>
-    p.inventory.batches.some((b) => b.isLowStock)
-  );
+    const isProfitable =
+      data?.cac < data?.unitEconomics?.finalProfit?.value;
 
-  const expiringProducts = products.filter((p) =>
-    p.inventory.batches.some((b) => b.isExpiringSoon)
+    return {
+      products,
+      topProduct,
+      highestCostProduct,
+      lowestMarginProduct,
+      healthScore,
+      isProfitable,
+      totalProfit,
+      lowStockProducts,
+      expiringProducts,
+    };
+  }, [data]);
+
+  if (!data || loader) return (
+    <div>
+      <AdminNavbar />
+      <Loader />
+    </div>
   );
 
   return (
@@ -288,9 +339,9 @@ export default function InsightPage() {
 
         {/* INSIGHTS */}
         <div className={styles.insightBox}>
-          <p>💰 Best Product: <strong>{topProduct.name}</strong></p>
-          <p>⚠️ Highest Cost: <strong>{highestCostProduct.name}</strong></p>
-          <p>📉 Lowest Margin: <strong>{lowestMarginProduct.name}</strong></p>
+          {topProduct && <p>💰 Best Product: <strong>{topProduct?.name}</strong></p>}
+          {highestCostProduct && <p>⚠️ Highest Cost: <strong>{highestCostProduct?.name}</strong></p>}
+          {lowestMarginProduct && <p>📉 Lowest Margin: <strong>{lowestMarginProduct?.name}</strong></p>}
           <p>{isProfitable ? "🟢 Profitable Ads" : "🔴 Losing on Ads"}</p>
         </div>
 
@@ -349,7 +400,7 @@ export default function InsightPage() {
         <h2 className={styles.sectionTitle}>All Products</h2>
         <div className={styles.productGrid}>
           {products.map((product) => {
-            const contribution = (
+            const contribution = totalProfit && (
               (product.sales.finalProfit / totalProfit) *
               100
             ).toFixed(1);

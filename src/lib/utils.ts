@@ -51,6 +51,7 @@ export type Product = {
   batchId: string;
   quantity: number;
   discountPercentage: number;
+  accountTotalPrice?: number;
 };
 
 export const isLastRowEmpty = (products: Product[]) => {
