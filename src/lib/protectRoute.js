@@ -18,6 +18,7 @@ const ProtectRoute = ({ children }) => {
     if (!router.isReady) return;
 
     if (!isAuthorized) {
+      localStorage.removeItem("auth");
       dispatch({ type: ACTIONS.REMOVE_AUTH });
       console.info("going back to login", router.isReady, state?.auth?.isLoggedIn, state?.auth);
       router.replace("/login");

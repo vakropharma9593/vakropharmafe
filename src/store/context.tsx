@@ -1,9 +1,10 @@
-import React, { createContext, useMemo, useReducer } from "react";
+import React, { createContext, useEffect, useMemo, useReducer } from "react";
 
 import { adminReducer, appReducer, authReducer } from "./reducers";
 import useCombinedReducer from "./useCombineReducer";
 import { ContextType, initialState } from "./initialState";
 import { ReactChild } from "@/lib/utils";
+import ACTIONS from "./actions";
 
 export const Context = createContext<ContextType>({
   state: initialState,
@@ -19,7 +20,17 @@ const ContextProvider: React.FC<ReactChild> = ({ children }) => {
 
   const {
     auth: { isLoggedIn }
-} = state;
+  } = state;
+
+  useEffect(() => {
+    const storedAuth = localStorage.getItem("auth");
+    if (storedAuth) {
+      dispatch({
+        type: ACTIONS.SET_AUTH,
+        payload: JSON.parse(storedAuth),
+      });
+    }
+  }, []);
 
 
   const value = useMemo(() => {
