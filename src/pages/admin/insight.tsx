@@ -362,7 +362,7 @@ const InsightPage = () => {
                 <h3>{product.name}</h3>
 
                 <p>Sold: {product.sales.unitCount}</p>
-                <p>Left: {product.inventory.totalRemaining}</p>
+                <p>Left: {product.inventory?.totalRemaining}</p>
 
                 <div className={styles.divider} />
 
