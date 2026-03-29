@@ -65,7 +65,7 @@ const Admin = () => {
       <AdminNavbar />
       <div className={styles.container}>
         <h1 className={styles.title}>Business Insights</h1>
-        <div className={styles.insightButon} onClick={() => router.replace("/admin/insight")} >
+        <div className={styles.insightButon} onClick={() => router.push("/admin/insight")} >
           Go to Insights
         </div>
       </div>
