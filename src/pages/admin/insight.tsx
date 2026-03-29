@@ -247,11 +247,11 @@ const InsightPage = () => {
     );
 
     const lowStockProducts = products?.filter((p) =>
-      p.inventory.batches.some((b) => b.isLowStock)
+      p.inventory?.batches.some((b) => b.isLowStock)
     ) || [];
 
     const expiringProducts = products?.filter((p) =>
-      p.inventory.batches.some((b) => b.isExpiringSoon)
+      p.inventory?.batches.some((b) => b.isExpiringSoon)
     ) || [];
 
     const healthScore = Math.round(
@@ -386,7 +386,7 @@ const InsightPage = () => {
                 <div className={styles.batchSection}>
                   <p className={styles.batchTitle}>Batches</p>
 
-                  {product.inventory.batches.map((batch) => (
+                  {product?.inventory?.batches.map((batch) => (
                     <div key={batch.batch} className={styles.batchCard}>
                       <div className={styles.batchHeader}>
                         <span className={styles.batchName}>
