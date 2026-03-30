@@ -4,6 +4,7 @@ import Payment from "@/models/Payment";
 
 import "@/models/Order";
 import "@/models/Customer";
+import "@/models/Product";
 
 export default async function handler(
   req: NextApiRequest,

@@ -8,23 +8,30 @@ import { ReactChild } from "@/lib/utils";
 export const Context = createContext<ContextType>({
   state: initialState,
   dispatch: () => null,
-  isAuthenticated: false,
 });
+
+const getInitialAuth = () => {
+  if (typeof window === "undefined") return initialState.auth;
+
+  const storedAuth = localStorage.getItem("auth");
+  return storedAuth ? JSON.parse(storedAuth) : initialState.auth;
+};
 
 const ContextProvider: React.FC<ReactChild> = ({ children }) => {
   const [state, dispatch] = useCombinedReducer({
     app: useReducer(appReducer, initialState.app),
-    auth: useReducer(authReducer, initialState.auth),
+    auth: useReducer(authReducer, getInitialAuth()),
     adminData: useReducer(adminReducer, initialState.adminData),
   });
 
   const {
     auth: { isLoggedIn }
-} = state;
+  } = state;
 
 
   const value = useMemo(() => {
-    return { state, dispatch, isAuthenticated: isLoggedIn, };
+    console.info("context logine", isLoggedIn);
+    return { state, dispatch };
   }, [state, dispatch, isLoggedIn]);
 
   return (

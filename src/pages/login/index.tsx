@@ -16,8 +16,10 @@ export default function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (phone === process.env.NEXT_PUBLIC_PHONE && password === process.env.NEXT_PUBLIC_PASSWORD) {
+        const authData = { username: phone, isLoggedIn: true };
+        localStorage.setItem("auth", JSON.stringify(authData));
         dispatch({ type: ACTIONS.SET_AUTH, payload: { username: phone, isLoggedIn: true }});
-        router.push("/admin");
+        router.replace("/admin");
     } else {
         toast("Phone and password is incorrect", {
             position: "top-right",

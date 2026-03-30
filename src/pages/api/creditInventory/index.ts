@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/mongodb";
 import CreditInventory from "@/models/CreditInventory";
 import "@/models/Customer"; 
+import "@/models/Inventory";
+import "@/models/Product";
 import { ObjectId } from "mongoose";
 
 export default async function handler(

@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/mongodb";
-import Inventory from "@/models/Inventory";
-import { InventoryItem } from "@/store/reducers/adminReducer";
+import Inventory from "@/models/Inventory"
+import "@/models/Product";
 import { ObjectId } from "mongoose";
 
 export default async function handler(

@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/mongodb";
 import "@/models/Customer";
+import "@/models/Order";
+import "@/models/Product";
 import ReturnRefund from "@/models/ReturnRefund";
 
 export default async function handler(
