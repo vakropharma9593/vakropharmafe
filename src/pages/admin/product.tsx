@@ -19,7 +19,12 @@ const Product = () => {
     mrp: 0,
     gstPercentage: 0,
     costPrice: 0,
+    gstPercentageOnCostPrice: 0,
   });
+
+  useEffect(() => {
+    getProducts();
+  },[])
 
   useEffect(() => {
     if (products) {
@@ -56,7 +61,7 @@ const Product = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoader(true);
-    if (formData?.name !== "" && formData?.mrp > 0 && formData?.costPrice > 0 && formData?.gstPercentage > 0) {
+    if (formData?.name !== "" && formData?.mrp > 0 && formData?.costPrice > 0 && formData?.gstPercentage > 0 && formData?.gstPercentageOnCostPrice > 0) {
       try {
         const res = await fetch("/api/product", {
           method: "POST",
@@ -108,6 +113,7 @@ const Product = () => {
                   <th>#</th>
                   <th>Name</th>
                   <th>Cost Price</th>
+                  <th>GST% Paid</th>
                   <th>MRP</th>
                   <th>GST %</th>
                 </tr>
@@ -119,6 +125,7 @@ const Product = () => {
                     <td>{i + 1}</td>
                     <td>{item.name}</td>
                     <td>₹{item.costPrice}</td>
+                    <td>{item?.gstPercentageOnCostPrice}</td>
                     <td>₹{item.mrp}</td>
                     <td>{item.gstPercentage}%</td>
                   </tr>
@@ -141,13 +148,63 @@ const Product = () => {
             </div>
 
             <form onSubmit={handleSubmit} className={styles.form}>
-              <input name="name" placeholder="Product name" onChange={handleChange} required />
-              <input type="number" name="costPrice" placeholder="Cost Price" step="0.01" onChange={handleChange} />
+              <div className={styles.formGroup}>
+                <label>Product Name</label>
+                <input
+                  name="name"
+                  placeholder="Enter product name"
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-              <input type="number" name="mrp" placeholder="MRP" step="0.01" onChange={handleChange} />
-              <input type="number" name="gstPercentage" placeholder="GST %" step="0.01" onChange={handleChange} />
+              <div className={styles.formGroup}>
+                <label>Cost Price (₹)</label>
+                <input
+                  type="number"
+                  name="costPrice"
+                  placeholder="Enter cost price"
+                  step="0.01"
+                  onChange={handleChange}
+                />
+              </div>
 
-              <button type="submit">Submit</button>
+              <div className={styles.formGroup}>
+                <label>GST % Paid (on Cost Price)</label>
+                <input
+                  type="number"
+                  name="gstPercentageOnCostPrice"
+                  placeholder="Enter GST paid"
+                  step="0.01"
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>MRP (₹)</label>
+                <input
+                  type="number"
+                  name="mrp"
+                  placeholder="Enter MRP"
+                  step="0.01"
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>GST % (Selling)</label>
+                <input
+                  type="number"
+                  name="gstPercentage"
+                  placeholder="Enter GST %"
+                  step="0.01"
+                  onChange={handleChange}
+                />
+              </div>
+
+              <button type="submit" className={styles.submitBtn}>
+                Submit Product
+              </button>
             </form>
           </div>
         </div>

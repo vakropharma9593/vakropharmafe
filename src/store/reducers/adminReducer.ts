@@ -15,6 +15,7 @@ export interface InventoryItem {
   mrp?: number;
   costPrice?: number;
   gstPercentage?: number;
+  gstPercentageOnCostPrice?: number;
 }
 
 export interface AdminState {

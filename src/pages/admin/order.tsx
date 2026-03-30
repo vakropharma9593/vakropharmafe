@@ -221,26 +221,32 @@ const Orders = () => {
 
             <div className={styles.form}>
               <p>{selectedOrder.customerName}</p>
-
-              <select
-                value={statusUpdate}
-                onChange={(e) => setStatusUpdate(e.target.value)}
-              >
-                {Object.values(OrderStatusType)?.map((item: string) => {
-                  if (!isStatusAllowed(item)) return null;
-                  return (
-                    <option key={item} value={item} >{item}</option>
-                  )
-                })}
-              </select>
-
-              {statusUpdate === "Payment_Done" && <select name="paymentType" onChange={(e) => setPaymentModeForUpdate(e.target.value)}>
-                {Object.values(PaymentModeType)?.map((item: string) => {
+              <div className={styles.formGroup}>
+                <label>Order Status</label>
+                <select
+                  value={statusUpdate}
+                  onChange={(e) => setStatusUpdate(e.target.value)}
+                >
+                  {Object.values(OrderStatusType)?.map((item: string) => {
+                    if (!isStatusAllowed(item)) return null;
                     return (
-                          <option key={item}>{item}</option>
+                      <option key={item} value={item} >{item}</option>
                     )
-                })}
-              </select>}
+                  })}
+                </select>
+              </div>
+              {statusUpdate === "Payment_Done" && 
+                <div className={styles.formGroup}>
+                  <label>Payment Mode</label>
+                  <select name="paymentType" onChange={(e) => setPaymentModeForUpdate(e.target.value)}>
+                    {Object.values(PaymentModeType)?.map((item: string) => {
+                        return (
+                              <option key={item}>{item}</option>
+                        )
+                    })}
+                  </select>
+                </div>
+              }
 
               <button onClick={updateOrderStatus}>
                 Update Status
@@ -288,39 +294,69 @@ const Orders = () => {
               </div>
 
               {/* PRODUCTS */}
-              <h4 style={{ marginTop: "20px" }}>Products</h4>
+              <h4 style={{ marginTop: "12px", marginBottom: "4px" }}>Products</h4>
 
-              <div className={styles.detailsTable}>
-                <div className={styles.detailsHeader}>
-                  <div>Product</div>
-                  <div>Batch</div>
-                  <div>MRP</div>
-                  <div>Discount %</div>
-                  <div>Total Price</div>
-                  <div>Selling Price</div>
-                  <div>Qty</div>
-                  <div>Total</div>
-                </div>
+              <div className={styles.tableWrapper}>
+                {selectedOrder?.products?.length > 0 ? 
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>Product</th>
+                        <th>Batch</th>
+                        <th>MRP</th>
+                        <th>Discount %</th>
+                        <th>Total Price</th>
+                        <th>Selling Price</th>
+                        <th>Qty</th>
+                        <th>Total Paid ₹</th>
+                        <th>Total GST</th>
+                        <th>Total CP</th>
+                        <th>Profit</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedOrder.products.map((p, i) => {
+                          const productInfo = stateProducts?.find((item: ProductType) => item?._id === p.productId);
+                          const mrp = productInfo?.mrp || 0;
+                          const gst = productInfo?.gstPercentage || 0;
+                          const sellingPrice = p.totalPrice/(1 + gst/100);
+                          return (
+                            <tr key={i}>
+                              <td>{p.productName}</td>
+                              <td>{p.batch}</td>
+                              <td>₹{mrp}</td>
+                              <td>{Number(((mrp - p.totalPrice)/mrp)*100).toFixed(2)}%</td>
+                              <td>₹{p.totalPrice}</td>
+                              <td>₹{Number(sellingPrice.toFixed(2))}</td>
+                              <td>{p.quantity}</td>
+                              <td>₹{p.totalPrice * p.quantity}</td>
+                              <td>₹{p.totalGstPayable} </td>
+                              <td>₹{p.totalCostPrice}</td>
+                              <td>₹{p.totalProfit}</td>
+                            </tr>
+                          )
+                      })}
+                      <tr>
+                        <td>Total</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>{selectedOrder.products?.reduce((total, item ) => { return total + item?.quantity}, 0)}</td>
+                        <td>₹{Number((selectedOrder.products?.reduce((total, item ) => { return total + item.totalPrice * item.quantity}, 0)).toFixed(2))}</td>
+                        <td>₹{Number((selectedOrder.products?.reduce((total, item ) => { return total + (item?.totalGstPayable || 0)}, 0)).toFixed(2))} </td>
+                        <td>₹{Number((selectedOrder.products?.reduce((total, item ) => { return total + (item?.totalCostPrice || 0)}, 0)).toFixed(2))} </td>
+                        <td>₹{Number((selectedOrder.products?.reduce((total, item ) => { return total + (item?.totalProfit || 0)}, 0)).toFixed(2))}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                : 
+                  (
+                    <p className={styles.empty}>No orders yet</p>
+                  )
+                }
 
-                {selectedOrder.products.map((p, i) => {
-                  const productInfo = stateProducts?.find((item: ProductType) => item?._id === p.productId);
-                  const mrp = productInfo?.mrp || 0;
-                  const gst = productInfo?.gstPercentage || 0;
-                  const sellingPrice = p.totalPrice/(1 + gst/100);
-
-                  return (
-                    <div key={i} className={styles.detailsRow}>
-                      <div>{p.productName}</div>
-                      <div>{p.batch}</div>
-                      <div>₹{mrp}</div>
-                      <div>{Number(((mrp - p.totalPrice)/mrp)*100).toFixed(2)}%</div>
-                      <div>₹{p.totalPrice}</div>
-                      <div>₹{Number(sellingPrice.toFixed(2))}</div>
-                      <div>{p.quantity}</div>
-                      <div>₹{p.totalPrice * p.quantity}</div>
-                    </div>
-                  );
-                })}
               </div>
 
               {/* TOTAL */}

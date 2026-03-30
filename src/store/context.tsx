@@ -30,7 +30,6 @@ const ContextProvider: React.FC<ReactChild> = ({ children }) => {
 
 
   const value = useMemo(() => {
-    console.info("context logine", isLoggedIn);
     return { state, dispatch };
   }, [state, dispatch, isLoggedIn]);
 

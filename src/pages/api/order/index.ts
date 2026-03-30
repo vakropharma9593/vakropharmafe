@@ -22,6 +22,7 @@ interface OrderWithCustomer {
       _id: string;
       name: string;
       mrp: number;
+      costPrice: number;
     },
     batchId: {
       batch: string;
@@ -31,6 +32,7 @@ interface OrderWithCustomer {
     batch: string;
     quantity: number;
     totalPrice: number;
+    profit: number;
   }[];
 }
 
@@ -141,7 +143,7 @@ export default async function handler(
     if (req.method === "GET") {
       const orders = await Order.find()
         .populate("customerId", "name phone")
-        .populate("products.productId", "name mrp")
+        .populate("products.productId", "name mrp costPrice")
         .populate("products.batchId", "batch")
         .lean();
 
@@ -175,7 +177,10 @@ export default async function handler(
                         quantity: p.quantity,
                         totalPrice: p.totalPrice,
                         sellingPrice: p.sellingPrice,
-                        discountPercentage: Number((((p?.productId?.mrp - p.totalPrice)/p?.productId?.mrp)*100).toFixed(2))
+                        discountPercentage: Number((((p?.productId?.mrp - p.totalPrice)/p?.productId?.mrp)*100).toFixed(2)),
+                        totalCostPrice: Number((p?.productId?.costPrice * p.quantity).toFixed(2)),
+                        totalGstPayable: Number(((p.totalPrice - p.sellingPrice)*p.quantity).toFixed(2)),
+                        totalProfit: Number((p.profit*p.quantity).toFixed(2)),
                       })),
             totalAmountPaid: o?.totalAmount || 0,
             paymentType: payment?.paymentType || null,

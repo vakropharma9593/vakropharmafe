@@ -16,12 +16,14 @@ export default async function handler(
         mrp,
         costPrice,
         gstPercentage,
+        gstPercentageOnCostPrice,
       } = req.body;
 
       const inventory = await Product.create({
         name,
         mrp: Number(mrp.toFixed(2)),
         costPrice,
+        gstPercentageOnCostPrice,
         gstPercentage,
       });
 

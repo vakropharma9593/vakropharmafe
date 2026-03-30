@@ -52,7 +52,7 @@ const Payments = () => {
         </div>
 
         <div className={styles.tableWrapper}>
-          {payments.length > 0 ? (
+          {payments?.length > 0 ? (
             <table className={styles.table}>
               <thead>
                 <tr>
@@ -66,15 +66,15 @@ const Payments = () => {
               </thead>
 
               <tbody>
-                {payments.map((payment, index) => (
+                {payments?.map((payment, index) => (
                   <tr key={payment._id || index}>
                     <td>{index + 1}</td>
                     <td>{payment.customerNumber}</td>
-                    <td>{dateToShow(payment.date)}</td>
+                    <td>{dateToShow(payment?.date)}</td>
                     <td>₹{Number(payment.totalAmount.toFixed(2))}</td>
                     <td>{payment.paymentType}</td>        
                     <td>
-                      {payment.products.map((p, i) => (
+                      {payment?.products?.map((p, i) => (
                         <div key={i} className={styles.productItem}>
                           <div>{p.productName} × {p.quantity}</div>
                           <div>Total Price: {p.totalPrice}*{p.quantity} :: {p.totalPrice*p.quantity}</div>

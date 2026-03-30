@@ -40,6 +40,7 @@
 .table th,
 .table td {
   padding: 12px;
+  font-size: 12px;
   text-align: start;
 }
 
@@ -110,7 +111,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .modalHeader h2 {
@@ -337,7 +338,7 @@
 
 .detailsGrid div {
   background: rgba(255, 255, 255, 0.05);
-  padding: 10px;
+  padding: 2px 8px;
   border-radius: 10px;
 }
 
@@ -347,8 +348,8 @@
 }
 
 .detailsGrid p {
-  margin: 4px 0 0;
-  font-size: 14px;
+  margin:0;
+  font-size: 12px;
 }
 
 /* TABLE */
@@ -362,7 +363,7 @@
 .detailsHeader,
 .detailsRow {
   display: grid;
-  grid-template-columns: 1fr 0.8fr 0.7fr 0.8fr 0.8fr 0.5fr 0.8fr 0.7fr;
+  grid-template-columns: 1fr 0.4fr 0.4fr 0.4fr 0.4fr 0.4fr 0.3fr 0.4fr 0.4fr 0.5fr 0.5fr;
   gap: 4px;
   padding: 5px 6px;
   border-radius: 6px;
@@ -391,5 +392,75 @@
   text-align: right;
   font-weight: 600;
   color: #b7f7e6;
+}
+
+
+/* form group */
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.formGroup label {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--vakro-gold);
+}
+
+.formGroup input {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.dateField {
+  width: 50%;
+}
+
+.formGroup input:focus {
+  border-color: var(--vakro-green);
+  box-shadow: 0 0 0 2px rgba(23, 63, 54, 0.1);
+}
+
+
+.submitBtn {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: var(--vakro-green);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.submitBtn:hover {
+  background: var(--vakro-green-dark);
+}
+
+@media (max-width: 768px) {
+  .tableWrapper {
+    padding: 6px;
+    border-radius: 12px;
+  }
+
+  .modal {
+    height: 90%;
+    overflow-y: scroll;
+  }
+  
+  .table th,
+  .table td {
+    padding: 6px;
+    font-size: 11px;
+    text-align: start;
+  }
 }
 

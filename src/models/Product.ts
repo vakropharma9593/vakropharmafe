@@ -14,6 +14,10 @@ const ProductSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    gstPercentageOnCostPrice: {
+      type: Number,
+      required: true,
+    },
     gstPercentage: {
       type: Number,
       required: true,

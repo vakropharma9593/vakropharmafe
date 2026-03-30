@@ -41,7 +41,7 @@ export default async function handler(
     // GET: Fetch inventory list
     if (req.method === "GET") {
       const inventory = await Inventory.find()
-      .populate("productId", "name costPrice mrp gstPercentage")
+      .populate("productId", "name costPrice mrp gstPercentage gstPercentageOnCostPrice")
       .sort({ createdAt: -1 });
 
       const inventoryToSend: {
@@ -56,7 +56,8 @@ export default async function handler(
         productName: string,
         costPrice: number,
         mrp: number,
-        gstPercentage: number
+        gstPercentage: number,
+        gstPercentageOnCostPrice: number,
       }[] = [];
       inventory.forEach((item) => {
 
@@ -72,7 +73,8 @@ export default async function handler(
           productName: item?.productId?.name,
           costPrice: item?.productId?.costPrice,
           mrp: item?.productId?.mrp,
-          gstPercentage: item?.productId?.gstPercentage
+          gstPercentage: item?.productId?.gstPercentage,
+          gstPercentageOnCostPrice: item?.productId?.gstPercentageOnCostPrice
         }
         inventoryToSend.push(newInventory);
       })
