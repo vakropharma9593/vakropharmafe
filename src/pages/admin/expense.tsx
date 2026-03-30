@@ -261,39 +261,65 @@ const Expense = () => {
             </div>
 
             <form onSubmit={handleSubmit} className={styles.form}>
-              <input name="voucher" placeholder="Voucher" onChange={handleChange} required />
-              <input name="paidTo" placeholder="Paid To" onChange={handleChange} required />
-              <input name="purpose" placeholder="Purpose" onChange={handleChange} required />
-              <select name="expenseCategory" onChange={handleChange}>
-                <option value="">Select Category</option>
-                {Object.values(ExpenseCategoryType)?.map((category: string) => {
-                    return (
-                        <option key={category} value={category}>{category}</option>
-                    );
-                })};
-              </select>
-              {formData?.expenseCategory === ExpenseCategoryType.COGS &&
-                <select value={formData?.productId} name="productId" onChange={handleChange}>
-                    <option value="">Select Product</option>
-                    {stateProducts?.map((item: ProductType) => {
-                        return (
-                        <option key={item?._id} value={item?._id}>{item?.name}</option>
-                        )
-                    })}
+              <div className={styles.formGroup}>
+                <label>Voucher</label>
+                <input name="voucher" placeholder="Voucher" onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Expense Paid To (Name)</label>
+                <input name="paidTo" placeholder="Paid To" onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Expense Purpose</label>
+                <input name="purpose" placeholder="Purpose" onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Expense Category</label>
+                <select name="expenseCategory" onChange={handleChange}>
+                  <option value="">Select Category</option>
+                  {Object.values(ExpenseCategoryType)?.map((category: string) => {
+                      return (
+                          <option key={category} value={category}>{category}</option>
+                      );
+                  })};
                 </select>
+              </div>
+              {formData?.expenseCategory === ExpenseCategoryType.COGS &&
+                <div className={styles.formGroup}>
+                  <label>Product Name</label>
+                  <select value={formData?.productId} name="productId" onChange={handleChange}>
+                      <option value="">Select Product</option>
+                      {stateProducts?.map((item: ProductType) => {
+                          return (
+                          <option key={item?._id} value={item?._id}>{item?.name}</option>
+                          )
+                      })}
+                  </select>
+                </div>
               }
-              <input name="paidBy" placeholder="Paid By" onChange={handleChange} required />
-              <input type="number" name="amountPaid" placeholder="Amount Paid" step="0.01" onChange={handleChange} />
-              <label>Payment Date</label>
-              <input type="date" name="paymentDate" onChange={handleChange} />
-              <select name="paymentMode" onChange={handleChange}>
-                <option value="">Select Mode</option>
-                {Object.values(PaymentType)?.map((payment: string) => {
-                    return (
-                        <option key={payment} value={payment}>{payment}</option>
-                    );
-                })};
-              </select>
+              <div className={styles.formGroup}>
+                <label>Amount Paid By (Name)</label>
+                <input name="paidBy" placeholder="Paid By" onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Amount Paid ₹</label>
+                <input type="number" name="amountPaid" placeholder="Amount Paid" step="0.01" onChange={handleChange} />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Payment Date</label>
+                <input className={styles.dateField} type="date" name="paymentDate" onChange={handleChange} />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Payment Mode</label>
+                <select name="paymentMode" onChange={handleChange}>
+                  <option value="">Select Mode</option>
+                  {Object.values(PaymentType)?.map((payment: string) => {
+                      return (
+                          <option key={payment} value={payment}>{payment}</option>
+                      );
+                  })};
+                </select>
+              </div>
               {/* Authorized By Director */}
                 <div className={styles.radioGroup}>
                     <p>Authorized By Director</p>
@@ -357,8 +383,12 @@ const Expense = () => {
                         </label>
                     </div>
                 </div>
-              {formData?.isSettled && <label>Settlement Date</label>}
-              {formData?.isSettled && <input type="date" name="settlementDate" onChange={handleChange} />}
+              {formData?.isSettled && 
+                <div className={styles.formGroup}>
+                  <label>Settlement Date</label>
+                  <input className={styles.dateField} type="date" name="settlementDate" onChange={handleChange} />
+                </div>
+              }
 
               <button type="submit">Submit</button>
             </form>
@@ -408,8 +438,12 @@ const Expense = () => {
                         </label>
                     </div>
                 </div>
-              {formData?.isSettled && <label>Settlement Date</label>}
-              {formData?.isSettled && <input type="date" name="settlementDate" onChange={handleChange} />}
+              {formData?.isSettled && 
+                <div className={styles.formGroup}>
+                  <label>Settlement Date</label>
+                  <input className={styles.dateField} type="date" name="settlementDate" onChange={handleChange} />
+                </div>
+              }
 
               <button onClick={updateOrderStatus}>
                 Update Status

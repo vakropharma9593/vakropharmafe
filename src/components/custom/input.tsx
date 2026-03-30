@@ -1,22 +1,52 @@
-import * as React from "react";
+"use client";
 
-import { cn } from "@/lib/utils";
+import styles from "../../styles/custom/customInput.module.css";
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
-    return (
-      <input
-        type={type}
-        className={cn(
-          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-          className,
-        )}
-        ref={ref}
-        {...props}
-      />
-    );
-  },
-);
-Input.displayName = "Input";
+type Props = {
+  label: string;
+  name: string;
+  type?: string;
+  value: string | number;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  error?: string;
+  required?: boolean;
+  prefix?: string; // ₹ support
+};
 
-export { Input };
+const PremiumInput = ({
+  label,
+  name,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+  error,
+  required,
+  prefix,
+}: Props) => {
+  return (
+    <div className={styles.wrapper}>
+      <label className={styles.label}>
+        {label} {required && <span>*</span>}
+      </label>
+
+      <div className={`${styles.inputContainer} ${error ? styles.errorBorder : ""}`}>
+        {prefix && <span className={styles.prefix}>{prefix}</span>}
+
+        <input
+          name={name}
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          className={styles.input}
+        />
+      </div>
+
+      {error && <p className={styles.error}>{error}</p>}
+    </div>
+  );
+};
+
+export default PremiumInput;

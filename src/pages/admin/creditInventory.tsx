@@ -93,7 +93,6 @@ const CreditInventory = () => {
     const updated = { ...formData, [name]: value };
     setFormData(updated);
     if (name === "productId") {
-      console.info(stateInventory);
       const allBatchesOfProduct = stateInventory?.filter((item: InventoryItem) => item?.productId === value)?.map((item: InventoryItem) => {
         return {
           _id: item?._id || "",
@@ -238,51 +237,60 @@ const CreditInventory = () => {
             </div>
 
             <form onSubmit={handleSubmit} className={styles.form}>
-              <input
-                placeholder="Customer Phone"
-                value={formData.customerNumber}
-                maxLength={10}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, "");
-                  setFormData({
-                    ...formData,
-                    customerNumber: value,
-                    customerId: "",
-                    customerName: ""
-                  })
-                  if (value?.length === 10) {
-                    getCustomer(value);
-                  }
-                }}
-                onBlur={() => validatePhone(formData.customerNumber)}
-              />
-              {errors.customerNumber !== "" && (
-                <p className={styles.error}>{errors.customerNumber}</p>
-              )}
+              <div className={styles.formGroup}>
+                <label>Customer Phone</label>
+                <input
+                  placeholder="Customer Phone"
+                  value={formData.customerNumber}
+                  maxLength={10}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "");
+                    setFormData({
+                      ...formData,
+                      customerNumber: value,
+                      customerId: "",
+                      customerName: ""
+                    })
+                    if (value?.length === 10) {
+                      getCustomer(value);
+                    }
+                  }}
+                  onBlur={() => validatePhone(formData.customerNumber)}
+                />
+                {errors.customerNumber !== "" && (
+                  <p className={styles.error}>{errors.customerNumber}</p>
+                )}
+              </div>
 
               {formData?.customerName && <h4>Customer Details :: {formData?.customerName}</h4>}
-
-              <select name="productId" onChange={handleChange}>
-                <option value="">Select Product</option>
-                {products?.map((item: ProductType) => {
-                  return (
-                    <option key={item?._id} value={item?._id}>{item?.name}</option>
-                  )
-                })}
-              </select>
-
-              <select
-                name="batchId"
-                value={formData.batchId}
-                onChange={handleChange}
-              >
-                <option value="">Batch</option>
-                {batches.map((b) => (
-                  <option key={b._id} value={b._id}>{b.batch}</option>
-                ))}
-              </select>
-
-              <input type="number" name="totalCount" placeholder="Total Count" onChange={handleChange} />
+              <div className={styles.formGroup}>
+                <label>Product Name</label>
+                <select name="productId" onChange={handleChange}>
+                  <option value="">Select Product</option>
+                  {products?.map((item: ProductType) => {
+                    return (
+                      <option key={item?._id} value={item?._id}>{item?.name}</option>
+                    )
+                  })}
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Batch Name</label>
+                <select
+                  name="batchId"
+                  value={formData.batchId}
+                  onChange={handleChange}
+                >
+                  <option value="">Batch</option>
+                  {batches.map((b) => (
+                    <option key={b._id} value={b._id}>{b.batch}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Total Units</label>
+                <input type="number" name="totalCount" placeholder="Total Count" onChange={handleChange} />
+              </div>
 
               <button type="submit">Submit</button>
             </form>

@@ -57,7 +57,6 @@ export default async function handler(
 
     // GET Expenses
     if (req.method === "GET") {
-      console.info("asdfas");
         const inventory = await Expense.find().lean();
       
         return res.status(200).json({

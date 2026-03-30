@@ -3,7 +3,7 @@
 import ACTIONS from "@/store/actions";
 import { Context } from "@/store/context";
 import { useRouter } from "next/router";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { toast, Bounce } from "react-toastify";
 
 export default function LoginPage() {
@@ -12,6 +12,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
 
   const router = useRouter()
+
+  useEffect(() => {
+    const storedAuth = localStorage.getItem("auth");
+    if (storedAuth && JSON.parse(storedAuth)?.isLoggedIn) {
+      router.push("/admin");
+    }
+  },)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

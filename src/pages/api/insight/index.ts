@@ -68,13 +68,13 @@ export default async function getInsights(
       Inventory.find()
         .populate({
             path: "productId",
-            select: "name costPrice",
+            select: "name costPrice gstPercentageOnCostPrice",
         })
         .lean(),
       Product.find().lean(),
       Expense.find().lean(),
       Order.find()
-        .populate("products.productId", "name costPrice")
+        .populate("products.productId", "name costPrice gstPercentageOnCostPrice gstPercentage")
         .lean(),
       Payment.find().lean(),
       ReturnRefund.find().lean()
@@ -99,12 +99,15 @@ export default async function getInsights(
     const today = new Date();
     const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 
+    let totalGstPaidInCP = 0;
+
     for (const inv of inventories) {
         const productId = inv.productId?._id;
         const costPrice = inv.productId?.costPrice || 0;
 
         if (!productId) continue;
 
+        totalGstPaidInCP += inv.productId?.gstPercentageOnCostPrice * inv.remainingCount;
         const inventoryValue = inv.remainingCount * costPrice;
 
         // Initialize product bucket
@@ -223,7 +226,7 @@ export default async function getInsights(
     ========================== */
     const ordersCount = orders?.length;
 
-    const productWiseSales: Record<string, { unitCount: number, productName: string, totalSale: number, netSale: number, cogs: number, cm1: number, cm2: number, cm3: number, finalProfit: number }> = {};
+    const productWiseSales: Record<string, { unitCount: number, productName: string, totalSale: number, netSale: number, cogs: number, cm1: number, cm2: number, cm3: number, finalProfit: number, gstPaidInCP: number, gstCollected: number }> = {};
     
     Object.keys(productMap)?.forEach((id: string) => {
       productWiseSales[id] = {
@@ -236,6 +239,8 @@ export default async function getInsights(
         cm2: 0,
         cm3: 0,
         finalProfit: 0,
+        gstPaidInCP: 0,
+        gstCollected: 0,
       }
     })
 
@@ -244,6 +249,9 @@ export default async function getInsights(
     let paidOrders = 0;
     let preparingOrders = 0;
     let dispatchedOrders = 0;
+
+    let gstPaidInCPForOrders = 0;
+    let gstToBePaidForOrders = 0;
 
     orders.forEach((order) => {
       switch (order.status) {
@@ -266,17 +274,26 @@ export default async function getInsights(
           break;
       }
       if (order.status === OrderStatusType.PAYMENT_DONE || order.status === OrderStatusType.PREPARING || order.status === OrderStatusType.DISPATCHED || order.status === OrderStatusType.DELIVERED) {
-        order.products?.map((product: { totalPrice: number, sellingPrice: number, quantity: number, productId: { name: string, _id: Types.ObjectId, costPrice: number } }) => {
+        order.products?.map((product: { totalPrice: number, sellingPrice: number, quantity: number, productId: { name: string, _id: Types.ObjectId, costPrice: number, gstPercentage: number, gstPercentageOnCostPrice: number } }) => {
           const totalSale = productWiseSales[product.productId._id.toString()].totalSale + product.totalPrice * product.quantity;
           const netSale = productWiseSales[product.productId._id.toString()].netSale + product.sellingPrice * product.quantity;
           const cogs = (productWiseExpenses[product.productId._id.toString()].cogs / productWiseInventory[product.productId._id.toString()].totalUnits)* product.quantity;
           const unitCount = productWiseSales[product.productId._id.toString()].unitCount + product.quantity;
+          const gstAmount = (product.totalPrice - product.sellingPrice)*product.quantity;
+          const gstCP = ((product.productId.costPrice*product.productId.gstPercentageOnCostPrice)/(100 + product.productId.gstPercentageOnCostPrice))*product.quantity;
+          gstPaidInCPForOrders += gstCP;
+          gstToBePaidForOrders += gstAmount;
+          const gstCollected = productWiseSales[product.productId._id.toString()].gstCollected + gstAmount;
+          const gstPaidInCP = productWiseSales[product.productId._id.toString()].gstPaidInCP + gstCP;
+          // console.info("aa", gstAmount, product.totalPrice, product.sellingPrice, product.quantity);
       
           productWiseSales[product.productId._id.toString()] = {
             ...productWiseSales[product.productId._id.toString()],
             totalSale: Number(totalSale.toFixed(2)),
             netSale: Number(netSale.toFixed(2)),
             cogs: Number(cogs.toFixed(2)),
+            gstCollected: Number(gstCollected.toFixed(2)),
+            gstPaidInCP: Number(gstPaidInCP.toFixed(2)),
             unitCount,
           }
         })
@@ -297,7 +314,7 @@ export default async function getInsights(
       });
     }
 
-    const totalRevenue = totalAmountReceived - totalAmountReturned;
+    const totalRevenue = Number((totalAmountReceived - totalAmountReturned).toFixed(2));
     let totalUnitsSold = 0;
 
     Object.keys(productWiseSales)?.forEach((id: string) => {
@@ -381,6 +398,8 @@ export default async function getInsights(
         cm2: number,
         cm3: number,
         finalProfit: number,
+        gstPaidInCP: number,
+        gstCollected: number,
       }}> = {};
 
     typedProducts.forEach((p) => {
@@ -391,7 +410,6 @@ export default async function getInsights(
         sales: productWiseSales[p._id.toString()],
       };
     });
-    
 
     return res.status(200).json({
         success: true,
@@ -406,13 +424,16 @@ export default async function getInsights(
           },
           revenues: {
               totalRevenue,
-              netRevenue,
-              cm1,
-              cm2,
-              cm3,
-              finalProfit,
+              netRevenue: Number(netRevenue.toFixed(2)),
+              cm1: Number(cm1.toFixed(2)),
+              cm2: Number(cm2.toFixed(2)),
+              cm3: Number(cm3.toFixed(2)),
+              finalProfit: Number(finalProfit.toFixed(2)),
+              totalGstPaidInCP: Number(totalGstPaidInCP.toFixed(2)),
           },
           totalOrders: ordersCount,
+          gstPaidInCPForOrders: Number(gstPaidInCPForOrders.toFixed(2)),
+          gstToBePaidForOrders: Number(gstToBePaidForOrders.toFixed(2)),
           unitEconomics,
           cac,
           unitsPerOrder,
