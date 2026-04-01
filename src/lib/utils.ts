@@ -21,6 +21,7 @@ export interface ReactChild {
 }
 
 export const dateToShow = (date: string) => {
+  if (!date) return "";
   const dateMain = date?.split("T")[0];
   const [YYYY, MM, DD] = dateMain.split("-");
   return `${DD}-${MM}-${YYYY}`;
@@ -52,6 +53,9 @@ export type Product = {
   quantity: number;
   discountPercentage: number;
   accountTotalPrice?: number;
+  totalGstPayable?: number;
+  totalCostPrice?: number;
+  totalProfit?: number;
 };
 
 export const isLastRowEmpty = (products: Product[]) => {
@@ -89,6 +93,7 @@ export type ProductType = {
   mrp: number;
   costPrice: number;
   gstPercentage: number;
+  gstPercentageOnCostPrice: number;
 }
 
 export enum PaymentModeType {

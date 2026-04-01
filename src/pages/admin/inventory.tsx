@@ -3,7 +3,7 @@ import Loader from "@/components/Loader";
 import { dateToShow, ProductType } from "@/lib/utils";
 import ACTIONS from "@/store/actions";
 import { Context } from "@/store/context";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/inventory.module.css";
 import { InventoryItem } from "@/store/reducers/adminReducer";
@@ -24,6 +24,10 @@ const Inventory = () => {
     mfgDate: "",
     expiryDate: ""
   });
+
+  useEffect(() => {
+    getInventory();
+  },[]);
 
   const getInventory = async () => {
     setLoader(true);
@@ -130,6 +134,7 @@ const Inventory = () => {
                   <th>Mfg</th>
                   <th>Expiry</th>
                   <th>Cost Price</th>
+                  <th>GST on CP (%)</th>
                   <th>MRP</th>
                   <th>GST %</th>
                 </tr>
@@ -147,6 +152,7 @@ const Inventory = () => {
                     <td>{dateToShow(item.mfgDate)}</td>
                     <td>{dateToShow(item.expiryDate)}</td>
                     <td>₹{item.costPrice}</td>
+                    <td>{item?.gstPercentageOnCostPrice}%</td>
                     <td>₹{item?.mrp}</td>
                     <td>{item.gstPercentage}%</td>
                   </tr>
@@ -169,27 +175,39 @@ const Inventory = () => {
             </div>
 
             <form onSubmit={handleSubmit} className={styles.form}>
-              <input name="batch" placeholder="Batch" onChange={handleChange} required />
+              <div className={styles.formGroup}>
+                <label>Batch Name</label>
+                <input name="batch" placeholder="Batch" onChange={handleChange} required />
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label>Product Name</label>
+                <select name="productId" onChange={handleChange}>
+                  <option value="">Select Product</option>
+                  {products?.map((item: ProductType) => {
+                    return (
+                      <option key={item?._id} value={item?._id}>{item?.name}</option>
+                    )
+                  })}
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Total Units</label>
+                <input type="number" name="totalCount" placeholder="Total Count" onChange={handleChange} />
+              </div>
 
-              <select name="productId" onChange={handleChange}>
-                <option value="">Select Product</option>
-                {products?.map((item: ProductType) => {
-                  return (
-                    <option key={item?._id} value={item?._id}>{item?.name}</option>
-                  )
-                })}
-              </select>
-
-              <input type="number" name="totalCount" placeholder="Total Count" onChange={handleChange} />
-
-              <label>MFG</label>
-              <input type="date" name="mfgDate" onChange={handleChange} />
-
-              <label>Expiry</label>
-              <input type="date" name="expiryDate" onChange={handleChange} />
-
-              <label>Received</label>
-              <input type="date" name="receivedDate" onChange={handleChange} />
+              <div className={styles.formGroup}>
+                <label>MFG Date</label>
+                <input className={styles.dateField} type="date" name="mfgDate" onChange={handleChange} />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Expiry Date</label>
+                <input className={styles.dateField} type="date" name="expiryDate" onChange={handleChange} />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Received Date</label>
+                <input type="date" className={styles.dateField} name="receivedDate" onChange={handleChange} />
+              </div>
 
               <button type="submit">Submit</button>
             </form>

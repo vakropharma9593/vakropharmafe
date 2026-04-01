@@ -212,46 +212,55 @@ const Customers = () => {
             </div>
 
             <form className={styles.form} onSubmit={handleSubmit}>
-              <input
-                name="name"
-                placeholder="Name"
-                value={formData.name}
-                onChange={handleChange}
-                onBlur={() => validateName(formData.name)}
-              />
-              {errors.name && <p className={styles.error}>{errors.name}</p>}
-
-              <input
-                placeholder="Phone"
-                value={formData.phone}
-                maxLength={10}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    phone: e.target.value.replace(/\D/g, ""),
-                  })
-                }
-                onBlur={() => validatePhone(formData.phone)}
-              />
-              {errors.phone && <p className={styles.error}>{errors.phone}</p>}
-
-              <input
-                name="address"
-                placeholder="Address"
-                value={formData.address}
-                onChange={handleChange}
-              />
-
-              <select
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-              >
-                <option value="Individual">Individual</option>
-                <option value="Whole_Sale">Whole Sale</option>
-                <option value="Retail">Retail</option>
-                <option value="Doctor">Doctor</option>
-              </select>
+              <div className={styles.formGroup}>
+                <label>Customer Name</label>
+                <input
+                  name="name"
+                  placeholder="Name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  onBlur={() => validateName(formData.name)}
+                />
+                {errors.name && <p className={styles.error}>{errors.name}</p>}
+              </div>
+              <div className={styles.formGroup}>
+                <label>Phone Number</label>
+                <input
+                  placeholder="Phone"
+                  value={formData.phone}
+                  maxLength={10}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      phone: e.target.value.replace(/\D/g, ""),
+                    })
+                  }
+                  onBlur={() => validatePhone(formData.phone)}
+                />
+                {errors.phone && <p className={styles.error}>{errors.phone}</p>}
+              </div>
+              <div className={styles.formGroup}>
+                <label>Address</label>
+                <input
+                  name="address"
+                  placeholder="Address"
+                  value={formData.address}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Customer Type</label>
+                <select
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                >
+                  <option value="Individual">Individual</option>
+                  <option value="Whole_Sale">Whole Sale</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Doctor">Doctor</option>
+                </select>
+              </div>
 
               <button type="submit">
                 {isEdit ? "Update Customer" : "Add Customer"}

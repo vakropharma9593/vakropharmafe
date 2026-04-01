@@ -46,6 +46,8 @@ type ProductData = {
     cm2: number;
     cm3: number;
     finalProfit: number;
+    gstPaidInCP: number;
+    gstCollected: number;
   };
 };
 
@@ -56,6 +58,7 @@ type RevenueType = {
   cm2: number;
   cm3: number;
   finalProfit: number;
+  totalGstPaidInCP: number;
 }
 
 type ExpenseType = {
@@ -93,6 +96,8 @@ type InsightResponse = {
   unitEconomics: UnitEconomicsType;
   cac: number;
   unitsPerOrder: number;
+  gstPaidInCPForOrders: number;
+  gstToBePaidForOrders: number;
 };
 
 const InsightPage = () => {
@@ -303,6 +308,9 @@ const InsightPage = () => {
           <Card title="Profit" value={data.revenues.finalProfit} isAmount highlight />
           <Card title="Total Expenses" value={data.expenses.totalExpensesAmount} isAmount highlight />
           <Card title="Inventory Value" value={data.inventory.totalInventoryValue} isAmount highlight />
+          <Card title="GST Paid In CP" value={data.revenues.totalGstPaidInCP} isAmount highlight />
+          <Card title="GST Paid In CP(Order)" value={data.gstPaidInCPForOrders} isAmount />
+          <Card title="GST Collected (Order)" value={data.gstToBePaidForOrders} isAmount />
           <Card title="Health Score" value={healthScore} />
           <Card title="Orders" value={data.totalOrders} />
           <Card title="CAC" value={data.cac} isAmount />
@@ -369,6 +377,12 @@ const InsightPage = () => {
                 <p>Revenue: ₹{product.sales.totalSale}</p>
                 <p className={styles.profit}>
                   Profit: ₹{product.sales.finalProfit}
+                </p>
+                <p className={styles.profit}>
+                  GST Paid In CP: ₹{product.sales.gstPaidInCP}
+                </p>
+                <p className={styles.profit}>
+                  GST Collected: ₹{product.sales.gstCollected}
                 </p>
                 <p className={styles.muted}>
                   Contribution: {contribution}%
