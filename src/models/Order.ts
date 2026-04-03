@@ -56,6 +56,14 @@ const OrderSchema = new mongoose.Schema(
       default: OrderStatusType.PAYMENT_PENDING,
     },
 
+    deliveryService: {
+      type: String,
+    },
+
+    deliveryTrackNumber: {
+      type: String,
+    },
+
     totalAmount: {
       type: Number,
       required: true,

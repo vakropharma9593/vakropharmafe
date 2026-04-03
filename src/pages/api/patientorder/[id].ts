@@ -1,8 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/mongodb";
-import Order from "@/models/Order";
-import Payment from "@/models/Payment";
 import { OrderStatusType } from "@/lib/utils";
+import PatientOrder from "@/models/PatientOrder";
 
 export default async function handler(
   req: NextApiRequest,
@@ -13,18 +12,15 @@ export default async function handler(
 
     if (req.method === "PATCH") {
       const { id } = req.query;
-      const { status, paymentType } = req.body;
+      const { status } = req.body;
 
-      const existing = await Order.findById(id);
+      const existing = await PatientOrder.findById(id);
       if (!existing) {
           return res.status(404).json({
           success: false,
-          message: "Order not found",
+          message: "Patient Order not found",
           });
       }
-            
-      
-      const alreadyProcessed = existing.status === "Payment_Done";
 
       let deliveryService: string = existing.deliveryService;
       let deliveryTrackNumber: string = existing.deliveryTrackNumber;
@@ -34,19 +30,11 @@ export default async function handler(
         deliveryTrackNumber= req.body?.deliveryTrackNumber;
       }
 
-      const order = await Order.findByIdAndUpdate(
+      const order = await PatientOrder.findByIdAndUpdate(
         id,
         { status, deliveryService, deliveryTrackNumber },
         { new: true }
       );
-
-      if (status === "Payment_Done" && !alreadyProcessed) {
-        await Payment.create({
-          orderId: order._id,
-          totalAmount: order.totalAmount,
-          paymentType
-        });
-      }
 
       return res.status(200).json({
         success: true,
