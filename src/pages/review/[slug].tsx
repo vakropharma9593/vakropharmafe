@@ -20,6 +20,7 @@ const ReviewBySlugPage = () => {
   }, [slug]);
 
   const getProducts = async () => {
+    setLoader(true);
     try {
       const res = await fetch("/api/product");
       const data = await res.json();
