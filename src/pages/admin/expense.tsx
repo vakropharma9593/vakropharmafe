@@ -409,35 +409,35 @@ const Expense = () => {
               <p>{selectedExpense.voucher}</p>
 
               <div className={styles.radioGroup}>
-                    <p>Is Settled</p>
-                    <div className={styles.radioOptions}>
-                        <label>
-                        <input
-                            type="radio"
-                            name="isSettled"
-                            value="true"
-                            checked={formData.isSettled === true}
-                            onChange={() =>
-                                setFormData({ ...formData, isSettled: true })
-                            }
-                        />
-                        Yes
-                        </label>
+                <p>Is Settled</p>
+                <div className={styles.radioOptions}>
+                  <label>
+                    <input
+                      type="radio"
+                      name="isSettled"
+                      value="true"
+                      checked={formData.isSettled === true}
+                      onChange={() =>
+                          setFormData({ ...formData, isSettled: true })
+                      }
+                    />
+                      Yes
+                  </label>
 
-                        <label>
-                        <input
-                            type="radio"
-                            name="isSettled"
-                            value="false"
-                            checked={formData.isSettled === false}
-                            onChange={() =>
-                                setFormData({ ...formData, isSettled: false })
-                            }
-                        />
-                        No
-                        </label>
-                    </div>
+                  <label>
+                    <input
+                      type="radio"
+                      name="isSettled"
+                      value="false"
+                      checked={formData.isSettled === false}
+                      onChange={() =>
+                          setFormData({ ...formData, isSettled: false })
+                      }
+                    />
+                      No
+                  </label>
                 </div>
+              </div>
               {formData?.isSettled && 
                 <div className={styles.formGroup}>
                   <label>Settlement Date</label>

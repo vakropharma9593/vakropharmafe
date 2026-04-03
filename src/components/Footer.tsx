@@ -104,6 +104,8 @@ const Footer: React.FC<FooterProps> = ({ source }) => {
 
               {source === "product" ? null : <button onClick={() => scrollToSection("products")} className={styles.link}>Products</button>}
 
+              {/* <button onClick={() => router.push("about")} className={styles.link}>About Us</button> */}
+
               {source === "product" ? null : <button onClick={() => scrollToSection("benefits")} className={styles.link}>About Us</button>
 }
               {source === "product" ? null : <button onClick={() => scrollToSection("contact")} className={styles.link}>Contact</button>}
@@ -122,19 +124,19 @@ const Footer: React.FC<FooterProps> = ({ source }) => {
 
             <div className={styles.links}>
 
-              <button onClick={() => router.push("/products/facewash")} className={styles.link}>
+              <button onClick={() => router.push("/products/vakro-glo-depigmenting-facewash")} className={styles.link}>
                 Face Wash
               </button>
 
-              <button onClick={() => router.push("/products/facemoisturizer")} className={styles.link}>
+              <button onClick={() => router.push("/products/vakro-aqua-lite-moisturiser-face-gel")} className={styles.link}>
                 Face Moisturizer
               </button>
 
-              <button onClick={() => router.push("/products/faceserum")} className={styles.link}>
+              <button onClick={() => router.push("/products/vakro-lite-face-serum")} className={styles.link}>
                 Face Serum
               </button>
 
-              <button onClick={() => router.push("/products/sunscreen")} className={styles.link}>
+              <button onClick={() => router.push("/products/vakro-lite-depigmenting-fluid-sunscreen")} className={styles.link}>
                 Sunscreen
               </button>
 

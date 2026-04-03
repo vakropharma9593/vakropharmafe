@@ -16,6 +16,8 @@ interface OrderWithCustomer {
   };
   date: Date;
   status: string;
+  deliveryService: string;
+  deliveryTrackNumber: string;
   totalAmount: number;
   products: {
     productId: {
@@ -47,7 +49,7 @@ export default async function handler(
     if (req.method === "POST") {
       const { customerId, date, status, products, paymentType, orderType, creditId } = req.body;
 
-       const finalProducts = [];
+      const finalProducts = [];
 
       // 2️⃣ Check inventory & deduct stock
       for (const product of products) {
@@ -106,6 +108,14 @@ export default async function handler(
       );
 
       const finalTotalAmount = Number(totalAmount.toFixed(2));
+
+      let deliveryService: string = ""
+      let deliveryTrackNumber: string = ""
+
+      if (status === OrderStatusType.DISPATCHED) {
+        deliveryService = req.body?.deliveryService;
+        deliveryTrackNumber= req.body?.deliveryTrackNumber;
+      }
       
       // Create order
       const order = await Order.create({
@@ -113,7 +123,9 @@ export default async function handler(
         date,
         status,
         products: finalProducts,
-        totalAmount: finalTotalAmount
+        totalAmount: finalTotalAmount,
+        deliveryService,
+        deliveryTrackNumber
       });
 
       if (status !== OrderStatusType.PAYMENT_PENDING) {
@@ -170,6 +182,8 @@ export default async function handler(
             customerPhone: o.customerId?.phone,
             date: o.date,
             status: o.status,
+            deliveryService: o.deliveryService,
+            deliveryTrackNumber: o.deliveryTrackNumber,
             products: o.products.map((p) => ({
                         productId: p?.productId?._id,
                         productName: p?.productId?.name,

@@ -17,19 +17,24 @@ export default async function handler(
         costPrice,
         gstPercentage,
         gstPercentageOnCostPrice,
+        isActive
       } = req.body;
 
-      const inventory = await Product.create({
+      const slug = name.toLowerCase().replace(/\s+/g, "-");
+
+      const product = await Product.create({
         name,
         mrp: Number(mrp.toFixed(2)),
         costPrice,
         gstPercentageOnCostPrice,
         gstPercentage,
+        slug,
+        isActive
       });
 
       return res.status(201).json({
         success: true,
-        data: inventory,
+        data: product,
       });
     }
 

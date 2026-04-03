@@ -6,6 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/order.module.css";
 import OrderModal from "@/components/OrderModal";
+import OrderUpdateModal from "@/components/OrderUpdateModal";
 
 type Order = {
   id?: string;
@@ -13,6 +14,8 @@ type Order = {
   customerPhone: string;
   date: string;
   status: string;
+  deliveryService?: string;
+  deliveryTrackNumber?: string;
   products: Product[];
   totalAmountPaid: number;
   totalAccountAmountPaid: number;
@@ -28,14 +31,17 @@ const PatientOrders = () => {
   const [showModal, setShowModal] = useState(false);
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
 
   useEffect(() => {
     getOrders();
   }, []);
 
   const getOrders = async () => {
+    showModal && setShowModal(false);
+    showStatusModal && setShowStatusModal(false);
+
     try {
       setLoader(true);
       const res = await fetch("/api/patientorder");
@@ -89,6 +95,7 @@ const PatientOrders = () => {
                   <th>Account ₹</th>
                   <th>Products</th>
                   <th>Payment</th>
+                  <th>Action</th>
                 </tr>
               </thead>
 
@@ -124,6 +131,20 @@ const PatientOrders = () => {
                     </td>
 
                     <td>{order.paymentType}</td>
+                    <td>
+                      <button
+                        className={styles.updateBtn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedOrder(order);
+                          setShowStatusModal(true);
+                        }}
+                        disabled={order.status === "Delivered"}
+                        style={{ cursor: order.status === "Delivered" ? "not-allowed" : "pointer"}}
+                      >
+                        Update
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -137,6 +158,10 @@ const PatientOrders = () => {
       {/* MODAL */}
       {showModal && (
         <OrderModal setShowOrderModal={setShowModal} source="patientOrderPage" callAfterSave={getOrders} />
+      )}
+
+      {showStatusModal && selectedOrder && (
+        <OrderUpdateModal source="patientOrderPage" callAfterSave={getOrders} selectedOrder={selectedOrder} setShowStatusModal={setShowStatusModal}  />
       )}
 
       {showViewModal && selectedOrder && (
@@ -169,6 +194,16 @@ const PatientOrders = () => {
                   <span>Status</span>
                   <p>{formatStatus(selectedOrder.status)}</p>
                 </div>
+
+                {selectedOrder.deliveryService && <div>
+                  <span>Delivery Service</span>
+                  <p>{selectedOrder.deliveryService}</p>
+                </div>}
+
+                {selectedOrder.deliveryTrackNumber && <div>
+                  <span>Delivery Track No.</span>
+                  <p>{selectedOrder.deliveryTrackNumber}</p>
+                </div>}
 
                 <div>
                   <span>Payment</span>

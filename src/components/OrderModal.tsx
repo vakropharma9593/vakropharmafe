@@ -8,14 +8,16 @@ import Loader from "./Loader";
 import { InventoryItem } from "@/store/reducers/adminReducer";
 
 type Order = {
-    customerPhone: string,
-    customerId: string,
-    customerName: string,
-    date: string, 
-    status: string, 
-    paymentType?: string,
-    creditId?: string,
-    selectedProductId?: string,
+    customerPhone: string;
+    customerId: string;
+    customerName: string;
+    date: string;
+    status: string;
+    deliveryService?: string;
+    deliveryTrackNumber?: string;
+    paymentType?: string;
+    creditId?: string;
+    selectedProductId?: string;
 }
 
 interface OrderModalInterface {
@@ -36,6 +38,8 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
         customerName: "",
         date: "",
         status: "",
+        deliveryService: "",
+        deliveryTrackNumber: "",
         paymentType: "",
         selectedProductId: "",
         creditId: ""
@@ -217,9 +221,9 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
             toast.error(data.message);
         }
         } catch {
-        toast.error("Failed to fetch customer details.");
+            toast.error("Failed to fetch customer details.");
         } finally {
-        setLoader(false);
+            setLoader(false);
         }
     }
 
@@ -289,6 +293,20 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                     })}
                 </select>
               </div>
+
+              {orderFormData?.status === OrderStatusType.DISPATCHED &&
+                <div className={styles.formGroup}>
+                    <label>Delivery Service</label>
+                    <input className={styles.dateField} type="text" name="deliveryService" onChange={handleOrderChange} />
+                </div>
+              }
+
+              {orderFormData?.status === OrderStatusType.DISPATCHED &&
+                <div className={styles.formGroup}>
+                    <label>Delivery Track No.</label>
+                    <input className={styles.dateField} type="text" name="deliveryTrackNumber" onChange={handleOrderChange} />
+                </div>
+              }
 
               {(orderFormData.status === OrderStatusType.PAYMENT_DONE || orderFormData.status === OrderStatusType.PREPARING || orderFormData.status === OrderStatusType.DISPATCHED || orderFormData.status === OrderStatusType.DELIVERED) && 
                 <div className={styles.formGroup}>

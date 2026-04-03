@@ -85,6 +85,13 @@ const AdminNavbar = () => {
         </button>
 
         <button
+          className={router.pathname === "/admin/review" ? styles.active : ""}
+          onClick={() => router.push("/admin/review")}
+        >
+          Reviews
+        </button>
+
+        <button
           className={router.pathname === "/admin/contactus" ? styles.active : ""}
           onClick={() => router.push("/admin/contactus")}
         >
