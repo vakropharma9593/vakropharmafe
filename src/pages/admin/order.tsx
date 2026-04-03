@@ -1,18 +1,21 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
-import { dateToShow, formatStatus, OrderStatusType, PaymentModeType, Product, ProductType } from "@/lib/utils";
+import { dateToShow, formatStatus, OrderStatusType, Product, ProductType } from "@/lib/utils";
 import { Context } from "@/store/context";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/order.module.css";
 import OrderModal from "@/components/OrderModal";
+import OrderUpdateModal from "@/components/OrderUpdateModal";
 
 type Order = {
-  id?: string;
+  _id?: string;
   customerName: string;
   customerPhone: string;
   date: string;
   status: string;
+  deliveryService?: string;
+  deliveryTrackNumber?: string;
   products: Product[];
   totalAmountPaid: number;
   paymentType: string;
@@ -27,8 +30,6 @@ const Orders = () => {
   const [showModal, setShowModal] = useState(false);
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [statusUpdate, setStatusUpdate] = useState("");
-  const [paymentModeForUpdate, setPaymentModeForUpdate] = useState("");
   const [showStatusModal, setShowStatusModal] = useState(false);
 
   const [showViewModal, setShowViewModal] = useState(false);
@@ -39,6 +40,8 @@ const Orders = () => {
 
   const getOrders = async () => {
     try {
+      showStatusModal && setShowStatusModal(false);
+      showModal && setShowModal(false);
       setLoader(true);
       const res = await fetch("/api/order");
       const data = await res.json();
@@ -54,37 +57,6 @@ const Orders = () => {
     }
   };
 
-  const updateOrderStatus = async () => {
-    if (!selectedOrder) return;
-
-    try {
-      setLoader(true);
-
-      const res = await fetch(`/api/order/${selectedOrder.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: statusUpdate, paymentType: paymentModeForUpdate }),
-      });
-
-      const data = await res.json();
-      if(data.success){
-        setOrders((prev) =>
-          prev.map((o) =>
-            o.id === selectedOrder.id ? { ...o, status: statusUpdate, paymentType: statusUpdate === "Payment_Done" ? paymentModeForUpdate : o.paymentType } : o
-          )
-        );
-        toast.success("Order status updated");
-        setShowStatusModal(false);
-      } else {
-        toast.error(data.message);
-      }
-    } catch {
-      toast.error("Failed to update status");
-    } finally {
-      setLoader(false);
-    }
-  };
-
   const STATUS_COLORS: Record<string, string> = {
     [OrderStatusType.PAYMENT_PENDING]: styles.pending,
     [OrderStatusType.PAYMENT_DONE]: styles.paid,
@@ -92,29 +64,6 @@ const Orders = () => {
     [OrderStatusType.DISPATCHED]: styles.dispatched,
     [OrderStatusType.DELIVERED]: styles.delivered,
   };
-
-  const isStatusAllowed = (item: string) => {
-    switch (selectedOrder?.status) {
-      case OrderStatusType.PAYMENT_PENDING:
-        return true;
-        break;
-      case OrderStatusType.PAYMENT_DONE:
-        if (item === OrderStatusType.PAYMENT_DONE || item === OrderStatusType.PREPARING || item === OrderStatusType.DISPATCHED || item === OrderStatusType.DELIVERED) return true;
-        break;
-      case OrderStatusType.PREPARING:
-        if (item === OrderStatusType.PREPARING || item === OrderStatusType.DISPATCHED || item === OrderStatusType.DELIVERED) return true;
-        break;
-      case OrderStatusType.DISPATCHED:
-        if (item === OrderStatusType.DISPATCHED || item === OrderStatusType.DELIVERED) return true;
-        break;
-      case OrderStatusType.DELIVERED:
-        if (item === OrderStatusType.DELIVERED) return true;
-        break;
-      default:
-        break;
-    }
-    return false;
-  }
 
   return (
     <div className={styles.container}>
@@ -151,7 +100,7 @@ const Orders = () => {
               <tbody>
                 {orders.map((order, index) => (
                   <tr 
-                    key={order.id || index} 
+                    key={order._id || index} 
                     onClick={() => {
                       setSelectedOrder(order);
                       setShowViewModal(true);
@@ -186,7 +135,6 @@ const Orders = () => {
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedOrder(order);
-                          setStatusUpdate(order.status);
                           setShowStatusModal(true);
                         }}
                         disabled={order.status === "Delivered"}
@@ -212,48 +160,7 @@ const Orders = () => {
 
       {/* STATUS MODAL */}
       {showStatusModal && selectedOrder && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <h2>Update Status</h2>
-              <button onClick={() => setShowStatusModal(false)}>✕</button>
-            </div>
-
-            <div className={styles.form}>
-              <p>{selectedOrder.customerName}</p>
-              <div className={styles.formGroup}>
-                <label>Order Status</label>
-                <select
-                  value={statusUpdate}
-                  onChange={(e) => setStatusUpdate(e.target.value)}
-                >
-                  {Object.values(OrderStatusType)?.map((item: string) => {
-                    if (!isStatusAllowed(item)) return null;
-                    return (
-                      <option key={item} value={item} >{item}</option>
-                    )
-                  })}
-                </select>
-              </div>
-              {statusUpdate === "Payment_Done" && 
-                <div className={styles.formGroup}>
-                  <label>Payment Mode</label>
-                  <select name="paymentType" onChange={(e) => setPaymentModeForUpdate(e.target.value)}>
-                    {Object.values(PaymentModeType)?.map((item: string) => {
-                        return (
-                              <option key={item}>{item}</option>
-                        )
-                    })}
-                  </select>
-                </div>
-              }
-
-              <button onClick={updateOrderStatus}>
-                Update Status
-              </button>
-            </div>
-          </div>
-        </div>
+        <OrderUpdateModal source="orderPage" callAfterSave={getOrders} selectedOrder={selectedOrder} setShowStatusModal={setShowStatusModal}  />
       )}
 
       {showViewModal && selectedOrder && (
@@ -286,6 +193,16 @@ const Orders = () => {
                   <span>Status</span>
                   <p>{formatStatus(selectedOrder.status)}</p>
                 </div>
+
+                {selectedOrder.deliveryService && <div>
+                  <span>Delivery Service</span>
+                  <p>{selectedOrder.deliveryService}</p>
+                </div>}
+
+                {selectedOrder.deliveryTrackNumber && <div>
+                  <span>Delivery Track Number</span>
+                  <p>{selectedOrder.deliveryTrackNumber}</p>
+                </div>}
 
                 <div>
                   <span>Payment</span>

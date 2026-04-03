@@ -3,7 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import "@/models/Customer"; 
 import "@/models/Product";
 import "@/models/Inventory";
-import { PaymentModeType } from "@/lib/utils";
+import { OrderStatusType, PaymentModeType } from "@/lib/utils";
 import PatientOrder from "@/models/PatientOrder";
 
 interface OrderWithCustomer {
@@ -14,6 +14,8 @@ interface OrderWithCustomer {
   };
   date: Date;
   status: string;
+  deliveryService: string;
+  deliveryTrackNumber: string;
   totalAmount: number;
   totalAccountAmount: number;
   paymentType: PaymentModeType;
@@ -59,6 +61,14 @@ export default async function handler(
       );
 
       const finalTotalAmount = Number(totalAmount.toFixed(2));
+
+      let deliveryService: string = ""
+      let deliveryTrackNumber: string = ""
+      
+      if (status === OrderStatusType.DISPATCHED) {
+        deliveryService = req.body?.deliveryService;
+        deliveryTrackNumber= req.body?.deliveryTrackNumber;
+      }
       
       // Create order
       const order = await PatientOrder.create({
@@ -69,6 +79,8 @@ export default async function handler(
         totalAmount: finalTotalAmount,
         totalAccountAmount,
         paymentType: paymentType,
+        deliveryService,
+        deliveryTrackNumber,
       });
 
       const result = {
@@ -102,6 +114,8 @@ export default async function handler(
             customerPhone: o.customerId?.phone,
             date: o.date,
             status: o.status,
+            deliveryService: o.deliveryService,
+            deliveryTrackNumber: o.deliveryTrackNumber,
             products: o.products.map((p) => ({
                         productId: p?.productId?._id,
                         productName: p?.productId?.name,

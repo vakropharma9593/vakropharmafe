@@ -1,92 +1,127 @@
-import Image, { StaticImageData } from "next/image";
+"use client";
+
+import Image from "next/image";
 import styles from "../styles/eachProduct.module.css";
-import { ReactNode } from "react";
-
-type Feature = {
-  icon: ReactNode;
-  text: string;
-};
-
-type Benefit = {
-  icon: ReactNode;
-  title: string;
-  description: string;
-};
-
-type Ingredient = {
-  name: string;
-  description: string;
-};
+import { useEffect, useState } from "react";
+import AddReviewModal from "./AddReviewModal";
+import { Review } from "@/lib/utils";
+import { ProductUIData } from "@/lib/productData";
+import { Sparkles } from "lucide-react";
+import { toast } from "react-toastify";
+import Loader from "./Loader";
 
 type ProductPageProps = {
-  title: string;
-  price: string;
-  heroImage: StaticImageData;
-  usageImage: StaticImageData;
-  tagline: string;
-  features: Feature[];
-  benefitsTitle: string;
-  benefits: Benefit[];
-  ingredients: Ingredient[];
-  usageSteps: string[];
-  product: string;
+  product: {
+    _id: string;
+    name: string;
+    mrp: number;
+    description?: string;
+    slug: string;
+  };
+  productInfo: ProductUIData,
 };
 
 const ProductPage = ({
-  title,
-  price,
-  heroImage,
-  usageImage,
-  tagline,
-  features,
-  benefitsTitle,
-  benefits,
-  ingredients,
-  usageSteps,
-  product
+  product,
+  productInfo
 }: ProductPageProps) => {
+
+  const [reviewsData, setReviewsData] = useState<{ reviews: Review[], totalReviews: number, averageRating: number, ratingBreakdown: Record<number, number> }>({ 
+    reviews: [],
+    totalReviews: 0,
+    averageRating: 0,
+    ratingBreakdown: {}
+  });
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [loader, setLoader] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (product) {
+      getAllReviews(product?._id);
+    }
+  },[product])
+
+  const getAllReviews = async (id: string) => {
+    setOpenModal(false);
+    setLoader(true);
+    try {
+      const res = await fetch(`/api/review?productId=${id}`);
+      const data = await res.json();
+      if(data.success) {
+        setReviewsData(data.data || []);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch reviews.");
+    } finally {
+      setLoader(false);
+    }
+  }
+
   const handleBuyNow = () => {
     const phoneNumber = 919286382701;
-    const url = `https://wa.me/${phoneNumber}`;
-    window.open(url, "_blank");
-  }
+    window.open(`https://wa.me/${phoneNumber}`, "_blank");
+  };
 
   return (
     <main className={styles.productPage}>
-
-      {/* HERO */}
-
       <section className={styles.hero}>
         <div className={styles.container}>
           <div className={styles.heroGrid}>
 
             <div className={styles.heroImage}>
-              <Image src={heroImage} alt={title} priority />
+              <Image src={productInfo.heroImage} alt={product.name} priority />
             </div>
 
             <div className={styles.heroContent}>
-              <h1>{title}</h1>
-
-              <p className={styles.tagline}>
-                {tagline}
-              </p>
-
-              <div className={styles.price}>
-                ₹{price}
+              <h1>{product.name}</h1>
+              <div className={styles.topRating}>
+                <div className={styles.starWrapper}>
+                  <div
+                    className={styles.starFill}
+                    style={{
+                      width: `${(reviewsData.averageRating / 5) * 100}%`
+                    }}
+                  >
+                    ★★★★★
+                  </div>
+                  <div className={styles.starBase}>★★★★★</div>
+                </div>
+                <span className={styles.topRatingText}>
+                  {reviewsData.averageRating} ({reviewsData.totalReviews} reviews)
+                </span>
               </div>
+              <p className={styles.tagline}>{productInfo.tagLine}</p>
+
+              <div className={styles.price}>₹{product.mrp}</div>
 
               <ul className={styles.features}>
-                {features.map((f, i) => (
-                  <li key={i}>
-                    {f.icon} {f.text}
-                  </li>
+                {productInfo.features.map((f, i) => (
+                  <li key={i}>{f.icon} {f.text}</li>
                 ))}
               </ul>
 
-              <button className={styles.buyButton} onClick={() => handleBuyNow()} >
+              {/* PREMIUM INGREDIENT STRIP */}
+              <div className={styles.heroIngredients}>
+                <h3 className={styles.heroIngredientTitle}>Key Ingredients</h3>
+                <p className={styles.heroIngredientSubtitle}>
+                  Every ingredient is carefully selected to deliver visible results while being gentle on your skin.
+                </p>
+
+                <div className={styles.heroIngredientList}>
+                  {productInfo.ingredients.slice(0, 4).map((ing, i) => (
+                    <div key={i} className={styles.heroIngredientPill}>
+                      <Sparkles size={12} />
+                      {ing.name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <button className={styles.buyButton} onClick={handleBuyNow}>
                 Buy Now
               </button>
-
             </div>
 
           </div>
@@ -94,14 +129,12 @@ const ProductPage = ({
       </section>
 
       {/* BENEFITS */}
-
       <section className={styles.benefits}>
         <div className={styles.container}>
-
-          <h2>{benefitsTitle}</h2>
+          <h2>Why Choose Me</h2>
 
           <div className={styles.benefitGrid}>
-            {benefits.map((b, i) => (
+            {productInfo.benefits.map((b, i) => (
               <div key={i} className={styles.benefitCard}>
                 {b.icon}
                 <h3>{b.title}</h3>
@@ -109,22 +142,128 @@ const ProductPage = ({
               </div>
             ))}
           </div>
-
         </div>
       </section>
 
-      {/* INGREDIENTS */}
+      {/* USAGE */}
+      <section className={styles.benefits}>
+        <div className={styles.container}>
+          <h2>How to Use</h2>
 
-      <section className={styles.ingredients}>
+          <p className={styles.usageSubtitle}>
+            Follow this simple routine to get the best results
+          </p>
+
+          <div className={styles.steps}>
+            {productInfo.usageSteps.map((step, i) => (
+              <div key={i} className={styles.stepCard}>
+                <div className={styles.stepNumber}>0{i + 1}</div>
+                <p>{step}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* REVIEWS */}
+      <section className={styles.reviews}>
         <div className={styles.container}>
 
-          <h2>Key Ingredients</h2>
+          <div className={styles.reviewHeader}>
+            <h2>Customer Reviews</h2>
 
-          <div className={`${styles.ingredientGrid} ${product === "facewash" ? styles.threeGrid : ""}`}>
-            {ingredients.map((ing, i) => (
-              <div key={i} className={styles.ingredientCard}>
-                <h3>{ing.name}</h3>
-                <p>{ing.description}</p>
+            {/* SUMMARY */}
+            <div className={styles.reviewSummary}>
+              
+              <div className={styles.leftSummary}>
+                <div className={styles.bigRating}>{reviewsData.averageRating}</div>
+                <div className={styles.starWrapper}>
+                  <div
+                    className={styles.starFill}
+                    style={{
+                      width: `${(reviewsData.averageRating / 5) * 100}%`
+                    }}
+                  >
+                    ★★★★★
+                  </div>
+                  <div className={styles.starBase}>★★★★★</div>
+                </div>
+                <div className={styles.totalReviews}>
+                  {reviewsData.totalReviews} reviews
+                </div>
+              </div>
+
+              {/* ⭐ BREAKDOWN */}
+              <div className={styles.breakdown}>
+                {[5, 4, 3, 2, 1].map((star) => {
+                  const count = reviewsData.ratingBreakdown[star] || 0;
+                  const percentage = reviewsData.totalReviews
+                    ? (count / reviewsData.totalReviews) * 100
+                    : 0;
+
+                  return (
+                    <div key={star} className={styles.breakdownRow}>
+                      <span>{star}★</span>
+
+                      <div className={styles.bar}>
+                        <div
+                          className={styles.fill}
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+
+                      <span>{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
+
+            <button
+              className={styles.reviewButton}
+              onClick={() => setOpenModal(true)}
+            >
+              Write a Review
+            </button>
+          </div>
+
+          {/* 🌟 BEST REVIEW
+          {bestReview && (
+            <div className={styles.bestReview}>
+              <div className={styles.badge}>Top Review</div>
+              <div className={styles.reviewStars}>
+                {"★".repeat(bestReview.rating)}
+              </div>
+              <p className={styles.bestText}>{bestReview.review}</p>
+              <span className={styles.bestUser}>
+                {bestReview.reviewerName} • {bestReview.skinType}
+              </span>
+            </div>
+          )} */}
+
+          {/* ALL REVIEWS */}
+          <div className={styles.reviewScroll}>
+            {reviewsData.reviews.map((r, i) => (
+              <div key={i} className={styles.reviewCard}>
+
+                <div className={styles.reviewTop}>
+                  <div>
+                    <strong>{r.reviewerName}</strong>
+                    <div className={styles.reviewMeta}>
+                      {r.skinType} • {r.skinConcern}
+                    </div>
+                  </div>
+
+                  {r.isVerifiedUser && (
+                    <span className={styles.verified}>✔ Verified</span>
+                  )}
+                </div>
+
+                <div className={styles.reviewStars}>
+                  {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
+                </div>
+                <p className={styles.reviewText}>{r.review}</p>
               </div>
             ))}
           </div>
@@ -132,34 +271,14 @@ const ProductPage = ({
         </div>
       </section>
 
-      {/* HOW TO USE */}
-
-      <section className={styles.usage}>
-        <div className={styles.container}>
-
-          <div className={styles.usageGrid}>
-
-            <div className={styles.usageImage}>
-              <Image src={usageImage} alt="How to use product" priority />
-            </div>
-
-            <div className={styles.usageSteps}>
-
-              <h2>How to Use</h2>
-
-              <ol>
-                {usageSteps.map((step, i) => (
-                  <li key={i}>{step}</li>
-                ))}
-              </ol>
-
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
+      {openModal && (
+        <AddReviewModal
+          onClose={() => setOpenModal(false)}
+          productId={product?._id}
+          afterSuccessCall={() => getAllReviews(product?._id)}
+        />
+      )}
+      {loader && <Loader />}
     </main>
   );
 };
