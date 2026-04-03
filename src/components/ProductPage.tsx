@@ -276,6 +276,7 @@ const ProductPage = ({
           onClose={() => setOpenModal(false)}
           productId={product?._id}
           afterSuccessCall={() => getAllReviews(product?._id)}
+          productName={product?.name}
         />
       )}
       {loader && <Loader />}

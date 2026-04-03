@@ -15,9 +15,10 @@ type Props = {
   afterSuccessCall: () => void;
   source?: string;
   products?: ProductType[];
+  productName?: string;
 };
 
-const AddReviewModal = ({ onClose, productId, afterSuccessCall, source, products }: Props) => {
+const AddReviewModal = ({ onClose, productId, afterSuccessCall, source, products, productName }: Props) => {
   const router = useRouter();
   const [hover, setHover] = useState(0);
   const [form, setForm] = useState<Review>({
@@ -126,7 +127,8 @@ const AddReviewModal = ({ onClose, productId, afterSuccessCall, source, products
           <h2>Write a Review</h2>
         </div>}
         <div className={styles.formSection}>
-          {source === "sharedLink" && <div className={styles.formGroup}>
+          <h2>{productName}</h2>
+          {productId ? null : <div className={styles.formGroup}>
             <label className={styles.label}>Select Product</label>
 
             <div className={styles.radioGrid}>
