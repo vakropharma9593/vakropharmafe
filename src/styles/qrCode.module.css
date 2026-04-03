@@ -1,0 +1,103 @@
+.page {
+  background: #F4EFE7;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  background: #FFFFFF;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  border: 1px solid #EFEAE2;
+  text-align: center;
+  width: 350px;
+}
+
+.heading {
+  color: #173F36;
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #EAE6DF;
+  outline: none;
+  font-size: 14px;
+  color: #1F1F1F;
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  border-color: #173F36;
+  box-shadow: 0 0 0 2px rgba(23, 63, 54, 0.1);
+}
+
+.buttonGroup {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.primaryBtn {
+  background: #173F36;
+  color: #FFFFFF;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primaryBtn:hover {
+  background: #2E5E52;
+}
+
+.secondaryBtn {
+  background: #2E5E52;
+  color: #FFFFFF;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondaryBtn:hover {
+  opacity: 0.9;
+}
+
+.primaryButton {
+  margin-top: 12px;
+  background: #C9A25E;
+  color: #173F36;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.goldBtn {
+  background: #C9A25E;
+  color: #173F36;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.goldBtn:hover {
+  background: #E1C88A;
+}
+
