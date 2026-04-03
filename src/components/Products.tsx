@@ -1,46 +1,46 @@
-import facewash from "../../public/assets/facewash.jpeg";
-import faceSerum from "../../public/assets/faceserum.jpeg";
-import moisturizer from "../../public/assets/moisturiser.jpeg";
-import sunscreen from "../../public/assets/sunscreen.jpeg";
+import facewash from "../../public/assets/vakro-glo-depigmenting-facewash.jpeg";
+import faceSerum from "../../public/assets/vakro-lite-face-serum.jpeg";
+import moisturizer from "../../public/assets/vakro-aqua-lite-moisturiser-face-gel.jpeg";
+import sunscreen from "../../public/assets/vakro-lite-depigmenting-fluid-sunscreen.jpeg";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import styles from "../styles/products.module.css";
 
 const products = [
   {
-    name: "Luxury Depigmenting Face Wash",
+    name: "Vakro-glo depigmenting facewash",
     description:
       "Experience the Art of Balanced Skin with Vakro Depigmenting Face Wash.",
     category: "Face Care",
     image: facewash,
     alt: "Vakro Glow Balance Depigmenting Face Wash with Salicylic Acid and Niacinamide",
-    productLink: "/products/facewash",
+    productLink: "/products/vakro-glo-depigmenting-facewash",
   },
   {
-    name: "Anti-Acne & Depigmenting Face Serum",
+    name: "Vakro-lite face serum",
     description: "Multi-Active Acne Clarifying & Oil Balancing Serum.",
     category: "Face Care",
     image: faceSerum,
     alt: "Vakro Lite Dual Hit Serum with Azelaic Acid and Salicylic Acid for acne control",
-    productLink: "/products/faceserum",
+    productLink: "/products/vakro-lite-face-serum",
   },
   {
-    name: "Face Moisturizer Gel",
+    name: "Vakro-aqua lite moisturiser face gel",
     description:
       "Experience advanced hydration with powerful sun defense in one lightweight formula.",
     category: "Face Care",
     image: moisturizer,
     alt: "Vakro Aqualite SPF 50+ Face Moisturizer Gel with 5 Ceramides",
-    productLink: "/products/facemoisturizer",
+    productLink: "/products/vakro-aqua-lite-moisturiser-face-gel",
   },
   {
-    name: "Vakro Lite Anti-Pigment SPF 50+ Sunscreen",
+    name: "Vakro-lite depigmenting fluid sunscreen",
     description:
       "Broad-spectrum SPF 50+ sunscreen that protects from UV damage and helps reduce dark spots for an even-toned glow.",
     category: "Sun Care",
     image: sunscreen,
     alt: "Vakro Lite Anti-Pigment SPF 50+ Broad Spectrum Sunscreen",
-    productLink: "/products/sunscreen",
+    productLink: "/products/vakro-lite-depigmenting-fluid-sunscreen",
   },
 ];
 

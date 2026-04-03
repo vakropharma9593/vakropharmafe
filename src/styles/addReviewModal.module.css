@@ -1,0 +1,166 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #FFFFFF;
+  padding: 32px;
+  border-radius: 14px;
+  width: 420px;
+  max-width: 92%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+.modal h2 {
+  margin-bottom: 20px;
+  color: #173F36;
+}
+
+/* ⭐ STARS */
+
+.starContainer {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.star {
+  font-size: 26px;
+  cursor: pointer;
+  color: #ddd;
+  transition: 0.2s;
+}
+
+.star:hover {
+  transform: scale(1.2);
+}
+
+.active {
+  color: #C9A25E;
+}
+
+/* INPUTS */
+
+.modal input,
+.modal textarea {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 11px;
+  border: 1px solid #EAE6DF;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.modal textarea {
+  min-height: 100px;
+}
+
+/* ACTIONS */
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.cancel {
+  background: #F0F0F0;
+  border: none;
+  padding: 10px 18px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.submit {
+  background: #173F36;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: 0.25s;
+}
+
+.submit:hover {
+  background: #2E5E52;
+}
+
+.emailHint {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #2E5E52;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(46, 94, 82, 0.08);
+  padding: 6px 10px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.error {
+  color: #ff6b6b;
+  font-size: 12px;
+  margin-top: -6px;
+}
+
+.lockIcon {
+  font-size: 12px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.formGroup label {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--vakro-gold);
+}
+
+.formGroup input {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.dateField {
+  width: 50%;
+}
+
+.formGroup input:focus {
+  border-color: var(--vakro-green);
+  box-shadow: 0 0 0 2px rgba(23, 63, 54, 0.1);
+}
+
+
+.submitBtn {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: var(--vakro-green);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.submitBtn:hover {
+  background: var(--vakro-green-dark);
+}

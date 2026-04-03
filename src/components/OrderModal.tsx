@@ -217,9 +217,9 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
             toast.error(data.message);
         }
         } catch {
-        toast.error("Failed to fetch customer details.");
+            toast.error("Failed to fetch customer details.");
         } finally {
-        setLoader(false);
+            setLoader(false);
         }
     }
 

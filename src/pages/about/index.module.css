@@ -1,0 +1,76 @@
+.container { background: var(--vakro-cream); }
+
+.hero { background: var(--vakro-cream); padding: 120px 20px 80px; text-align: center; }
+.heroContent h1 { font-size: 44px; color: var(--vakro-green); }
+.heroContent p { color: #6B6B6B; margin: 10px 0 20px; }
+
+.primaryBtn { background: var(--vakro-green); color: white; padding: 12px 28px; border-radius: 8px; border: none; }
+.primaryBtn:hover { background: var(--vakro-green-light); }
+
+.section { padding: 100px 20px; background: #FFFFFF; }
+.sectionAlt { padding: 100px 20px; background: #F9F6F0; }
+
+.story { max-width: 700px; margin: auto; text-align: center; }
+.story h2 { color: var(--vakro-green); margin-bottom: 16px; }
+.story p { color: #1F1F1F; line-height: 1.7; }
+
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 1000px; margin: auto; align-items: center; }
+.image { width: 100%; border-radius: 16px; }
+
+.founderName { font-size: 20px; font-weight: 600; color: var(--vakro-green); margin: 8px 0; }
+
+.doctorCard {
+  max-width: 400px;
+  margin: auto;
+  text-align: center;
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid #EFEAE2;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+}
+
+.avatar { border-radius: 50%; margin-bottom: 12px; }
+
+.credential { color: #6B6B6B; font-size: 14px; }
+
+.badge {
+  display: inline-block;
+  margin: 10px 0;
+  padding: 6px 12px;
+  background: var(--vakro-gold-light);
+  color: var(--vakro-green);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.doctorText { margin-top: 10px; color: #1F1F1F; font-style: italic; }
+
+.center { text-align: center; margin-bottom: 40px; color: var(--vakro-green); }
+
+.grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; max-width: 1000px; margin: auto; }
+
+.card {
+  padding: 20px;
+  border-radius: 12px;
+  background: #FFFFFF;
+  border: 1px solid #EFEAE2;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+  text-align: center;
+  color: var(--vakro-green);
+}
+
+.carousel { display: flex; gap: 20px; overflow-x: auto; }
+.carouselImg { border-radius: 12px; }
+
+.cta { text-align: center; padding: 100px 20px; background: var(--vakro-green); color: white; }
+
+.goldBtn { margin-top: 20px; background: var(--vakro-gold); color: var(--vakro-green); padding: 14px 30px; border-radius: 10px; }
+.goldBtn:hover { background: var(--vakro-gold-light); }
+
+@media (max-width:768px) {
+  .split { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: 1fr 1fr; }
+  .heroContent h1 { font-size: 32px; }
+}

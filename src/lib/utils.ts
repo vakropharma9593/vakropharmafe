@@ -94,6 +94,8 @@ export type ProductType = {
   costPrice: number;
   gstPercentage: number;
   gstPercentageOnCostPrice: number;
+  isActive: boolean;
+  slug?: string;
 }
 
 export enum PaymentModeType {
@@ -117,3 +119,20 @@ export enum ExpenseCategoryType {
   MARKETING = "Marketing",
   VARIABLE = "Variable",
 }
+
+export type Review = {
+  _id?: string;
+  reviewerName: string;
+  productId?: {
+    _id: string;
+    slug: string;
+    name: string;
+  };
+  skinType?: string;
+  skinConcern?: string;
+  rating: number;
+  review: string;
+  phone?: string;
+  email?: string;
+  isVerifiedUser?: boolean;
+};

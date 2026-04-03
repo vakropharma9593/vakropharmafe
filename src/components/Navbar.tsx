@@ -53,6 +53,7 @@ const Navbar: React.FC<NavbarProps> = ({ source }) => {
             {source !== "product" && (
               <>
                 <button onClick={() => scrollToSection("products")} className={styles.link}>Products</button>
+                {/* <button onClick={() => router.push("/about")} className={styles.link}>About Us</button> */}
                 <button onClick={() => scrollToSection("benefits")} className={styles.link}>Why Us</button>
                 <button onClick={() => scrollToSection("contact")} className={styles.link}>Contact</button>
                 <button onClick={() => scrollToSection("contact")} className={styles.primaryBtn}>Get Started</button>
@@ -78,6 +79,7 @@ const Navbar: React.FC<NavbarProps> = ({ source }) => {
           {source !== "product" && (
             <>
               <button onClick={() => scrollToSection("products")}>Products</button>
+              {/* <button onClick={() => router.push("/about")}>About Us</button> */}
               <button onClick={() => scrollToSection("benefits")}>Why Us</button>
               <button onClick={() => scrollToSection("contact")}>Contact</button>
             </>

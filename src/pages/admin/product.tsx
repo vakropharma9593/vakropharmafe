@@ -20,6 +20,7 @@ const Product = () => {
     gstPercentage: 0,
     costPrice: 0,
     gstPercentageOnCostPrice: 0,
+    isActive: false,
   });
 
   useEffect(() => {
@@ -88,6 +89,30 @@ const Product = () => {
     }
   };
 
+  const handleUpdateProductStatus = async (id: string, status: boolean) => {
+    setLoader(true);
+    try {
+      const res = await fetch(`/api/product/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isActive: !status }),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          setShowModal(false);
+          toast.success(`Status updated successfully`);
+          getProducts();
+        } else {
+          toast.error(data.message);
+        }
+    } catch (error) {
+      toast.error("Failed to update status");
+    } finally {
+      setLoader(false);
+    }
+  }
+
   return (
     <div className={styles.container}>
       <AdminNavbar />
@@ -116,18 +141,33 @@ const Product = () => {
                   <th>GST% Paid</th>
                   <th>MRP</th>
                   <th>GST %</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
               </thead>
 
               <tbody>
                 {allProducts?.map((item: ProductType, i: number) => (
-                  <tr key={item?._id}>
+                  <tr key={item?._id} className={!item.isActive ? styles.inActive : "" }>
                     <td>{i + 1}</td>
                     <td>{item.name}</td>
                     <td>₹{item.costPrice}</td>
                     <td>{item?.gstPercentageOnCostPrice}</td>
                     <td>₹{item.mrp}</td>
                     <td>{item.gstPercentage}%</td>
+                    <td>{item.isActive ? "Active" :  "Inactive"} </td>
+                    <td>
+                      <button
+                        className={styles.updateBtn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUpdateProductStatus(item?._id || "", item?.isActive);
+                        }}
+                        style={{ cursor: "pointer"}}
+                      >
+                        {item.isActive ? "Mark Inactive" : "Mark Active"}
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -200,6 +240,37 @@ const Product = () => {
                   step="0.01"
                   onChange={handleChange}
                 />
+              </div>
+
+              <div className={styles.radioGroup}>
+                <p>Is Active</p>
+                <div className={styles.radioOptions}>
+                  <label>
+                    <input
+                      type="radio"
+                      name="isActive"
+                      value="true"
+                      checked={formData.isActive === true}
+                      onChange={() =>
+                          setFormData({ ...formData, isActive: true })
+                      }
+                    />
+                      Yes
+                  </label>
+
+                  <label>
+                    <input
+                      type="radio"
+                      name="isActive"
+                      value="false"
+                      checked={formData.isActive === false}
+                      onChange={() =>
+                          setFormData({ ...formData, isActive: false })
+                      }
+                    />
+                      No
+                  </label>
+                </div>
               </div>
 
               <button type="submit" className={styles.submitBtn}>

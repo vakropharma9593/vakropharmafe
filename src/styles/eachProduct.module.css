@@ -13,7 +13,7 @@
 /* HERO */
 
 .hero{
-  padding:120px 0 80px;
+  padding: 100px 0 30px;
 }
 
 .heroGrid{
@@ -25,7 +25,7 @@
 
 .heroImage{
   background:white;
-  padding:40px;
+  padding:28px;
   border-radius:16px;
   box-shadow:0 20px 40px rgba(0,0,0,0.06);
 }
@@ -90,7 +90,7 @@
 /* BENEFITS */
 
 .benefits{
-  padding:80px 0;
+  padding:0 0 28px;
 }
 
 .benefits h2{
@@ -214,4 +214,389 @@
     grid-template-columns: 1fr;
   }
 
+}
+
+
+/* REVIEWS */
+
+.reviews {
+  padding: 32px 0;
+  background: #F9F6F0;
+}
+
+.reviewHeader {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.ratingSummary {
+  margin-top: 10px;
+  color: #173F36;
+}
+
+.ratingNumber {
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.stars {
+  color: #C9A25E;
+  margin-left: 10px;
+}
+
+.reviewCount {
+  margin-left: 10px;
+  color: #666;
+}
+
+.reviewButton {
+  margin-top: 20px;
+  background: #C9A25E;
+  color: #173F36;
+  border: none;
+  padding: 12px 26px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.reviewButton:hover {
+  background: #E1C88A;
+}
+
+/* SCROLLABLE REVIEW LIST */
+
+.reviewScroll {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 8px;
+}
+
+/* Custom Scrollbar (premium feel) */
+
+.reviewScroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.reviewScroll::-webkit-scrollbar-thumb {
+  background: #C9A25E;
+  border-radius: 10px;
+}
+
+.reviewCard {
+  background: white;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid #EFE7DA;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+  transition: all 0.3s ease;
+}
+
+.reviewCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+}
+
+.reviewTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.reviewMeta {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.reviewStars {
+  color: #C9A25E;
+  margin: 6px 0 10px;
+  font-size: 14px;
+  letter-spacing: 1.5px;
+}
+
+.reviewText {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+}
+
+@media(max-width:900px) {
+  .reviewGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* TOP RATING (HERO) */
+
+.topRating {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.topStars {
+  color: #C9A25E;
+}
+
+.topRatingText {
+  color: #666;
+  font-size: 14px;
+}
+
+/* REVIEW SUMMARY */
+
+.reviewSummary {
+  display: flex;
+  gap: 60px;
+  justify-content: center;
+  margin: 40px 0;
+}
+
+.leftSummary {
+  text-align: center;
+}
+
+.bigRating {
+  font-size: 42px;
+  font-weight: 600;
+  color: #173F36;
+}
+
+.totalReviews {
+  color: #777;
+  margin-top: 5px;
+}
+
+/* BREAKDOWN */
+
+.breakdown {
+  width: 300px;
+}
+
+.breakdownRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.bar {
+  flex: 1;
+  height: 6px;
+  background: #eee;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: #C9A25E;
+}
+
+/* BEST REVIEW */
+
+.bestReview {
+  background: white;
+  border-left: 4px solid #C9A25E;
+  padding: 24px;
+  border-radius: 10px;
+  margin-bottom: 40px;
+}
+
+.badge {
+  font-size: 12px;
+  color: #C9A25E;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.bestText {
+  font-size: 16px;
+  margin: 10px 0;
+}
+
+.bestUser {
+  font-size: 13px;
+  color: #777;
+}
+
+/* VERIFIED */
+
+.verified {
+  font-size: 11px;
+  color: #2E5E52;
+  background: rgba(46,94,82,0.08);
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.error {
+  color: #ff6b6b;
+  font-size: 12px;
+  margin-top: -6px;
+}
+
+/* MOBILE */
+
+@media(max-width:900px) {
+  .reviewSummary {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .breakdown {
+    width: 100%;
+  }
+}
+
+/* HERO INGREDIENTS (PREMIUM STRIP) */
+
+.heroIngredients {
+  margin-bottom: 30px;
+}
+
+.heroIngredientTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #173F36;
+  margin-bottom: 6px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.heroIngredientSubtitle {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 14px;
+  line-height: 1.5;
+  max-width: 420px; /* keeps it tight & premium */
+}
+
+.heroIngredientList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.heroIngredientPill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #F4EFE7, #EFE7DA);
+  border: 1px solid #E5DFD4;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #173F36;
+  transition: all 0.25s ease;
+}
+
+.heroIngredientPill:hover {
+  background: #173F36;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+
+/* .dot {
+  width: 6px;
+  height: 6px;
+  background: #C9A25E;
+  border-radius: 50%;
+  flex-shrink: 0;
+} */
+
+.ingredientsSubtitle {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 40px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.ingredientCard {
+  border: 1px solid #eee;
+  padding: 26px;
+  border-radius: 12px;
+  background: #F9F9F9;
+  transition: all 0.3s ease;
+}
+
+.ingredientCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+  background: white;
+}
+
+.usageSubtitle {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+/* STEP CARDS */
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stepCard {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: white;
+  padding: 18px 20px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  transition: all 0.3s ease;
+}
+
+.stepCard:hover {
+  transform: translateX(6px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+}
+
+/* STEP NUMBER */
+
+.stepNumber {
+  min-width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #173F36;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.starWrapper {
+  position: relative;
+  display: inline-block;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+
+.starBase {
+  color: #ddd;
+}
+
+.starFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  color: #C9A25E;
 }
