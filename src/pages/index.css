@@ -5,6 +5,20 @@
   text-align: center;
 }
 
+:root {
+  --vakro-green: #173F36;
+  --vakro-green-dark: #0F2F29;
+  --vakro-green-light: #2E5E52;
+  --vakro-gold: #C9A25E;
+  --vakro-gold-light: #E1C88A;
+  --vakro-cream: #F4EFE7;
+
+  --text-primary: #1F1F1F;
+  --text-muted: #6B6B6B;
+
+  --border: #EFEAE2;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
