@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useRouter } from "next/router";
 import styles from "../styles/adminNavbar.module.css";
 
@@ -10,6 +10,7 @@ import vakroLogo from "../../public/assets/goldenLogo.svg";
 const AdminNavbar = () => {
   const router = useRouter();
   const { dispatch } = useContext(Context);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
     dispatch({
@@ -19,93 +20,100 @@ const AdminNavbar = () => {
     router.push("/");
   };
 
+  const navItems = [
+    { label: "Products", path: "/admin/product" },
+    { label: "Inventory", path: "/admin/inventory" },
+    { label: "Customers", path: "/admin/customer" },
+    { label: "Orders", path: "/admin/order" },
+    { label: "Expenses", path: "/admin/expense" },
+    { label: "Payments", path: "/admin/payment" },
+    { label: "Credit Inventory", path: "/admin/creditInventory" },
+    { label: "Patient Order", path: "/admin/patientOrder" },
+    { label: "Reviews", path: "/admin/review" },
+    { label: "Contact Forms", path: "/admin/contactus" },
+    { label: "QR", path: "/admin/qrCode" },
+  ];
+
   return (
-    <nav className={styles.navbar}>
-      {/* LEFT */}
-      <div className={styles.logo} onClick={() => router.push("/admin")}>
-        <Image src={vakroLogo} alt="Vakro" width={80} height={80} style={{ transform: "scale(1.5)", transformOrigin: "center" }} />
+    <>
+      <nav className={styles.navbar}>
+        {/* LEFT */}
+        <div className={styles.logo} onClick={() => router.push("/admin")}>
+          <Image
+            src={vakroLogo}
+            alt="Vakro"
+            width={80}
+            height={80}
+            style={{ transform: "scale(1.5)" }}
+          />
+        </div>
+
+        {/* DESKTOP LINKS */}
+        <div className={styles.links}>
+          {navItems.map((item) => (
+            <button
+              key={item.path}
+              className={router.pathname === item.path ? styles.active : ""}
+              onClick={() => router.push(item.path)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {/* RIGHT */}
+        <div className={styles.actions}>
+          <button className={styles.logout} onClick={handleLogout}>
+            Logout
+          </button>
+
+          {/* HAMBURGER */}
+          <div
+            className={styles.hamburger}
+            onClick={() => setMenuOpen(true)}
+          >
+            ☰
+          </div>
+        </div>
+      </nav>
+
+      {/* MOBILE DRAWER */}
+      <div
+        className={`${styles.drawer} ${menuOpen ? styles.open : ""}`}
+      >
+        <div className={styles.drawerHeader}>
+          <span>Menu</span>
+          <button onClick={() => setMenuOpen(false)}>✕</button>
+        </div>
+
+        <div className={styles.drawerLinks}>
+          {navItems.map((item) => (
+            <button
+              key={item.path}
+              className={router.pathname === item.path ? styles.active : ""}
+              onClick={() => {
+                router.push(item.path);
+                setMenuOpen(false);
+              }}
+            >
+              {item.label}
+            </button>
+          ))}
+
+          <button className={styles.logout} onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       </div>
 
-      {/* CENTER LINKS */}
-      <div className={styles.links}>
-        <button
-          className={router.pathname === "/admin/product" ? styles.active : ""}
-          onClick={() => router.push("/admin/product")}
-        >
-          Products
-        </button>
-
-        <button
-          className={router.pathname === "/admin/inventory" ? styles.active : ""}
-          onClick={() => router.push("/admin/inventory")}
-        >
-          Inventory
-        </button>
-
-        <button
-          className={router.pathname === "/admin/customer" ? styles.active : ""}
-          onClick={() => router.push("/admin/customer")}
-        >
-          Customers
-        </button>
-
-        <button
-          className={router.pathname === "/admin/order" ? styles.active : ""}
-          onClick={() => router.push("/admin/order")}
-        >
-          Orders
-        </button>
-
-        <button
-          className={router.pathname === "/admin/expense" ? styles.active : ""}
-          onClick={() => router.push("/admin/expense")}
-        >
-          Expenses
-        </button>
-
-        <button
-          className={router.pathname === "/admin/payment" ? styles.active : ""}
-          onClick={() => router.push("/admin/payment")}
-        >
-          Payments
-        </button>
-
-        <button
-          className={router.pathname === "/admin/creditInventory" ? styles.active : ""}
-          onClick={() => router.push("/admin/creditInventory")}
-        >
-          Credit Inventory
-        </button>
-
-        <button
-          className={router.pathname === "/admin/patientOrder" ? styles.active : ""}
-          onClick={() => router.push("/admin/patientOrder")}
-        >
-          Patient Order
-        </button>
-
-        <button
-          className={router.pathname === "/admin/review" ? styles.active : ""}
-          onClick={() => router.push("/admin/review")}
-        >
-          Reviews
-        </button>
-
-        <button
-          className={router.pathname === "/admin/contactus" ? styles.active : ""}
-          onClick={() => router.push("/admin/contactus")}
-        >
-          Contact Forms
-        </button>
-      </div>
-
-      {/* RIGHT */}
-      <div className={styles.actions}>
-        <button className={styles.logout} onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
-    </nav>
+      {/* BACKDROP */}
+      {menuOpen && (
+        <div
+          className={styles.backdrop}
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
+    </>
   );
 };
 
