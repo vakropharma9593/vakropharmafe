@@ -237,14 +237,6 @@
   gap: 10px;
 }
 
-.form input,
-.form select {
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  outline: none;
-}
-
 .form button {
   margin-top: 10px;
   background: white;

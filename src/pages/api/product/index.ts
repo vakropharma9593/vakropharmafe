@@ -19,8 +19,12 @@ export default async function handler(
         gstPercentageOnCostPrice,
         isActive
       } = req.body;
-
-      const slug = name.toLowerCase().replace(/\s+/g, "-");
+      
+      const slug = name
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]+/g, "");
 
       const product = await Product.create({
         name,

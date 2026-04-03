@@ -20,6 +20,17 @@
   box-shadow: 0 20px 60px rgba(0,0,0,0.15);
 }
 
+.logoSection {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ratingGroup {
+  display: flex;
+}
+
 .modal h2 {
   margin-bottom: 20px;
   color: #173F36;
@@ -30,7 +41,6 @@
 .starContainer {
   display: flex;
   gap: 8px;
-  margin-bottom: 18px;
 }
 
 .star {
@@ -163,4 +173,103 @@
 
 .submitBtn:hover {
   background: var(--vakro-green-dark);
+}
+
+.formSection {
+  margin-top: 24px;
+  max-height: 60vh;
+  overflow-y: scroll;
+}
+
+.formGroup {
+  margin-bottom: 24px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: var(--vakro-green);
+}
+
+/* GRID */
+.radioGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+/* CARD */
+.radioCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 12px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+
+  background: #ffffff;
+  border: 1px solid #efeae2;
+
+  transition: all 0.25s ease;
+}
+
+/* HOVER */
+.radioCard:hover {
+  border-color: var(--vakro-gold);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* HIDE DEFAULT RADIO */
+.radioCard input {
+  display: none;
+}
+
+/* CUSTOM RADIO */
+.customRadio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--vakro-green-light);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+/* ACTIVE RADIO */
+.radioCard input:checked + .customRadio {
+  border-color: var(--vakro-gold);
+}
+
+.radioCard input:checked + .customRadio::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  background: var(--vakro-gold);
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+}
+
+/* PRODUCT TEXT */
+.productName {
+  font-size: 14px;
+  color: var(--vakro-green);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  width: 80%;
+}
+
+/* SELECTED CARD (Premium Highlight) */
+.radioCard:has(input:checked) {
+  border-color: var(--vakro-gold);
+  background: var(--vakro-green-light);
+  box-shadow: 0 10px 25px rgba(201, 162, 94, 0.15);
+}
+
+.radioCard:has(input:checked) .productName {
+  font-weight: 600;
+  color: var(--vakro-gold-dark);
 }
