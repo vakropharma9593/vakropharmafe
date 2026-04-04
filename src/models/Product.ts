@@ -28,6 +28,10 @@ const ProductSchema = new mongoose.Schema(
       unique: true,
       index: true
     },
+    oldSlugs: {
+      type: [String],
+      default: [],
+    },
     isActive: {
       type: Boolean,
       required: true,

@@ -89,44 +89,44 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     await connectDB();
     const normalizedSlug = slug.toLowerCase().trim();
-    const product = await Product.findOne({ slug: normalizedSlug }).lean();
+    let product = await Product.findOne({ slug: normalizedSlug }).lean();
 
     // 🔥 1. HANDLE OLD SLUG REDIRECTS
-    if (!product) {
-      const redirectMap: Record<string, string> = {
-        facewash: "vakro-glo-depigmenting-facewash",
-        facemoisturizer: "vakro-aqua-lite-moisturiser-face-gel",
-        faceserum: "vakro-lite-face-serum",
-        sunscreen: "vakro-lite-depigmenting-fluid-sunscreen",
-      };
-
-      const newSlug = redirectMap[normalizedSlug];
-
-      if (newSlug) {
-        return {
-          redirect: {
-            destination: `/products/${newSlug}`,
-            permanent: true, // ✅ SEO safe (301)
-          },
-        };
-      }
-    }
-
-    // 🔥 2. OPTIONAL: Check DB for oldSlug (scalable approach)
     // if (!product) {
-    //   product = await Product.findOne({
-    //     oldSlugs: normalizedSlug, // 👈 array field in DB
-    //   }).lean();
+    //   const redirectMap: Record<string, string> = {
+    //     facewash: "vakro-glo-depigmenting-facewash",
+    //     facemoisturizer: "vakro-aqua-lite-moisturiser-face-gel",
+    //     faceserum: "vakro-lite-face-serum",
+    //     sunscreen: "vakro-lite-depigmenting-fluid-sunscreen",
+    //   };
 
-    //   if (product) {
+    //   const newSlug = redirectMap[normalizedSlug];
+
+    //   if (newSlug) {
     //     return {
     //       redirect: {
-    //         destination: `/products/${product.slug}`,
-    //         permanent: true,
+    //         destination: `/products/${newSlug}`,
+    //         permanent: true, // ✅ SEO safe (301)
     //       },
     //     };
     //   }
     // }
+
+    // 🔥 2. OPTIONAL: Check DB for oldSlug (scalable approach)
+    if (!product) {
+      product = await Product.findOne({
+        oldSlugs: normalizedSlug, // 👈 array field in DB
+      }).lean();
+
+      if (product) {
+        return {
+          redirect: {
+            destination: `/products/${product.slug}`,
+            permanent: true,
+          },
+        };
+      }
+    }
 
     // ❌ 3. FINAL FALLBACK → 404
     if (!product) {
