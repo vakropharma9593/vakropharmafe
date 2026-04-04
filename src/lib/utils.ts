@@ -96,6 +96,7 @@ export type ProductType = {
   gstPercentageOnCostPrice: number;
   isActive: boolean;
   slug?: string;
+  updatedAt?: string;
 }
 
 export enum PaymentModeType {
