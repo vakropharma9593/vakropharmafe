@@ -1,0 +1,75 @@
+.container {
+  min-height: 100vh;
+  background: var(--vakro-cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #efeae2;
+  border-radius: 16px;
+  padding: 60px 40px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  max-width: 500px;
+  width: 100%;
+}
+
+.code {
+  font-size: 80px;
+  font-weight: 700;
+  color: var(--vakro-gold);
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: 28px;
+  color: var(--vakro-green);
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #6b6b6b;
+  margin-bottom: 30px;
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Primary Button */
+.primaryBtn {
+  background: var(--vakro-green);
+  color: #ffffff;
+  padding: 12px 22px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.primaryBtn:hover {
+  background: var(--vakro-green-light);
+}
+
+/* Gold CTA Button */
+.secondaryBtn {
+  background: var(--vakro-gold);
+  color: var(--vakro-green);
+  padding: 12px 22px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.secondaryBtn:hover {
+  background: var(--vakro-gold-light);
+}

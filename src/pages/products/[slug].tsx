@@ -52,8 +52,9 @@ const ProductSlugPage = ({ product }: ProductPageProps) => {
             "@context": "https://schema.org",
             "@type": "Product",
             name: product.name,
-            image: `https://www.vakropharma.com/assets/${slug}.jpeg`,
+            image: [`https://www.vakropharma.com/assets/${slug}.jpeg`],
             description: productInfo.description || product.name,
+            url: `https://www.vakropharma.com/products/${slug}`,
             brand: {
               "@type": "Brand",
               name: "Vakro Pharma",
@@ -86,35 +87,62 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { slug } = context.params as { slug: string };
 
   try {
-    // const baseUrl =
-    //   process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-    // const res = await fetch(
-    //   `${baseUrl}/api/product/slug/${slug}`
-    // );
-
-    // const data = await res.json();
-
-    // debugger;
-
-    // if (!data.success) {
-    //   return { notFound: true };
-    // }
-
     await connectDB();
+    const normalizedSlug = slug.toLowerCase().trim();
+    const product = await Product.findOne({ slug: normalizedSlug }).lean();
 
-    const product = await Product.findOne({ slug }).lean();
-
+    // 🔥 1. HANDLE OLD SLUG REDIRECTS
     if (!product) {
-        return { notFound: true };
+      const redirectMap: Record<string, string> = {
+        facewash: "vakro-glo-depigmenting-facewash",
+        facemoisturizer: "vakro-aqua-lite-moisturiser-face-gel",
+        faceserum: "vakro-lite-face-serum",
+        sunscreen: "vakro-lite-depigmenting-fluid-sunscreen",
+      };
+
+      const newSlug = redirectMap[normalizedSlug];
+
+      if (newSlug) {
+        return {
+          redirect: {
+            destination: `/products/${newSlug}`,
+            permanent: true, // ✅ SEO safe (301)
+          },
+        };
+      }
     }
 
+    // 🔥 2. OPTIONAL: Check DB for oldSlug (scalable approach)
+    // if (!product) {
+    //   product = await Product.findOne({
+    //     oldSlugs: normalizedSlug, // 👈 array field in DB
+    //   }).lean();
+
+    //   if (product) {
+    //     return {
+    //       redirect: {
+    //         destination: `/products/${product.slug}`,
+    //         permanent: true,
+    //       },
+    //     };
+    //   }
+    // }
+
+    // ❌ 3. FINAL FALLBACK → 404
+    if (!product) {
+      return { notFound: true };
+    }
+
+    // ✅ 4. SUCCESS
     return {
       props: {
         product: JSON.parse(JSON.stringify(product)),
-        slug,
+        slug: normalizedSlug,
       },
     };
   } catch (error) {
+    console.error("SSR Product Error:", error);
+
     return { notFound: true };
   }
 };
