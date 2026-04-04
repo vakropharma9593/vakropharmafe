@@ -152,7 +152,7 @@ const Product = () => {
                     <td>{i + 1}</td>
                     <td>{item.name}</td>
                     <td>₹{item.costPrice}</td>
-                    <td>{item?.gstPercentageOnCostPrice}</td>
+                    <td>{item?.gstPercentageOnCostPrice}%</td>
                     <td>₹{item.mrp}</td>
                     <td>{item.gstPercentage}%</td>
                     <td>{item.isActive ? "Active" :  "Inactive"} </td>
