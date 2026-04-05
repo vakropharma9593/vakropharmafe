@@ -161,7 +161,8 @@ export const productData = {
       { icon: <Sun size={18}/>, text: "SPF 50 UV protection" },
       { icon: <ShieldCheck size={18}/>, text: "Prevents sun damage" },
       { icon: <Droplets size={18}/>, text: "Hydrating formula" },
-      { icon: <Sparkles size={18}/>, text: "Lightweight & non-greasy" }
+      { icon: <Sparkles size={18}/>, text: "Lightweight & non-greasy" },
+      { icon: <Droplets size={18}/>, text: "Reduced Dark Spots" },
     ],
     benefits: [
       {
@@ -185,12 +186,20 @@ export const productData = {
     ],
     ingredients: [
       {
-        name: "Zinc Oxide",
-        description: "Provides strong protection from harmful UV rays."
+        name: "4-butyl resorcinol",
+        description: "Strong tyrosinase inhibitor, reduce melanin production, reduce dark spots, improve uneven skin tone."
+      },
+      {
+        name: "Trnaexamic Acid",
+        description: ""
       },
       {
         name: "Vitamin E",
         description: "Antioxidant that protects skin from environmental damage."
+      },
+      {
+        name: "Zinc Oxide",
+        description: "Provides strong protection from harmful UV rays."
       },
       {
         name: "Niacinamide",
@@ -200,10 +209,6 @@ export const productData = {
         name: "Aloe Extract",
         description: "Soothes skin and prevents dryness caused by sun exposure."
       },
-      {
-        name: "4-butyl resorcinol",
-        description: "Strong tyrosinase inhibitor, reduce melanin production, reduce dark spots, improve uneven skin tone."
-      }
     ],
     usageSteps: [
       "Apply sunscreen on clean face and neck.",
@@ -245,8 +250,16 @@ export const productData = {
     ],
     ingredients: [
       {
+        name: "EXOSOMAL Azelaic Acid",
+        description: ""
+      },
+      {
         name: "Niacinamide",
         description: "Reduces pigmentation and improves skin texture."
+      },
+      {
+        name: "Salicylic Acid",
+        description: ""
       },
       {
         name: "Vitamin C",

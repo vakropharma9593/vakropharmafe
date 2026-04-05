@@ -17,7 +17,7 @@ type Order = {
     deliveryTrackNumber?: string;
     paymentType?: string;
     creditId?: string;
-    selectedProductId?: string;
+    selectedProductId?: string[];
 }
 
 interface OrderModalInterface {
@@ -41,7 +41,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
         deliveryService: "",
         deliveryTrackNumber: "",
         paymentType: "",
-        selectedProductId: "",
+        selectedProductId: [],
         creditId: ""
     });
     const [loader, setLoader] = useState(false);
@@ -53,7 +53,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
     });
 
     const [products, setProducts] = useState<Product[]>([
-          { productId: "", productName: "", totalPrice: 0, accountTotalPrice: 0, batch: "", quantity: 0, discountPercentage: 0, batchId: "" },
+          { productId: "", productName: "", totalPrice: NaN, accountTotalPrice: 0, batch: "", quantity: NaN, discountPercentage: NaN, batchId: "" },
     ]);
     const [errors, setErrors] = useState({ customerPhone: "" });
 
@@ -146,7 +146,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
     const addProduct = () => {
         setProducts([
             ...products,
-            { productId:  "", productName: "", totalPrice: 0, batch: "", quantity: 0, discountPercentage: 0, batchId: "" },
+            { productId:  "", productName: "", totalPrice: NaN, batch: "", quantity: NaN, discountPercentage: NaN, batchId: "" },
         ]);
     };
 
@@ -179,21 +179,26 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                 batch: batchName,
             };
         }
-
-        setProducts(updated);
         if (updated[index]?.quantity > 0) {
             const currentTotalInfo = calculateTotal(updated);
             setTotalInfo(currentTotalInfo);
         }
-        // update batches based on product
-        if (field === "discountPercentage" && p) {
+        if ((field === "discountPercentage" || field === "totalPrice") && p) {
             const mrp = stateProducts?.filter((b: ProductType) => b._id === p.productId)[0].mrp;
-            const totalPrice = mrp*(1 - parseFloat(value as string)/ 100);
+            let totalPrice = updated[index].totalPrice;
+            let discountPercentage = updated[index].discountPercentage;
+            if (field === "discountPercentage") {
+                totalPrice = Number((mrp*(1 - parseFloat(value as string)/ 100)).toFixed(2));
+            } else if (field === "totalPrice") {
+                discountPercentage = Number((((mrp - totalPrice)/mrp)*100).toFixed(2));
+            }
             updated[index] = {
                 ...updated[index],
-                totalPrice: Number(totalPrice.toFixed(2)),
+                totalPrice,
+                discountPercentage,
             };
         }
+        setProducts(updated);
     };
 
     const removeProduct = (index: number) => {
@@ -327,8 +332,8 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
               {products.map((p, index) => {
                 const allBatchesOfProduct = stateInventory?.filter((item: InventoryItem) => item?.productId === p.productId);
                 let productList = stateProducts;
-                if (orderFormData?.selectedProductId && orderFormData?.selectedProductId !== "") {
-                    productList = stateProducts?.filter((item: ProductType) => item?._id === orderFormData?.selectedProductId);
+                if (orderFormData?.selectedProductId && orderFormData?.selectedProductId?.length > 0) {
+                    productList = stateProducts?.filter((item: ProductType) => orderFormData?.selectedProductId?.includes(item?._id || ""));
                 }
                 return (
                     <div key={index} className={styles.eachProduct}>
@@ -379,20 +384,34 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                                     className={styles.smallInput}
                                     placeholder="%"
                                     onChange={(e) =>
-                                    handleProductChange(
-                                        index,
-                                        "discountPercentage",
-                                        Number(e.target.value),
-                                        p,
-                                    )
+                                        handleProductChange(
+                                            index,
+                                            "discountPercentage",
+                                            Number(e.target.value),
+                                            p,
+                                        )
                                     }
+                                    value={p.discountPercentage}
                                 />
                             </div>
 
                             {/* Total PRICE */}
                             <div className={styles.infoBox}>
                                 <span>Total ₹</span>
-                                ₹{p.totalPrice}
+                                <input
+                                    type="number"
+                                    className={styles.smallInput}
+                                    placeholder="₹"
+                                    onChange={(e) =>
+                                        handleProductChange(
+                                            index,
+                                            "totalPrice",
+                                            Number(e.target.value),
+                                            p,
+                                        )
+                                    }
+                                    value={p.totalPrice}
+                                />
                             </div>
 
                             {source === "patientOrderPage" && 
@@ -442,9 +461,9 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                 )
               })}
 
-              {orderFormData?.selectedProductId && orderFormData?.selectedProductId !== "" ? null : <button type="button" disabled={isLastRowEmpty(products)} onClick={addProduct}>
+              <button type="button" disabled={isLastRowEmpty(products)} onClick={addProduct}>
                 + Add Product
-              </button>}
+              </button>
 
               <div className={styles.totalInfo}>
                 <div className={styles.totalInfoEach} >

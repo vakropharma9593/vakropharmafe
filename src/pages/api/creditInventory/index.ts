@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/mongodb";
 import CreditInventory from "@/models/CreditInventory";
-import "@/models/Customer"; 
+import "@/models/Customer";
 import "@/models/Inventory";
 import "@/models/Product";
 import { ObjectId } from "mongoose";
@@ -13,49 +13,41 @@ export default async function handler(
   try {
     await connectDB();
 
-    // POST: Create inventory
+    // =========================
+    // ✅ POST: Create NEW record always
+    // =========================
     if (req.method === "POST") {
       const {
-        batchId,
-        productId,
-        totalCount,
-        customerId
+        products,
+        customerId,
+        dateOfInventory,
       } = req.body;
 
-      const existing = await CreditInventory.findOne({
-                        batchId,
-                        productId,
-                        customerId,
-                      });
-
-      let creditInventory;
-
-      if (existing) {
-        existing.totalCount = existing.totalCount + parseInt(totalCount);
-        existing.remainingCount = existing.remainingCount + parseInt(totalCount);
-        creditInventory = await existing.save();
-      } else {
-        creditInventory = await CreditInventory.create({
-          batchId,
-          productId,
-          totalCount,
-          remainingCount: totalCount,
-          customerId,
+      // 🔴 Basic validation
+      if (
+        !customerId ||
+        !dateOfInventory
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "All fields are required",
         });
       }
 
-      // const creditInventory = await CreditInventory.create({
-      //   batchId,
-      //   productId,
-      //   totalCount,
-      //   remainingCount: totalCount,
-      //   customerId,
-      // });
+      const parsedDate = new Date(dateOfInventory);
 
-      // const populatedInventory = await creditInventory.populate(
-      //   "customerId",
-      //   "name phone"
-      // );
+      const finalProducts = [];
+      
+      for (const product of products) {
+        const newProduct = { ...product, totalUnit: parseInt(product.totalUnit), remainingUnit: parseInt(product.totalUnit) };
+        finalProducts.push(newProduct);
+      }
+
+      const creditInventory = await CreditInventory.create({
+        products: finalProducts,
+        customerId,
+        dateOfInventory: parsedDate,
+      });
 
       return res.status(201).json({
         success: true,
@@ -63,41 +55,68 @@ export default async function handler(
       });
     }
 
-    // GET: Fetch inventory list
+    // =========================
+    // ✅ GET: Fetch with optional filters
+    // =========================
     if (req.method === "GET") {
+      // const { fromDate, toDate, customerId } = req.query;
+
+      // const filter: Record<string, unknown> = {};
+
+      // // 🔹 Filter by date range
+      // if (fromDate && toDate) {
+      //   filter.dateOfInventory = {
+      //     $gte: new Date(fromDate as string),
+      //     $lte: new Date(toDate as string),
+      //   };
+      // }
+
+      // // 🔹 Filter by customer
+      // if (customerId) {
+      //   filter.customerId = customerId;
+      // }
+
       const creditInventory = await CreditInventory.find()
         .populate("customerId", "name phone")
-        .populate("productId", "name")
-        .populate("batchId", "batch")
-        .sort({ createdAt: -1 });
+        .populate("products.productId", "name")
+        .populate("products.batchId", "batch")
+        .sort({ dateOfInventory: -1, createdAt: -1 });
 
       const creditInventoryToSend: {
-        _id: ObjectId,
-        productId: ObjectId,
-        productName: string,
-        batchId: ObjectId,
-        batch: string,
-        customerId: ObjectId,
-        customerName: string,
-        customerPhone: string,
-        totalCount: number,
-        remainingCount: number,
+        _id: ObjectId;
+        products: {
+          productId: ObjectId;
+          productName: string;
+          batchId: ObjectId;
+          batch: string;
+          totalUnit: number;
+          remainingUnit: number;
+        }[];
+        customerId: ObjectId;
+        customerName: string;
+        customerPhone: string;
+        dateOfInventory: Date;
       }[] = [];
+
       creditInventory.forEach((item) => {
-        const newCInventory = {
+        creditInventoryToSend.push({
           _id: item?._id,
-          productId: item?.productId?._id,
-          productName: item?.productId?.name,
-          batchId: item?.batchId?._id,
-          batch: item?.batchId?.batch,
+          products: item?.products?.map((each: { productId: { _id: ObjectId, name: string }, batchId: { _id: ObjectId, batch: string }, totalUnit: number, remainingUnit: number }) => {
+            return {
+              productId: each.productId._id,
+              productName: each.productId.name,
+              batchId: each.batchId._id,
+              batch: each.batchId.batch,
+              totalUnit: each.totalUnit,
+              remainingUnit: each.remainingUnit,
+            }
+          }),
           customerId: item?.customerId?._id,
           customerName: item?.customerId?.name,
           customerPhone: item?.customerId?.phone,
-          totalCount: item?.totalCount,
-          remainingCount: item?.remainingCount,
-        }
-        creditInventoryToSend.push(newCInventory);
-      }) 
+          dateOfInventory: item?.dateOfInventory,
+        });
+      });
 
       return res.status(200).json({
         success: true,
@@ -105,12 +124,12 @@ export default async function handler(
       });
     }
 
-    res.status(405).json({ message: "Method not allowed" });
+    return res.status(405).json({ message: "Method not allowed" });
 
   } catch (error) {
     console.error("CREDIT-INVENTORY API ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });

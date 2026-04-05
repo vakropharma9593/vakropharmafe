@@ -60,7 +60,7 @@ export type Product = {
 
 export const isLastRowEmpty = (products: Product[]) => {
   const lastProduct = products[products?.length - 1];
-    if (lastProduct.productName && lastProduct?.batch && lastProduct?.discountPercentage && lastProduct?.totalPrice && lastProduct?.quantity) {
+    if (lastProduct.productName && lastProduct?.batch && lastProduct?.quantity) {
       return false;
     } else {
       return true;

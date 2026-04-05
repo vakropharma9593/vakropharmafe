@@ -110,7 +110,7 @@ const ProductPage = ({
                 </p>
 
                 <div className={styles.heroIngredientList}>
-                  {productInfo.ingredients.slice(0, 4).map((ing, i) => (
+                  {productInfo.ingredients.map((ing, i) => (
                     <div key={i} className={styles.heroIngredientPill}>
                       <Sparkles size={12} />
                       {ing.name}
