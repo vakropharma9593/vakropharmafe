@@ -436,3 +436,94 @@
 .inActive {
   background-color: var(--vakro-gold-light);
 }
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .modal {
+    width: 98%;
+    padding: 10px;
+  }
+
+  .productRow {
+    grid-template-columns: 0.4fr 0.4fr 0.4fr 0.4fr 0.4fr 0.2fr;
+    padding: 10px 2px;
+  }
+}
+
+.productRow {
+  display: grid;
+  grid-template-columns: 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr 0.2fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.eachProduct {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.productHeader {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  gap: 10px;
+  font-size: 12px;
+  color: #b7f7e6;
+  margin-bottom: 6px;
+  padding: 0 4px;
+}
+
+.productRowOne {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.productRowOne .formGroup {
+  width: 40%;
+}
+
+.productRowOneBatch {
+  margin-left: 20px;
+}
+
+
+.deleteBtn {
+  background: rgba(255, 0, 0, 0.1);
+  color: #ff6b6b;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.deleteBtn:hover {
+  background: rgba(255, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+
+.infoBox {
+  background: rgba(0, 0, 0, 0.25);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #cfe8e3;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.infoBox span {
+  font-size: 10px;
+  opacity: 0.7;
+}

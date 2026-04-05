@@ -7,6 +7,7 @@ import CreditInventory from "@/models/CreditInventory";
 import "@/models/Customer"; 
 import Product from "@/models/Product";
 import { OrderStatusType } from "@/lib/utils";
+import { ObjectId } from "mongoose";
 
 interface OrderWithCustomer {
   _id: string;
@@ -51,6 +52,17 @@ export default async function handler(
 
       const finalProducts = [];
 
+      let creditInventory;
+      let creditProducts;
+
+      if (orderType === "CREDIT" && creditId) {
+        creditInventory = await CreditInventory.findOne({
+              _id: creditId
+            });
+        creditProducts = creditInventory.products;
+      }
+
+
       // 2️⃣ Check inventory & deduct stock
       for (const product of products) {
         const inventory = await Inventory.findOne({
@@ -72,22 +84,19 @@ export default async function handler(
         }
 
         inventory.remainingCount -= product.quantity;
-        await inventory.save();
 
         if (orderType === "CREDIT") {
-          const creditInventory = await CreditInventory.findOne({
-            _id: creditId
-          });
-
-          if (creditInventory.remainingCount < product.quantity) {
+          const index = creditProducts.findIndex((item: { productId: ObjectId }) => item.productId.toString() === product.productId)
+          if (index !== -1) {
+            const currentProduct = creditProducts[index];
+            currentProduct.remainingUnit = currentProduct.remainingUnit - product.quantity
+            creditProducts[index] = currentProduct;
+          } else {
             return res.status(400).json({
               success: false,
-              message: `Not enough CREDIT stock for ${product.productName} batch ${product.batch}`
+              message: `No product found in credit inventory.`
             });
           }
-
-          creditInventory.remainingCount -= product.quantity;
-          await creditInventory.save();
         }
 
         const productData = await Product.findOne({
@@ -99,6 +108,13 @@ export default async function handler(
         const profit = sellingPriceToSave - productData?.costPrice;
         const newProduct = { ...product, sellingPrice: sellingPriceToSave, costPrice: productData.costPrice, profit };
         finalProducts.push(newProduct);
+
+        await inventory.save();
+      }
+
+      if (orderType === "CREDIT" && creditId) {
+        creditInventory.products = creditProducts;
+        await creditInventory.save();
       }
 
       // Calculate payment amount
