@@ -5,52 +5,65 @@ import { toast, Bounce } from "react-toastify";
 import styles from "../../styles/inventory.module.css";
 import { Context } from "@/store/context";
 import OrderModal from "@/components/OrderModal";
-import { ProductType } from "@/lib/utils";
+import { dateToShow, isLastRowEmpty, Product, ProductType } from "@/lib/utils";
 import { InventoryItem } from "@/store/reducers/adminReducer";
 
 type CreditInventoryItem = {
   _id?: string;
-  batchId: string;
-  batch: string;
-  productId: string;
-  productName: string;
-  totalCount: number;
-  remainingCount: number;
+  products: {
+    productId: string;
+    productName: string;
+    batchId: string;
+    batch: string;
+    totalUnit: number;
+    remainingUnit: number;
+  }[];
   customerName: string;
   customerId: string;
   customerPhone: number;
+  dateOfInventory: string;
 }
 
 const CreditInventory = () => {
   const { state } = useContext(Context);
   const stateInventory = state?.adminData?.inventory;
-  const products = state?.adminData?.products;
+  const stateProducts = state?.adminData?.products;
   const [loader, setLoader] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [creditInventory, setCreditInventory] = useState<CreditInventoryItem[]>([]);
   const [errors, setErrors] = useState({ customerNumber: "" });
-  const [batches, setBatches] = useState<{batch: string, _id: string}[]>([]);
 
   const [showOrderModal, setShowOrderModal] = useState(false);
-  const [orderFormData, setOrderFormData] = useState({
+  const [orderFormData, setOrderFormData] = useState<{
+    customerPhone: string;
+    customerId: string;
+    customerName: string;
+    date: string;
+    status: string;
+    paymentType: string;
+    selectedProductId: string[];
+    creditId: string;
+  }>({
     customerPhone: "", // to show
     customerId: "",
     customerName: "", // to show
     date: "",
     status: "Payment_Pending",
     paymentType: "UPI",
-    selectedProductId: "",
+    selectedProductId: [],
     creditId: "",
   });
 
   const [formData, setFormData] = useState({
-    batchId: "",
-    productId: "",
-    totalCount: 0,
     customerId: "",
     customerNumber: "",
-    customerName: ""
+    customerName: "",
+    dateOfInventory: "",
   });
+
+  const [products, setProducts] = useState<Product[]>([
+        { productId: "", productName: "", totalPrice: 0, accountTotalPrice: 0, batch: "", quantity: 0, discountPercentage: 0, batchId: "" },
+  ]);
 
   useEffect(() => {
       getCreditInventory();
@@ -87,31 +100,26 @@ const CreditInventory = () => {
       }
     };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-
-    const updated = { ...formData, [name]: value };
-    setFormData(updated);
-    if (name === "productId") {
-      const allBatchesOfProduct = stateInventory?.filter((item: InventoryItem) => item?.productId === value)?.map((item: InventoryItem) => {
-        return {
-          _id: item?._id || "",
-          batch: item?.batch
-        }
-      });
-      setBatches(allBatchesOfProduct);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoader(true);
-    if (formData?.batchId !== "" && formData?.productId !== "" && formData?.totalCount > 0 && formData?.customerId !== "") {
+    if (formData?.customerId !== "" && products?.length > 0 && formData?.dateOfInventory !== "") {
+      const dataToSend = {
+        customerId: formData.customerId,
+        dateOfInventory: formData.dateOfInventory,
+        products: products?.map((item: Product) => {
+          return {
+            productId: item?.productId,
+            batchId: item?.batchId,
+            totalUnit: item?.quantity,
+          }
+        })
+      }
       try {
         const res = await fetch("/api/creditInventory", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(dataToSend),
         });
 
         const data = await res.json();
@@ -166,6 +174,51 @@ const CreditInventory = () => {
     return true;
   };
 
+  const addProduct = () => {
+      setProducts([
+          ...products,
+          { productId:  "", productName: "", totalPrice: 0, batch: "", quantity: 0, discountPercentage: 0, batchId: "" },
+      ]);
+  };
+
+  const handleProductChange = <K extends keyof Product>(
+      index: number,
+      field: K,
+      value: Product[K],
+      p?: Product,
+      allBatchesOfProduct?: InventoryItem[],
+  ) => {
+    const updated = [...products];
+
+    updated[index] = {
+        ...updated[index],
+        [field]: value,
+    };
+
+    if (field === "productId") {
+        const productName = stateProducts.find((item: ProductType) => item?._id === value)?.name || "";
+        updated[index] = {
+            ...updated[index],
+            productName: productName,
+        };
+    }
+
+    if (field === "batchId") {
+        const batchName = allBatchesOfProduct?.find((item: InventoryItem) => item?._id === value)?.batch || "";
+        updated[index] = {
+            ...updated[index],
+            batch: batchName,
+        };
+    }
+
+    setProducts(updated);
+  };
+
+  const removeProduct = (index: number) => {
+    const updated = products.filter((_, i) => i !== index);
+    setProducts(updated);
+  };
+
   return (
     <div className={styles.container}>
       <AdminNavbar />
@@ -189,12 +242,10 @@ const CreditInventory = () => {
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Batch</th>
-                  <th>Product</th>
-                  <th>Total</th>
-                  <th>Remaining</th>
                   <th>Customer Name</th>
                   <th>Customer Number</th>
+                  <th>Date of Inventory</th>
+                  <th>Products</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -203,15 +254,23 @@ const CreditInventory = () => {
                 {creditInventory.map((item: CreditInventoryItem, i: number) => (
                   <tr key={item._id}>
                     <td>{i + 1}</td>
-                    <td>{item.batch}</td>
-                    <td>{item.productName}</td>
-                    <td>{item.totalCount}</td>
-                    <td>{item.remainingCount}</td>
                     <td>{item?.customerName}</td>
                     <td>{item?.customerPhone}</td>
+                    <td>{dateToShow(item?.dateOfInventory)}</td>
+                    <td>
+                      {item.products.map((p, i) => (
+                        <div key={i} className={styles.productItem}>
+                          {p.productName} × {p.remainingUnit + "/" + p.totalUnit}
+                        </div>
+                      ))}
+                    </td>
                     <td className={styles.actions}>
                       <button onClick={() => {
-                        setOrderFormData({ ...orderFormData, customerPhone: JSON.stringify(item?.customerPhone), customerName: item?.customerName, customerId: item?.customerId || "", selectedProductId: item?.productId, creditId: item?._id || "" });
+                        const currentProductsName: string[] = [];
+                        item?.products?.forEach((e: {productId: string }) => {
+                          currentProductsName.push(e.productId);
+                        })
+                        setOrderFormData({ ...orderFormData, customerPhone: JSON.stringify(item?.customerPhone), customerName: item?.customerName, selectedProductId: currentProductsName, customerId: item?.customerId || "", creditId: item?._id || "" });
                         setShowOrderModal(true);
                       }}>
                         Place Order
@@ -263,34 +322,88 @@ const CreditInventory = () => {
               </div>
 
               {formData?.customerName && <h4>Customer Details :: {formData?.customerName}</h4>}
+
               <div className={styles.formGroup}>
-                <label>Product Name</label>
-                <select name="productId" onChange={handleChange}>
-                  <option value="">Select Product</option>
-                  {products?.map((item: ProductType) => {
-                    return (
-                      <option key={item?._id} value={item?._id}>{item?.name}</option>
-                    )
-                  })}
-                </select>
+                <label>Date of Inventory Given</label>
+                <input className={styles.dateField} type="date" name="dateOfInventory" onChange={(e) => setFormData({ ...formData, dateOfInventory: e.target.value})} />
               </div>
-              <div className={styles.formGroup}>
-                <label>Batch Name</label>
-                <select
-                  name="batchId"
-                  value={formData.batchId}
-                  onChange={handleChange}
-                >
-                  <option value="">Batch</option>
-                  {batches.map((b) => (
-                    <option key={b._id} value={b._id}>{b.batch}</option>
-                  ))}
-                </select>
-              </div>
-              <div className={styles.formGroup}>
-                <label>Total Units</label>
-                <input type="number" name="totalCount" placeholder="Total Count" onChange={handleChange} />
-              </div>
+
+              <h4>Products</h4>
+
+              {products.map((p, index) => {
+                const allBatchesOfProduct = stateInventory?.filter((item: InventoryItem) => item?.productId === p.productId);
+                return (
+                    <div key={index} className={styles.eachProduct}>
+                        <div className={styles.productRowOne} >
+                            {/* PRODUCT */}
+                            <div className={styles.formGroup}>
+                                <label>Product Name</label>
+                                <select value={p.productId} onChange={(e) => handleProductChange(index, "productId", e.target.value)}>
+                                    <option value="">Select Product</option>
+                                    {stateProducts?.map((item: ProductType) => {
+                                        return (
+                                        <option key={item?._id} value={item?._id}>{item?.name}</option>
+                                        )
+                                    })}
+                                </select>
+                            </div>
+
+                            {/* BATCH */}
+                            <div className={styles.formGroup}>
+                                <label>Batch Name</label>
+                                <select
+                                    value={p.batchId}
+                                    className={styles.productRowOneBatch}
+                                    onChange={(e) => handleProductChange(index, "batchId", e.target.value, undefined, allBatchesOfProduct)}
+                                >
+                                    <option value="">Batch</option>
+                                    {allBatchesOfProduct.map((b) => (
+                                        <option key={b._id} value={b._id}>{b.batch}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className={styles.productRow}>
+                            {/* MRP */}
+                            <div className={styles.infoBox}>
+                                <span>MRP</span>
+                                ₹{
+                                    stateProducts?.filter((b) => b._id === p.productId)[0]?.mrp || 0
+                                }
+                            </div>
+
+                            {/* QTY */}
+                            <div className={styles.formGroup}>
+                                <label>Quantity</label>
+                                <input
+                                    type="number"
+                                    className={styles.smallInput}
+                                    placeholder="Qty"
+                                    onChange={(e) =>
+                                    handleProductChange(
+                                        index,
+                                        "quantity",
+                                        Number(e.target.value)
+                                    )
+                                    }
+                                />
+                            </div>
+                            {!(index === 0 && products?.length === 1) && <button
+                                type="button"
+                                className={styles.deleteBtn}
+                                onClick={() => removeProduct(index)}
+                            >
+                                ✕
+                            </button>}
+                        </div>
+                    </div>
+                )
+              })}
+
+              <button type="button" disabled={isLastRowEmpty(products)} onClick={addProduct}>
+                + Add Product
+              </button>
 
               <button type="submit">Submit</button>
             </form>
