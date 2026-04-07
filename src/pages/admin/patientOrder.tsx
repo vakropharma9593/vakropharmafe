@@ -1,12 +1,12 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
 import { dateToShow, formatStatus, OrderStatusType, Product, ProductType } from "@/lib/utils";
-import { Context } from "@/store/context";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/order.module.css";
 import OrderModal from "@/components/OrderModal";
 import OrderUpdateModal from "@/components/OrderUpdateModal";
+import { useStore } from "@/store";
 
 type Order = {
   id?: string;
@@ -23,8 +23,7 @@ type Order = {
 };
 
 const PatientOrders = () => {
-  const { state } = useContext(Context);
-  const stateProducts = state.adminData.products;
+  const stateProducts = useStore((state) => state.adminData.products);
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loader, setLoader] = useState(false);

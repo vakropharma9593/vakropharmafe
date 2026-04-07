@@ -27,6 +27,14 @@ export type Ingredient = {
   description: string;
 };
 
+export type HomePageData = {
+  description: string;
+  category: string;
+  image: StaticImageData;
+  alt: string;
+  productLink: string;
+};
+
 export type ProductUIData = {
   features: Feature[];
   description: string;
@@ -37,10 +45,11 @@ export type ProductUIData = {
   heroImage: StaticImageData;
   howTOUseImage: StaticImageData;
   tagLine: string;
+  homepageData: HomePageData;
 };
 
 export const productData = {
-  "vakro-glo-depigmenting-facewash": { 
+  "vakro-glo-depigmenting-facewash": {
     description: "Vakro Facewash gently cleanses excess oil, helps in depigmentation and removes dirt while helping prevent acne.",
     keywords: "facewash for oily skin India, acne facewash, vakro facewash, depigmenting facewash",
     features: [
@@ -93,6 +102,13 @@ export const productData = {
     heroImage: facewash,
     howTOUseImage: facewashHowToUse,
     tagLine: "Depigmenting facewash formulated to cleanse excess oil, reduce dark spots and promote clear, healthy skin.",
+    homepageData: {
+      description: "Experience the Art of Balanced Skin with Vakro Depigmenting Face Wash.",
+      category: "Face Care",
+      image: facewash,
+      alt: "Vakro Glow Balance Depigmenting Face Wash with Salicylic Acid and Niacinamide",
+      productLink: "/products/vakro-glo-depigmenting-facewash",
+    }
   },
 
   "vakro-aqua-lite-moisturiser-face-gel": { 
@@ -152,6 +168,13 @@ export const productData = {
     heroImage: moisturizerImg,
     howTOUseImage: moisturizerUse,
     tagLine: "Lightweight daily moisturizer designed to deeply hydrate, repair skin barrier and keep your skin soft and radiant.",
+    homepageData: {
+      description: "Experience advanced hydration with powerful sun defense in one lightweight formula.",
+      category: "Face Care",
+      image: moisturizerImg,
+      alt: "Vakro Aqualite SPF 50+ Face Moisturizer Gel with 5 Ceramides",
+      productLink: "/products/vakro-aqua-lite-moisturiser-face-gel",
+    }
   },
 
   "vakro-lite-depigmenting-fluid-sunscreen": { 
@@ -220,6 +243,13 @@ export const productData = {
     heroImage: sunscreenImg,
     howTOUseImage: sunscreenUse,
     tagLine: "Broad spectrum SPF 50 sunscreen that protects skin from harmful UV rays while keeping it hydrated and smooth.",
+    homepageData: {
+      description: "Broad-spectrum SPF 50+ sunscreen that protects from UV damage and helps reduce dark spots for an even-toned glow.",
+      category: "Sun Care",
+      image: sunscreenImg,
+      alt: "Vakro Lite Anti-Pigment SPF 50+ Broad Spectrum Sunscreen",
+      productLink: "/products/vakro-lite-depigmenting-fluid-sunscreen",
+    }
   },
 
   "vakro-lite-face-serum": { 
@@ -284,5 +314,12 @@ export const productData = {
     heroImage: faceserum,
     howTOUseImage: faceserumusage,
     tagLine: "A lightweight serum formulated to brighten skin tone and restore natural glow.",
+    homepageData: {
+      description: "Multi-Active Acne Clarifying & Oil Balancing Serum.",
+      category: "Face Care",
+      image: faceserum,
+      alt: "Vakro Lite Dual Hit Serum with Azelaic Acid and Salicylic Acid for acne control",
+      productLink: "/products/vakro-lite-face-serum",
+    }
   }
 };

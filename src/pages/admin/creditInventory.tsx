@@ -1,12 +1,12 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast, Bounce } from "react-toastify";
 import styles from "../../styles/inventory.module.css";
-import { Context } from "@/store/context";
 import OrderModal from "@/components/OrderModal";
 import { dateToShow, isLastRowEmpty, Product, ProductType } from "@/lib/utils";
-import { InventoryItem } from "@/store/reducers/adminReducer";
+import { useStore } from "@/store";
+import { InventoryItem } from "@/store/adminStore";
 
 type CreditInventoryItem = {
   _id?: string;
@@ -25,9 +25,8 @@ type CreditInventoryItem = {
 }
 
 const CreditInventory = () => {
-  const { state } = useContext(Context);
-  const stateInventory = state?.adminData?.inventory;
-  const stateProducts = state?.adminData?.products;
+  const stateInventory = useStore((store) => store.adminData.inventory);
+  const stateProducts = useStore((store) => store.adminData.products);
   const [loader, setLoader] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [creditInventory, setCreditInventory] = useState<CreditInventoryItem[]>([]);
@@ -270,7 +269,7 @@ const CreditInventory = () => {
                         item?.products?.forEach((e: {productId: string }) => {
                           currentProductsName.push(e.productId);
                         })
-                        setOrderFormData({ ...orderFormData, customerPhone: JSON.stringify(item?.customerPhone), customerName: item?.customerName, selectedProductId: currentProductsName, customerId: item?.customerId || "", creditId: item?._id || "" });
+                        setOrderFormData({ ...orderFormData, date: item?.dateOfInventory, customerPhone: JSON.stringify(item?.customerPhone), customerName: item?.customerName, selectedProductId: currentProductsName, customerId: item?.customerId || "", creditId: item?._id || "" });
                         setShowOrderModal(true);
                       }}>
                         Place Order

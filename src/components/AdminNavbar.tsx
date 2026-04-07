@@ -1,22 +1,17 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import styles from "../styles/adminNavbar.module.css";
-
-import { Context } from "@/store/context";
-import ACTIONS from "@/store/actions";
 import Image from "next/image";
 import vakroLogo from "../../public/assets/goldenLogo.svg";
+import { useStore } from "@/store";
 
 const AdminNavbar = () => {
   const router = useRouter();
-  const { dispatch } = useContext(Context);
   const [menuOpen, setMenuOpen] = useState(false);
+  const setAuth = useStore((state) => state.setAuth);
 
   const handleLogout = () => {
-    dispatch({
-      type: ACTIONS.SET_AUTH,
-      payload: { username: "", isLoggedIn: false },
-    });
+    setAuth({username: "", isLoggedIn: false});
     router.push("/");
   };
 

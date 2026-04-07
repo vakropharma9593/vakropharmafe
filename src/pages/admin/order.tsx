@@ -1,18 +1,20 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
 import { dateToShow, formatStatus, OrderStatusType, Product, ProductType } from "@/lib/utils";
-import { Context } from "@/store/context";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/order.module.css";
 import OrderModal from "@/components/OrderModal";
 import OrderUpdateModal from "@/components/OrderUpdateModal";
+import { useStore } from "@/store";
 
 type Order = {
   _id?: string;
   customerName: string;
   customerPhone: string;
   date: string;
+  paymentDate?: string;
+  orderType: string;
   status: string;
   deliveryService?: string;
   deliveryTrackNumber?: string;
@@ -22,8 +24,7 @@ type Order = {
 };
 
 const Orders = () => {
-  const { state } = useContext(Context);
-  const stateProducts = state.adminData.products;
+  const stateProducts = useStore((state) => state.adminData.products);
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loader, setLoader] = useState(false);
@@ -88,8 +89,10 @@ const Orders = () => {
                   <th>#</th>
                   <th>Customer</th>
                   <th>Phone</th>
+                  <th>Type</th>
                   <th>Date</th>
                   <th>Status</th>
+                  <th>Payment Date</th>
                   <th>Total</th>
                   <th>Products</th>
                   <th>Payment</th>
@@ -109,6 +112,7 @@ const Orders = () => {
                     <td>{index + 1}</td>
                     <td>{order.customerName}</td>
                     <td>{order.customerPhone}</td>
+                    <td>{order.orderType}</td>
                     <td>{dateToShow(order.date)}</td>
 
                     <td>
@@ -116,6 +120,8 @@ const Orders = () => {
                         {formatStatus(order.status)}
                       </span>
                     </td>
+
+                    <td>{order?.paymentDate ? dateToShow(order?.paymentDate): "-" }</td>
 
                     <td>₹{order.totalAmountPaid}</td>
 

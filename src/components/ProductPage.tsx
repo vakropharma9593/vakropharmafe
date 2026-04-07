@@ -4,11 +4,12 @@ import Image from "next/image";
 import styles from "../styles/eachProduct.module.css";
 import { useEffect, useState } from "react";
 import AddReviewModal from "./AddReviewModal";
-import { Review } from "@/lib/utils";
-import { ProductUIData } from "@/lib/productData";
+import { ProductType, Review } from "@/lib/utils";
+import { productData, ProductUIData } from "@/lib/productData";
 import { Sparkles } from "lucide-react";
 import { toast } from "react-toastify";
 import Loader from "./Loader";
+import { useStore } from "@/store";
 
 type ProductPageProps = {
   product: {
@@ -20,6 +21,8 @@ type ProductPageProps = {
   };
   productInfo: ProductUIData,
 };
+
+type ProductSlug = keyof typeof productData;
 
 const ProductPage = ({
   product,
@@ -34,12 +37,35 @@ const ProductPage = ({
   });
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [loader, setLoader] = useState<boolean>(false);
+  const setProducts = useStore((state) => state.setProducts);
+  const allProducts = useStore((state) => state.adminData.products);
 
   useEffect(() => {
     if (product) {
       getAllReviews(product?._id);
+      getProducts()
     }
   },[product])
+
+  const getProducts = async () => {
+    setLoader(true);
+    try {
+        const res = await fetch("/api/product", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+        const data = await res.json();
+        if (data.success) {
+          setProducts(data.data || []);
+        } else {
+            toast.error(data.message);
+        }
+    } catch (error) {
+        toast.error("Failed to get product");
+    } finally {
+        setLoader(false);
+    }
+  }
 
   const getAllReviews = async (id: string) => {
     setOpenModal(false);
@@ -161,6 +187,47 @@ const ProductPage = ({
                 <p>{step}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* OTHER PRODUCTS */}
+      <section className={styles.otherProducts}>
+        <div className={styles.container}>
+          <h2>You may also like</h2>
+
+          <p className={styles.otherSubtitle}>
+            Complete your routine with these carefully selected products
+          </p>
+
+          <div className={styles.otherGrid}>
+            {Object.keys(productData)?.map((slug: string, i: number) => {
+              if (slug === product.slug) return null;
+              const p: ProductUIData = productData[slug as ProductSlug];
+              const otherProduct = allProducts?.find((item: ProductType ) => item?.slug === slug);
+              // debugger;
+              return (
+                <div key={i} className={styles.productCard}>
+
+                <div className={styles.productImage}>
+                  <Image src={p?.heroImage} alt={p?.homepageData?.alt} />
+                </div>
+
+                <h3>{otherProduct?.name}</h3>
+
+                <p className={styles.productTagline}>{p?.tagLine}</p>
+
+                <div className={styles.productPrice}>₹{otherProduct?.mrp}</div>
+
+                <button
+                  className={styles.viewButton}
+                  onClick={() => window.location.href = `/products/${otherProduct?.slug}`}
+                >
+                  View Product
+                </button>
+
+              </div>
+            )})}
           </div>
         </div>
       </section>

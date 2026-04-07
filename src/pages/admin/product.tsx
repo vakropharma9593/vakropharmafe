@@ -1,15 +1,14 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
 import { ProductType } from "@/lib/utils";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/inventory.module.css";
-import ACTIONS from "@/store/actions";
-import { Context } from "@/store/context";
+import { useStore } from "@/store";
 
 const Product = () => {
-  const { dispatch, state } = useContext(Context);
-  const { products } = state?.adminData;
+  const products = useStore((state) => state.adminData.products);
+  const setProducts = useStore((state) => state.setProducts);
   const [loader, setLoader] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [allProducts, setAllProducts] = useState<ProductType[]>([]);
@@ -42,7 +41,7 @@ const Product = () => {
         });
         const data = await res.json();
         if (data.success) {
-            dispatch({ type: ACTIONS.SET_PRODUCTS, payload: data.data || [] })
+          setProducts(data.data || []);
         } else {
             toast.error(data.message);
         }

@@ -114,6 +114,11 @@ export enum OrderStatusType  {
   DELIVERED = "Delivered",
 }
 
+export enum OrderType { 
+  CREDIT_ORDER = "Credit Order",
+  DIRECT_CUSTOMER = "Direct Customer",
+}
+
 export enum ExpenseCategoryType {
   COGS = "COGS",
   FIXED_OPEX = "Fixed Opex",

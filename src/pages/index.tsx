@@ -4,11 +4,41 @@ import Products from "@/components/Products";
 import Benefits from "@/components/Benefits";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
-import { ToastContainer, Bounce } from 'react-toastify';
+import { ToastContainer, Bounce, toast } from 'react-toastify';
 import SEO from "@/components/SEO";
+import { useEffect, useState } from "react";
+import { useStore } from "@/store";
+import Loader from "@/components/Loader";
 // import Dermatologist from "@/components/Dermatologist";
 
 const Index = () => {
+  const setProducts = useStore((state) => state.setProducts);
+
+  const [loader, setLoader] = useState<boolean>(false);
+
+  useEffect(() => {
+    getProducts();
+  },[])
+
+  const getProducts = async () => {
+    setLoader(true);
+    try {
+        const res = await fetch("/api/product", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+        const data = await res.json();
+        if (data.success) {
+          setProducts(data.data || []);
+        } else {
+            toast.error(data.message);
+        }
+    } catch (error) {
+        toast.error("Failed to get product");
+    } finally {
+        setLoader(false);
+    }
+  }
   return (
     <>
       <SEO
@@ -60,7 +90,7 @@ const Index = () => {
           theme="light"
           transition={Bounce}
         />
-
+        {loader && <Loader />}
       </main>
     </>
   );
