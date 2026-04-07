@@ -1,32 +1,39 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/router";
-
-import { Context } from "../store/context";
-import ACTIONS from "../store/actions";
+import { useStore } from "@/store";
+import Loader from "@/components/Loader";
 
 const ProtectRoute = ({ children }) => {
   const router = useRouter();
-  const { state, dispatch } = useContext(Context);
+  const authData = useStore((state) => state.auth);
+  const removeAuth = useStore((state) => state.removeAuth);
+  const hasHydrated = useStore((state) => state.hasHydrated);
 
-  // const publicRoutes = ["/login", "/", "/products/facewash", "/products/facemoisturizer" , "/products/faceserum", "/products/sunscreen", "/faq"];
   const publicRoutes = ["/login", "/", "/faq", "/review", "/404"];
   
 
   const isPublicRoute = publicRoutes.includes(router.pathname) || router.pathname.startsWith("/products/") || router.pathname.startsWith("/review/");
   const isAuthorized =
-    isPublicRoute || (state?.auth?.isLoggedIn && state?.auth?.username);
+    isPublicRoute || (authData?.isLoggedIn && authData?.username);
+
 
   useEffect(() => {
-    if (!router.isReady) return;
+    if (!router.isReady || !hasHydrated) return;
 
     if (!isAuthorized) {
       localStorage.removeItem("auth");
-      dispatch({ type: ACTIONS.REMOVE_AUTH });
+      removeAuth();
       router.replace("/login");
     }
-  }, [router.isReady, isAuthorized]);
+  }, [router.isReady, isAuthorized, hasHydrated]);
 
-  if (!isAuthorized) return null;
+  if (!hasHydrated) {
+    return <Loader />;
+  }
+
+  if (!isAuthorized) {
+    return <Loader />;
+  }
 
   return children;
 };

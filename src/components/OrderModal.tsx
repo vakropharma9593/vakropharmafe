@@ -1,17 +1,17 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "../styles/orderModal.module.css";
-import { isLastRowEmpty, OrderStatusType, PaymentModeType, Product, ProductType } from "@/lib/utils";
-import { Context } from "@/store/context";
+import { dateToShow, isLastRowEmpty, OrderStatusType, PaymentModeType, Product, ProductType } from "@/lib/utils";
 import { toast } from "react-toastify";
-import ACTIONS from "@/store/actions";
 import Loader from "./Loader";
-import { InventoryItem } from "@/store/reducers/adminReducer";
+import { useStore } from "@/store";
+import { InventoryItem } from "@/store/adminStore";
 
 type Order = {
     customerPhone: string;
     customerId: string;
     customerName: string;
     date: string;
+    paymentDate?: string;
     status: string;
     deliveryService?: string;
     deliveryTrackNumber?: string;
@@ -28,15 +28,16 @@ interface OrderModalInterface {
 }
 
 const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData, source, callAfterSave }) => {
-    const { state, dispatch } = useContext(Context);
-    const stateInventory = state.adminData.inventory;
-    const stateProducts = state.adminData.products;
+    const stateInventory = useStore((state) => state.adminData.inventory);
+    const stateProducts = useStore((state) => state.adminData.products);
+    const setInventyory = useStore((state) => state.setInventory);
 
     const [orderFormData, setOrderFormData] = useState<Order>({
         customerPhone: "",
         customerId: "",
         customerName: "",
         date: "",
+        paymentDate: "",
         status: "",
         deliveryService: "",
         deliveryTrackNumber: "",
@@ -68,7 +69,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
             const res = await fetch("/api/inventory");
             const data = await res.json();
             if(data.success) {
-                dispatch({ type: ACTIONS.SET_INVENTORY, payload: data.data || [] });
+                setInventyory(data.data || [])
                 setShowOrderModal(false);
             } else {
                 toast.error(data.message);
@@ -82,7 +83,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
     const handleOrderSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoader(true);
-        if (orderFormData?.customerId !== "" && orderFormData?.date !== "" && orderFormData?.paymentType !== "" && orderFormData?.status && products?.length > 0 && !isLastRowEmpty(products)) {
+        if (orderFormData?.customerId !== "" && orderFormData?.date !== "" && orderFormData?.status && products?.length > 0 && !isLastRowEmpty(products)) {
           try {
             const dataToSend = { ...orderFormData, products, orderType: source === "creditInventory" ? "CREDIT" : "" }
             if (orderFormData.status === OrderStatusType.PAYMENT_PENDING) {
@@ -283,10 +284,14 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                     {orderFormData?.customerName && <h4>Customer Name :: {orderFormData?.customerName}</h4>}
                 </>
               }
-              <div className={styles.formGroup}>
-                <label>Order Date</label>
-                <input className={styles.dateField} type="date" name="date" onChange={handleOrderChange} />
-              </div>
+              {source === "creditInventory" ? 
+                <h5>Credit Inventory Date : {dateToShow(orderFormData?.date)}</h5>
+              :
+                <div className={styles.formGroup}>
+                    <label>Order Date</label>
+                    <input className={styles.dateField} type="date" name="date" onChange={handleOrderChange} />
+                </div>
+              }
               <div className={styles.formGroup}>
                 <label>Order Status</label>
                 <select name="status" onChange={handleOrderChange}>
@@ -298,6 +303,13 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                     })}
                 </select>
               </div>
+
+              {(orderFormData.status === OrderStatusType.PAYMENT_DONE || orderFormData.status === OrderStatusType.PREPARING || orderFormData.status === OrderStatusType.DISPATCHED || orderFormData.status === OrderStatusType.DELIVERED) &&
+                <div className={styles.formGroup}>
+                    <label>Payment Date</label>
+                    <input className={styles.dateField} type="date" name="paymentDate" onChange={handleOrderChange} />
+                </div>
+              }
 
               {orderFormData?.status === OrderStatusType.DISPATCHED &&
                 <div className={styles.formGroup}>

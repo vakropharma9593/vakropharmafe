@@ -1,19 +1,19 @@
 "use client";
 
 import styles from "../../styles/admin.module.css";
-import { useEffect, useState, useContext } from "react";
-import { Context } from "@/store/context";
-import ACTIONS from "@/store/actions";
+import { useEffect, useState } from "react";
 import { toast, Bounce } from "react-toastify";
 import AdminNavbar from "@/components/AdminNavbar";
 import { useRouter } from "next/router";
 import Loader from "@/components/Loader";
+import { useStore } from "@/store";
 
 
 const Admin = () => {
-  const { dispatch } = useContext(Context);
   const [loader, setLoader] = useState(false);
   const router = useRouter();
+  const setInventory = useStore((state) => state.setInventory);
+  const setProducts = useStore((state) => state.setProducts);
 
   /* REQUIRED CODE */
   useEffect(() => {
@@ -23,10 +23,7 @@ const Admin = () => {
         const res = await fetch("/api/inventory");
         const data = await res.json();
         if (data.success) {
-          dispatch({
-            type: ACTIONS.SET_INVENTORY,
-            payload: data.data || [],
-          });
+          setInventory(data.data || []);
         } else {
           toast.error("Failed to fetch inventory");
         }
@@ -42,10 +39,7 @@ const Admin = () => {
         const res = await fetch("api/product");
         const data = await res.json();
         if (data.success) {
-          dispatch({
-            type: ACTIONS.SET_PRODUCTS,
-            payload: data.data || [],
-          });
+          setProducts(data.data || []);
         } else {
           toast.error("Failed to fetch products");
         }
