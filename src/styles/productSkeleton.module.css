@@ -1,0 +1,55 @@
+.wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  padding: 40px 0;
+}
+
+.image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  background: #eee;
+  animation: shimmer 1.5s infinite;
+}
+
+.content > div {
+  margin-bottom: 14px;
+}
+
+.title {
+  height: 28px;
+  width: 70%;
+  background: #eee;
+}
+
+.rating {
+  height: 16px;
+  width: 40%;
+  background: #eee;
+}
+
+.price {
+  height: 22px;
+  width: 30%;
+  background: #eee;
+}
+
+.lines div {
+  height: 12px;
+  margin-bottom: 8px;
+  background: #eee;
+}
+
+.button {
+  height: 42px;
+  width: 150px;
+  border-radius: 8px;
+  background: #eee;
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}

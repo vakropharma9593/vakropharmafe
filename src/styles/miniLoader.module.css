@@ -1,0 +1,105 @@
+/* wrapper takes full parent size */
+.wrapper {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(4px);
+
+  border-radius: inherit;
+  z-index: 2;
+}
+
+/* compact loader */
+.loader {
+  position: relative;
+  width: 50px;
+  height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* small drop */
+.drop {
+  position: absolute;
+  top: -16px;
+
+  width: 8px;
+  height: 12px;
+
+  background: linear-gradient(180deg, #E1C88A, #C9A25E);
+  border-radius: 50% 50% 60% 60%;
+
+  animation: dropFall 1.4s ease-in-out infinite;
+}
+
+/* center V */
+.v {
+  font-size: 16px;
+  font-weight: 700;
+  color: #173F36;
+
+  opacity: 0;
+  animation: showLogo 1.4s ease-in-out infinite;
+}
+
+/* ripple */
+.ripple {
+  position: absolute;
+
+  width: 36px;
+  height: 36px;
+
+  border-radius: 50%;
+  border: 2px solid rgba(201, 162, 94, 0.4);
+
+  opacity: 0;
+
+  animation: ripple 1.4s ease-out infinite;
+}
+
+/* animations (reuse but faster & smaller) */
+
+@keyframes dropFall {
+  0% { transform: translateY(0); opacity: 1; }
+  60% { transform: translateY(20px); opacity: 1; }
+  70% { opacity: 0; }
+  100% { transform: translateY(20px); opacity: 0; }
+}
+
+@keyframes showLogo {
+  0% { opacity: 0; transform: scale(0.8); }
+  65% { opacity: 0; }
+  80% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ripple {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+
+  animation: showLogo 1.4s ease-in-out infinite;
+}
+
+/* optional: make logo slightly pop */
+.logo img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(23, 63, 54, 0.2));
+}
