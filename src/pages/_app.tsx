@@ -1,13 +1,14 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import "./index.css";
-import ContextProvider from "@/store/context";
 import ProtectRoute from "../lib/protectRoute";
 import { ToastContainer, Bounce } from "react-toastify";
+import RouteTransition from "@/components/RouteTransition";
 
 export default function App({ Component, pageProps }: AppProps) {
   return <>
-    <ContextProvider>
+    <>
+      <RouteTransition />
       <ProtectRoute>
         <Component {...pageProps} />
       </ProtectRoute>
@@ -24,6 +25,6 @@ export default function App({ Component, pageProps }: AppProps) {
           theme="light"
           transition={Bounce}
         />
-    </ContextProvider>
+    </>
   </>;
 }

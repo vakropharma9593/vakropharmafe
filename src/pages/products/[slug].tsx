@@ -2,13 +2,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 
-import { useRouter } from "next/router";
-import { GetServerSideProps } from "next";
-
+import { GetStaticPaths, GetStaticProps } from "next";
 import ProductPage from "@/components/ProductPage";
 import { productData, ProductUIData } from "@/lib/productData";
 import { connectDB } from "@/lib/mongodb";
 import Product from "@/models/Product";
+import ProductSkeleton from "@/components/ProductSkeleton";
 
 type ProductPageProps = {
   product: {
@@ -23,28 +22,22 @@ type ProductPageProps = {
 type ProductSlug = keyof typeof productData;
 
 const ProductSlugPage = ({ product }: ProductPageProps) => {
-  const router = useRouter();
-  const slug = Array.isArray(router.query.slug)
-  ? router.query.slug[0]
-  : router.query.slug;
+  if (!product) return <ProductSkeleton />;
 
-  if (!product) return <div>Product not found</div>;
+  const productInfo: ProductUIData =
+    productData[product.slug as ProductSlug];
 
-   const productInfo: ProductUIData = productData[product.slug as ProductSlug];
-
-   if (!productInfo) return <div>Product UI not found</div>;
+  if (!productInfo) return <ProductSkeleton />;
 
   return (
     <>
-      {/* ✅ Dynamic SEO */}
       <SEO
         title={`${product.name} | Vakro Pharma`}
         description={productInfo?.description || product.name}
         keywords={productInfo.keywords}
-        url={`https://www.vakropharma.com/products/${slug}`}
+        url={`https://www.vakropharma.com/products/${product.slug}`}
       />
 
-      {/* ✅ Product Schema (SEO Rich Results) */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -52,9 +45,9 @@ const ProductSlugPage = ({ product }: ProductPageProps) => {
             "@context": "https://schema.org",
             "@type": "Product",
             name: product.name,
-            image: [`https://www.vakropharma.com/assets/${slug}.jpeg`],
+            image: [`https://www.vakropharma.com/assets/${product.slug}.jpeg`],
             description: productInfo.description || product.name,
-            url: `https://www.vakropharma.com/products/${slug}`,
+            url: `https://www.vakropharma.com/products/${product.slug}`,
             brand: {
               "@type": "Brand",
               name: "Vakro Pharma",
@@ -71,10 +64,7 @@ const ProductSlugPage = ({ product }: ProductPageProps) => {
 
       <Navbar source="product" />
 
-      <ProductPage
-        product={product}
-        productInfo={productInfo}
-      />
+      <ProductPage product={product} productInfo={productInfo} />
 
       <Footer source="product" />
     </>
@@ -83,39 +73,34 @@ const ProductSlugPage = ({ product }: ProductPageProps) => {
 
 export default ProductSlugPage;
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { slug } = context.params as { slug: string };
+
+// ✅ Pre-build all product pages
+export const getStaticPaths: GetStaticPaths = async () => {
+  return {
+    paths: [],
+    fallback: "blocking",
+  };
+};
+
+
+// ✅ Fetch product data
+export const getStaticProps: GetStaticProps = async (context) => {
+  const { slug } = context.params as { slug?: string };
+
+  if (!slug) return { notFound: true };
 
   try {
     await connectDB();
+
     const normalizedSlug = slug.toLowerCase().trim();
-    let product = await Product.findOne({ slug: normalizedSlug }).lean();
 
-    // 🔥 1. HANDLE OLD SLUG REDIRECTS
-    // if (!product) {
-    //   const redirectMap: Record<string, string> = {
-    //     facewash: "vakro-glo-depigmenting-facewash",
-    //     facemoisturizer: "vakro-aqua-lite-moisturiser-face-gel",
-    //     faceserum: "vakro-lite-face-serum",
-    //     sunscreen: "vakro-lite-depigmenting-fluid-sunscreen",
-    //   };
+    let product = await Product.findOne({
+      slug: normalizedSlug,
+    }).lean();
 
-    //   const newSlug = redirectMap[normalizedSlug];
-
-    //   if (newSlug) {
-    //     return {
-    //       redirect: {
-    //         destination: `/products/${newSlug}`,
-    //         permanent: true, // ✅ SEO safe (301)
-    //       },
-    //     };
-    //   }
-    // }
-
-    // 🔥 2. OPTIONAL: Check DB for oldSlug (scalable approach)
     if (!product) {
       product = await Product.findOne({
-        oldSlugs: normalizedSlug, // 👈 array field in DB
+        oldSlugs: normalizedSlug,
       }).lean();
 
       if (product) {
@@ -128,21 +113,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     }
 
-    // ❌ 3. FINAL FALLBACK → 404
     if (!product) {
       return { notFound: true };
     }
 
-    // ✅ 4. SUCCESS
     return {
       props: {
         product: JSON.parse(JSON.stringify(product)),
-        slug: normalizedSlug,
       },
+      revalidate: 60,
     };
   } catch (error) {
-    console.error("SSR Product Error:", error);
-
     return { notFound: true };
   }
 };

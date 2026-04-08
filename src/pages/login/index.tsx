@@ -1,15 +1,14 @@
 "use-client";
 
-import ACTIONS from "@/store/actions";
-import { Context } from "@/store/context";
+import { useStore } from "@/store";
 import { useRouter } from "next/router";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast, Bounce } from "react-toastify";
 
 export default function LoginPage() {
-  const { dispatch } = useContext(Context);
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const setAuth = useStore((state) => state.setAuth);
 
   const router = useRouter()
 
@@ -25,7 +24,7 @@ export default function LoginPage() {
     if (phone === process.env.NEXT_PUBLIC_PHONE && password === process.env.NEXT_PUBLIC_PASSWORD) {
         const authData = { username: phone, isLoggedIn: true };
         localStorage.setItem("auth", JSON.stringify(authData));
-        dispatch({ type: ACTIONS.SET_AUTH, payload: { username: phone, isLoggedIn: true }});
+        setAuth(authData);
         router.replace("/admin");
     } else {
         toast("Phone and password is incorrect", {

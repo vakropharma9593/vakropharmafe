@@ -4,11 +4,13 @@ import Image from "next/image";
 import styles from "../styles/eachProduct.module.css";
 import { useEffect, useState } from "react";
 import AddReviewModal from "./AddReviewModal";
-import { Review } from "@/lib/utils";
-import { ProductUIData } from "@/lib/productData";
+import { ProductType, Review } from "@/lib/utils";
+import { productData, ProductUIData } from "@/lib/productData";
 import { Sparkles } from "lucide-react";
 import { toast } from "react-toastify";
-import Loader from "./Loader";
+import { useStore } from "@/store";
+import Link from "next/link";
+import ProductSkeleton from "./ProductSkeleton";
 
 type ProductPageProps = {
   product: {
@@ -20,6 +22,8 @@ type ProductPageProps = {
   };
   productInfo: ProductUIData,
 };
+
+type ProductSlug = keyof typeof productData;
 
 const ProductPage = ({
   product,
@@ -34,12 +38,40 @@ const ProductPage = ({
   });
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [loader, setLoader] = useState<boolean>(false);
+  const setProducts = useStore((state) => state.setProducts);
+  const allProducts = useStore((state) => state.adminData.products);
 
   useEffect(() => {
     if (product) {
       getAllReviews(product?._id);
     }
   },[product])
+
+  useEffect(() => {
+    if(!allProducts || allProducts?.length === 0){
+      getProducts()
+    }
+  },[allProducts])
+
+  const getProducts = async () => {
+    setLoader(true);
+    try {
+        const res = await fetch("/api/product", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+        const data = await res.json();
+        if (data.success) {
+          setProducts(data.data || []);
+        } else {
+          toast.error(data.message);
+        }
+    } catch (error) {
+      toast.error("Failed to get product");
+    } finally {
+      setLoader(false);
+    }
+  }
 
   const getAllReviews = async (id: string) => {
     setOpenModal(false);
@@ -59,6 +91,13 @@ const ProductPage = ({
     }
   }
 
+ const bestReview =
+  reviewsData.reviews.length > 0
+    ? reviewsData.reviews.reduce((a, b) =>
+        a.rating > b.rating ? a : b
+      )
+    : null;
+
   const handleBuyNow = () => {
     const phoneNumber = 919286382701;
     window.open(`https://wa.me/${phoneNumber}`, "_blank");
@@ -71,7 +110,16 @@ const ProductPage = ({
           <div className={styles.heroGrid}>
 
             <div className={styles.heroImage}>
-              <Image src={productInfo.heroImage} alt={product.name} priority />
+              <div className={styles.zoomWrapper}>
+                <Image
+                  src={productInfo.heroImage}
+                  alt={product.name}
+                  fill
+                  priority
+                  sizes="(max-width: 900px) 100vw, 50vw"
+                  placeholder="blur"
+                />
+              </div>
             </div>
 
             <div className={styles.heroContent}>
@@ -165,6 +213,59 @@ const ProductPage = ({
         </div>
       </section>
 
+      {/* OTHER PRODUCTS */}
+      <section className={styles.otherProducts}>
+        <div className={styles.container}>
+          <h2>Build Your Routine</h2>
+
+          <p className={styles.otherSubtitle}>
+            Complete your routine with these carefully selected products
+          </p>
+
+          <div className={styles.routineSteps}>
+            <span className={styles.routineStep}>Step 1: Cleanser</span>
+            <span className={styles.routineStep}>Step 2: Serum</span>
+            <span className={styles.routineStep}>Step 3: Moisturizer</span>
+          </div>
+
+          <div className={styles.otherGrid}>
+            {Object.keys(productData)?.map((slug: string, i: number) => {
+              if (slug === product.slug) return null;
+              const p: ProductUIData = productData[slug as ProductSlug];
+              const otherProduct = allProducts?.find((item: ProductType ) => item?.slug === slug);
+              // debugger;
+              return (
+                <div key={i} className={styles.productCard}>
+
+                <div className={styles.productImage}>
+                  <Image
+                    src={p?.heroImage}
+                    alt={p?.homepageData?.alt}
+                    fill
+                    sizes="(max-width: 600px) 50vw, 25vw"
+                    placeholder="blur"
+                    loading="lazy"
+                  />
+                </div>
+
+                <h3>{otherProduct?.name}</h3>
+
+                <p className={styles.productTagline}>{p?.tagLine}</p>
+
+                <div className={styles.productPrice}>₹{otherProduct?.mrp}</div>
+
+                <Link href={`/products/${otherProduct?.slug}`} prefetch>
+                  <button className={styles.viewButton}>
+                    View Product
+                  </button>
+                </Link>
+
+              </div>
+            )})}
+          </div>
+        </div>
+      </section>
+
       {/* REVIEWS */}
       <section className={styles.reviews}>
         <div className={styles.container}>
@@ -228,7 +329,7 @@ const ProductPage = ({
             </button>
           </div>
 
-          {/* 🌟 BEST REVIEW
+          {/* 🌟 BEST REVIEW */}
           {bestReview && (
             <div className={styles.bestReview}>
               <div className={styles.badge}>Top Review</div>
@@ -240,7 +341,7 @@ const ProductPage = ({
                 {bestReview.reviewerName} • {bestReview.skinType}
               </span>
             </div>
-          )} */}
+          )}
 
           {/* ALL REVIEWS */}
           <div className={styles.reviewScroll}>
@@ -279,7 +380,20 @@ const ProductPage = ({
           productName={product?.name}
         />
       )}
-      {loader && <Loader />}
+
+      <div className={styles.stickyBar}>
+        <div className={styles.stickyContent}>
+          <div>
+            <div className={styles.stickyName}>{product.name}</div>
+            <div className={styles.stickyPrice}>₹{product.mrp}</div>
+          </div>
+
+          <button className={styles.stickyBtn} onClick={handleBuyNow}>
+            Buy Now
+          </button>
+        </div>
+      </div>
+      {loader && <ProductSkeleton />}
     </main>
   );
 };

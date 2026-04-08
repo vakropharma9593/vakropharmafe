@@ -1,27 +1,28 @@
-import styles from "../styles/loader.module.css";
+import styles from "../styles/miniLoader.module.css";
 import vakroLogo from "../../public/assets/darkGreenLogo.svg";
 import Image from "next/image";
 
-const Loader = () => {
+const MiniLoader = () => {
   return (
-    <div className={styles.overlay}>
+    <div className={styles.wrapper}>
       <div className={styles.loader}>
         <div className={styles.drop}></div>
+
+        {/* 🔥 Logo instead of V */}
         <div className={styles.logo}>
           <Image
             src={vakroLogo}
             alt="Vakro Pharma"
-            width={32}
-            height={32}
+            width={20}
+            height={20}
             priority
           />
         </div>
+
         <div className={styles.ripple}></div>
       </div>
-
-      <p className={styles.text}>Vakro Pharma</p>
     </div>
   );
 };
 
-export default Loader;
+export default MiniLoader;

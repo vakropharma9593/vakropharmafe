@@ -1,4 +1,4 @@
-import heroImage from "../../public/assets/vakroallproducts.jpeg";
+import heroImage from "../../public/assets/vakroallproducts.webp";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Image from "next/image";
 import styles from "../styles/hero.module.css";
@@ -81,10 +81,14 @@ const Hero = () => {
 
               <Image
                 src={heroImage}
-                height={616}
-                width={647}
                 alt="Vakro skincare products"
+                width={647}
+                height={616}
                 className={styles.heroImage}
+
+                priority   // 🔥 Important (hero image = LCP)
+                sizes="(max-width: 900px) 100vw, 50vw"  // 🔥 responsive optimization
+                placeholder="blur"  // 🔥 premium loading feel
               />
 
             </div>

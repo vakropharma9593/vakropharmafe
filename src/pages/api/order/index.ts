@@ -6,7 +6,7 @@ import Inventory from "@/models/Inventory";
 import CreditInventory from "@/models/CreditInventory";
 import "@/models/Customer"; 
 import Product from "@/models/Product";
-import { OrderStatusType } from "@/lib/utils";
+import { OrderStatusType, OrderType } from "@/lib/utils";
 import { ObjectId } from "mongoose";
 
 interface OrderWithCustomer {
@@ -16,7 +16,9 @@ interface OrderWithCustomer {
     phone: string;
   };
   date: Date;
+  paymentDate: Date;
   status: string;
+  orderType: string;
   deliveryService: string;
   deliveryTrackNumber: string;
   totalAmount: number;
@@ -48,7 +50,7 @@ export default async function handler(
 
     // CREATE ORDER
     if (req.method === "POST") {
-      const { customerId, date, status, products, paymentType, orderType, creditId } = req.body;
+      const { customerId, date, status, paymentDate, products, paymentType, orderType, creditId } = req.body;
 
       const finalProducts = [];
 
@@ -132,12 +134,16 @@ export default async function handler(
         deliveryService = req.body?.deliveryService;
         deliveryTrackNumber= req.body?.deliveryTrackNumber;
       }
+
+      const orderTypeToSave = orderType === "CREDIT" ? OrderType.CREDIT_ORDER :  OrderType.DIRECT_CUSTOMER;
       
       // Create order
       const order = await Order.create({
         customerId: customerId,
         date,
         status,
+        paymentDate,
+        orderType: orderTypeToSave,
         products: finalProducts,
         totalAmount: finalTotalAmount,
         deliveryService,
@@ -173,6 +179,7 @@ export default async function handler(
         .populate("customerId", "name phone")
         .populate("products.productId", "name mrp costPrice")
         .populate("products.batchId", "batch")
+        .sort({ date: -1 })
         .lean();
 
       const payments = await Payment.find();
@@ -198,6 +205,8 @@ export default async function handler(
             customerPhone: o.customerId?.phone,
             date: o.date,
             status: o.status,
+            orderType: o.orderType,
+            paymentDate: o.paymentDate,
             deliveryService: o.deliveryService,
             deliveryTrackNumber: o.deliveryTrackNumber,
             products: o.products.map((p) => ({

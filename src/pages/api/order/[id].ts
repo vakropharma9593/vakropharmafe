@@ -21,30 +21,31 @@ export default async function handler(
           success: false,
           message: "Order not found",
           });
-      }
-            
+      }     
       
       const alreadyProcessed = existing.status === "Payment_Done";
 
-      let deliveryService: string = existing.deliveryService;
-      let deliveryTrackNumber: string = existing.deliveryTrackNumber;
-
-      if (status === OrderStatusType.DISPATCHED) {
-        deliveryService = req.body?.deliveryService;
-        deliveryTrackNumber= req.body?.deliveryTrackNumber;
+      if (status === OrderStatusType.PAYMENT_DONE) {
+        existing.paymentDate = req.body?.paymentDate || "";
       }
 
-      const order = await Order.findByIdAndUpdate(
-        id,
-        { status, deliveryService, deliveryTrackNumber },
-        { new: true }
-      );
+      if (status === OrderStatusType.DISPATCHED) {
+        existing.deliveryService = req.body?.deliveryService;
+        existing.deliveryTrackNumber = req.body?.deliveryTrackNumber;
+      }
 
-      if (status === "Payment_Done" && !alreadyProcessed) {
+      existing.status = status;
+      console.info("before saving", existing);
+
+      const order = await existing.save();
+
+      console.info("adsfneew order", order);
+
+      if (status === OrderStatusType.PAYMENT_DONE && !alreadyProcessed) {
         await Payment.create({
           orderId: order._id,
           totalAmount: order.totalAmount,
-          paymentType
+          paymentType,
         });
       }
 

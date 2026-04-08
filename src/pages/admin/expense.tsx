@@ -1,10 +1,10 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
 import { booleanToYesNo, dateToShow, ExpenseCategoryType, PaymentType, ProductType } from "@/lib/utils";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/inventory.module.css";
-import { Context } from "@/store/context";
+import { useStore } from "@/store";
 
 export type ExpenseType = {
     voucher: string,
@@ -23,8 +23,7 @@ export type ExpenseType = {
 }
 
 const Expense = () => {
-  const { state } = useContext(Context);
-  const stateProducts = state.adminData.products;
+  const stateProducts = useStore((state) => state.adminData.products);
   const [expenses, setExpenses] = useState<ExpenseType[]>([]);
   const [loader, setLoader] = useState(false);
   const [showModal, setShowModal] = useState(false);
