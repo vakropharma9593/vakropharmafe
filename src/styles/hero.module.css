@@ -149,6 +149,11 @@
   width: 100%;
   height: auto;
   object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.imageWrapper:hover .heroImage {
+  transform: scale(1.03);
 }
 
 /* GLOW */

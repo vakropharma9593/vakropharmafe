@@ -1,14 +1,24 @@
-import Image from "next/image";
-import { useRouter } from "next/router";
+import Image, { StaticImageData } from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 import styles from "../styles/products.module.css";
 import { HomePageData, productData } from "@/lib/productData";
 import { useStore } from "@/store";
+import MiniLoader from "./MiniLoader";
+import { useRouter } from "next/router";
 
 const Products = () => {
-  const router = useRouter();
   const products = useStore((state) => state.adminData.products);
+  const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
+  const router = useRouter();
+
   type ProductSlug = keyof typeof productData;
 
+  const preloadImage = (src: string | StaticImageData) => {
+    const img = new window.Image();
+
+    img.src = typeof src === "string" ? src : src.src;
+  };
 
   return (
     <section id="products" className={styles.productsSection}>
@@ -25,52 +35,72 @@ const Products = () => {
         </div>
 
         <div className={styles.productsGrid}>
-          {products?.length > 0 && products?.map((product, index) => {
-            if (!product.isActive) return null;
-            const productHomeData: HomePageData = productData[product.slug as ProductSlug].homepageData;
-            return (
-              <div
-                key={index}
-                className={styles.productCard}
-                style={{ animationDelay: `${index * 80}ms` }}
-                onClick={() => router.push(productHomeData.productLink)}
-              >
-                <div className={styles.imageWrapper}>
-                  <Image
-                    src={productHomeData.image}
-                    alt={productHomeData.alt}
-                    fill
-                    sizes="(max-width: 600px) 100vw,
-                          (max-width: 1024px) 50vw,
-                          25vw"
-                    className={styles.productImage}
-                    priority
-                  />
+          {products?.length > 0 &&
+            products.map((product, index) => {
+              if (!product.isActive) return null;
 
-                  <span className={styles.categoryBadge}>
-                    {productHomeData.category}
-                  </span>
-                </div>
+              const productHomeData: HomePageData =
+                productData[product.slug as ProductSlug].homepageData;
 
-                <div className={styles.productContent}>
-                  <h2 className={styles.productName}>
-                    {product.name}
-                  </h2>
+              return (
+                <Link
+                  key={index}
+                  href={productHomeData.productLink}
+                  onClick={() => setLoadingIndex(index)}
+                  onMouseEnter={() => {
+                    preloadImage(productHomeData.image);
+                    router.prefetch(productHomeData.productLink);
+                  }}
+                  className={styles.productCard}
+                  style={{ animationDelay: `${index * 80}ms` }}
+                >
+                  <div className={styles.imageWrapper}>
+                    <Image
+                      src={productHomeData.image}
+                      alt={productHomeData.alt}
+                      fill
+                      sizes="(max-width: 600px) 100vw,
+                            (max-width: 1024px) 50vw,
+                            25vw"
+                      className={styles.productImage}
 
-                  <p className={styles.productDescription}>
-                    {productHomeData.description}
-                  </p>
+                      // ✅ Only first 2 images priority (above fold)
+                      priority={index < 2}
 
-                  <div className={styles.viewProduct}>
-                    View Product →
+                      // ✅ Smooth loading
+                      placeholder="blur"
+                      blurDataURL="data:image/jpeg;base64,..."
+
+                      // ✅ Performance
+                      loading={index < 2 ? "eager" : "lazy"}
+                    />
+
+                    <span className={styles.categoryBadge}>
+                      {productHomeData.category}
+                    </span>
                   </div>
-                </div>
 
-              </div>
-            )
-          })}
+                  <div className={styles.productContent}>
+                    <h2 className={styles.productName}>
+                      {product.name}
+                    </h2>
+
+                    <p className={styles.productDescription}>
+                      {productHomeData.description}
+                    </p>
+
+                    <div className={styles.viewProduct}>
+                      View Product →
+                    </div>
+                  </div>
+                  {/* 🔥 Instant feedback */}
+                  {loadingIndex === index && (
+                    <MiniLoader />
+                  )}
+                </Link>
+              );
+            })}
         </div>
-
       </div>
     </section>
   );

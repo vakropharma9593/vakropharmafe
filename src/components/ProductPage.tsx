@@ -8,8 +8,9 @@ import { ProductType, Review } from "@/lib/utils";
 import { productData, ProductUIData } from "@/lib/productData";
 import { Sparkles } from "lucide-react";
 import { toast } from "react-toastify";
-import Loader from "./Loader";
 import { useStore } from "@/store";
+import Link from "next/link";
+import ProductSkeleton from "./ProductSkeleton";
 
 type ProductPageProps = {
   product: {
@@ -43,9 +44,14 @@ const ProductPage = ({
   useEffect(() => {
     if (product) {
       getAllReviews(product?._id);
-      getProducts()
     }
   },[product])
+
+  useEffect(() => {
+    if(!allProducts || allProducts?.length === 0){
+      getProducts()
+    }
+  },[allProducts])
 
   const getProducts = async () => {
     setLoader(true);
@@ -58,12 +64,12 @@ const ProductPage = ({
         if (data.success) {
           setProducts(data.data || []);
         } else {
-            toast.error(data.message);
+          toast.error(data.message);
         }
     } catch (error) {
-        toast.error("Failed to get product");
+      toast.error("Failed to get product");
     } finally {
-        setLoader(false);
+      setLoader(false);
     }
   }
 
@@ -85,6 +91,13 @@ const ProductPage = ({
     }
   }
 
+ const bestReview =
+  reviewsData.reviews.length > 0
+    ? reviewsData.reviews.reduce((a, b) =>
+        a.rating > b.rating ? a : b
+      )
+    : null;
+
   const handleBuyNow = () => {
     const phoneNumber = 919286382701;
     window.open(`https://wa.me/${phoneNumber}`, "_blank");
@@ -97,7 +110,16 @@ const ProductPage = ({
           <div className={styles.heroGrid}>
 
             <div className={styles.heroImage}>
-              <Image src={productInfo.heroImage} alt={product.name} priority />
+              <div className={styles.zoomWrapper}>
+                <Image
+                  src={productInfo.heroImage}
+                  alt={product.name}
+                  fill
+                  priority
+                  sizes="(max-width: 900px) 100vw, 50vw"
+                  placeholder="blur"
+                />
+              </div>
             </div>
 
             <div className={styles.heroContent}>
@@ -194,11 +216,17 @@ const ProductPage = ({
       {/* OTHER PRODUCTS */}
       <section className={styles.otherProducts}>
         <div className={styles.container}>
-          <h2>You may also like</h2>
+          <h2>Build Your Routine</h2>
 
           <p className={styles.otherSubtitle}>
             Complete your routine with these carefully selected products
           </p>
+
+          <div className={styles.routineSteps}>
+            <span className={styles.routineStep}>Step 1: Cleanser</span>
+            <span className={styles.routineStep}>Step 2: Serum</span>
+            <span className={styles.routineStep}>Step 3: Moisturizer</span>
+          </div>
 
           <div className={styles.otherGrid}>
             {Object.keys(productData)?.map((slug: string, i: number) => {
@@ -210,7 +238,14 @@ const ProductPage = ({
                 <div key={i} className={styles.productCard}>
 
                 <div className={styles.productImage}>
-                  <Image src={p?.heroImage} alt={p?.homepageData?.alt} />
+                  <Image
+                    src={p?.heroImage}
+                    alt={p?.homepageData?.alt}
+                    fill
+                    sizes="(max-width: 600px) 50vw, 25vw"
+                    placeholder="blur"
+                    loading="lazy"
+                  />
                 </div>
 
                 <h3>{otherProduct?.name}</h3>
@@ -219,12 +254,11 @@ const ProductPage = ({
 
                 <div className={styles.productPrice}>₹{otherProduct?.mrp}</div>
 
-                <button
-                  className={styles.viewButton}
-                  onClick={() => window.location.href = `/products/${otherProduct?.slug}`}
-                >
-                  View Product
-                </button>
+                <Link href={`/products/${otherProduct?.slug}`} prefetch>
+                  <button className={styles.viewButton}>
+                    View Product
+                  </button>
+                </Link>
 
               </div>
             )})}
@@ -295,7 +329,7 @@ const ProductPage = ({
             </button>
           </div>
 
-          {/* 🌟 BEST REVIEW
+          {/* 🌟 BEST REVIEW */}
           {bestReview && (
             <div className={styles.bestReview}>
               <div className={styles.badge}>Top Review</div>
@@ -307,7 +341,7 @@ const ProductPage = ({
                 {bestReview.reviewerName} • {bestReview.skinType}
               </span>
             </div>
-          )} */}
+          )}
 
           {/* ALL REVIEWS */}
           <div className={styles.reviewScroll}>
@@ -346,7 +380,20 @@ const ProductPage = ({
           productName={product?.name}
         />
       )}
-      {loader && <Loader />}
+
+      <div className={styles.stickyBar}>
+        <div className={styles.stickyContent}>
+          <div>
+            <div className={styles.stickyName}>{product.name}</div>
+            <div className={styles.stickyPrice}>₹{product.mrp}</div>
+          </div>
+
+          <button className={styles.stickyBtn} onClick={handleBuyNow}>
+            Buy Now
+          </button>
+        </div>
+      </div>
+      {loader && <ProductSkeleton />}
     </main>
   );
 };

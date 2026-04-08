@@ -1,12 +1,12 @@
 import { Sparkles, Droplets, ShieldCheck, Leaf, Sun } from "lucide-react";
-import facewash from "../../public/assets/vakro-glo-depigmenting-facewash.jpeg";
-import facewashHowToUse from "../../public/assets/vakro-glo-depigmenting-facewash_how_to_use.png";
-import moisturizerImg from "../../public/assets/vakro-aqua-lite-moisturiser-face-gel.jpeg";
-import moisturizerUse from "../../public/assets/vakro-aqua-lite-moisturiser-face-gel_how_to_use.png";
-import sunscreenImg from "../../public/assets/vakro-lite-depigmenting-fluid-sunscreen.jpeg";
-import sunscreenUse from "../../public/assets/vakro-lite-depigmenting-fluid-sunscreen_how_to_use.png";
-import faceserum from "../../public/assets/vakro-lite-face-serum.jpeg";
-import faceserumusage from "../../public/assets/vakro-lite-face-serum_how_to_use.png";
+import facewash from "../../public/assets/vakro-glo-depigmenting-facewash.webp";
+import facewashHowToUse from "../../public/assets/vakro-glo-depigmenting-facewash_how_to_use.webp";
+import moisturizerImg from "../../public/assets/vakro-aqua-lite-moisturiser-face-gel.webp";
+import moisturizerUse from "../../public/assets/vakro-aqua-lite-moisturiser-face-gel_how_to_use.webp";
+import sunscreenImg from "../../public/assets/vakro-lite-depigmenting-fluid-sunscreen.webp";
+import sunscreenUse from "../../public/assets/vakro-lite-depigmenting-fluid-sunscreen_how_to_use.webp";
+import faceserum from "../../public/assets/vakro-lite-face-serum.webp";
+import faceserumusage from "../../public/assets/vakro-lite-face-serum_how_to_use.webp";
 import { StaticImageData } from "next/image";
 
 import { ReactNode } from "react";
