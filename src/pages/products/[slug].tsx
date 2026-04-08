@@ -76,24 +76,18 @@ export default ProductSlugPage;
 
 // ✅ Pre-build all product pages
 export const getStaticPaths: GetStaticPaths = async () => {
-  await connectDB();
-
-  const products = await Product.find({}, "slug").lean();
-
-  const paths = products.map((p) => ({
-    params: { slug: p.slug },
-  }));
-
   return {
-    paths,
-    fallback: "blocking", // 🔥 new products auto-supported
+    paths: [],
+    fallback: "blocking",
   };
 };
 
 
 // ✅ Fetch product data
 export const getStaticProps: GetStaticProps = async (context) => {
-  const { slug } = context.params as { slug: string };
+  const { slug } = context.params as { slug?: string };
+
+  if (!slug) return { notFound: true };
 
   try {
     await connectDB();
@@ -104,7 +98,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
       slug: normalizedSlug,
     }).lean();
 
-    // 🔥 Handle old slugs
     if (!product) {
       product = await Product.findOne({
         oldSlugs: normalizedSlug,
@@ -128,7 +121,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
       props: {
         product: JSON.parse(JSON.stringify(product)),
       },
-      revalidate: 60, // 🔥 ISR (refresh every 60 sec)
+      revalidate: 60,
     };
   } catch (error) {
     return { notFound: true };
