@@ -43,11 +43,13 @@ const PatientOrderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
       required: true,
+      index: true, // ✅ helps filtering
     },
 
     date: {
       type: Date,
       required: true,
+      index: true, // ✅ helps sorting
     },
 
     status: {
@@ -74,10 +76,13 @@ const PatientOrderSchema = new mongoose.Schema(
       required: true,
     },
 
+    paymentDate: {
+      type: Date,
+    },
+
     paymentType: {
         type: String,
         enum: Object.values(PaymentModeType),
-        required: true
     },
 
     products: {
@@ -87,6 +92,13 @@ const PatientOrderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+
+// 🔥 MOST IMPORTANT (for your API)
+PatientOrderSchema.index({ customerId: 1, date: -1 });
+
+// 🔥 Optional (future-proofing)
+PatientOrderSchema.index({ date: -1 }); // global sorting
 
 export default mongoose.models.PatientOrder ||
   mongoose.model("PatientOrder", PatientOrderSchema);

@@ -32,18 +32,30 @@ const CreditInventorySchema = new mongoose.Schema(
       type: [ProductSchema],
       required: true,
     },
+
     dateOfInventory: {
       type: Date,
       required: true,
+      index: true, // ✅ helps sorting
     },
+
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
       required: true,
+      index: true, // ✅ helps filtering
     },
   },
   { timestamps: true }
 );
+
+
+// 🔥 MOST IMPORTANT (for your API)
+CreditInventorySchema.index({ customerId: 1, dateOfInventory: -1 });
+
+// 🔥 Optional (for global sorting)
+CreditInventorySchema.index({ dateOfInventory: -1, createdAt: -1 });
+
 
 export default mongoose.models.CreditInventory ||
   mongoose.model("CreditInventory", CreditInventorySchema);

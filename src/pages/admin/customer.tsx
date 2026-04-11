@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/customer.module.css";
 import OrderModal from "@/components/OrderModal";
+import Pagination from "@/components/Pagination";
+import SearchBar from "@/components/SearchBar";
 
 type Customer = {
   id?: string;
@@ -40,17 +42,40 @@ const Customers = () => {
     paymentType: "UPI",
   });
 
-  useEffect(() => {
-    getCustomers();
-  }, []);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCustomers, setTotalCustomers] = useState(0);
 
-  const getCustomers = async () => {
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1); // reset to page 1 when searching
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    getCustomers(page, debouncedSearch);
+  }, [page, debouncedSearch]);
+
+  const getCustomers = async (pageNumber = 1, searchText = "") => {
     setLoader(true);
     try {
-      const res = await fetch("/api/customer");
+      const res = await fetch(
+        `/api/customer?page=${pageNumber}&limit=${limit}&search=${searchText}`
+      );
       const data = await res.json();
+
       if (data.success) {
         setCustomers(data.data || []);
+        setTotalPages(data.pagination?.totalPages || 1);
+        setPage(data.pagination?.page || 1);
+        setTotalCustomers(data.pagination?.total || 0);
       } else {
         toast.error(data.message);
       }
@@ -140,7 +165,7 @@ const Customers = () => {
         {/* HEADER */}
         <div className={styles.header}>
           <h1>
-            Customers <span>{customers.length}</span>
+            Customers <span>{customers.length} out of {totalCustomers}</span>
           </h1>
 
           <button
@@ -158,6 +183,12 @@ const Customers = () => {
             + Add Customer
           </button>
         </div>
+
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Search by name or phone..."
+        />
 
         {/* TABLE */}
         <div className={styles.tableWrapper}>
@@ -200,6 +231,12 @@ const Customers = () => {
             <p className={styles.empty}>No customers yet</p>
           )}
         </div>
+
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={(p) => setPage(p)}
+        />
       </div>
 
       {/* MODAL */}

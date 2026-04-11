@@ -7,6 +7,8 @@ import OrderModal from "@/components/OrderModal";
 import { dateToShow, isLastRowEmpty, Product, ProductType } from "@/lib/utils";
 import { useStore } from "@/store";
 import { InventoryItem } from "@/store/adminStore";
+import SearchBar from "@/components/SearchBar";
+import Pagination from "@/components/Pagination";
 
 type CreditInventoryItem = {
   _id?: string;
@@ -63,20 +65,39 @@ const CreditInventory = () => {
   const [products, setProducts] = useState<Product[]>([
         { productId: "", productName: "", totalPrice: 0, accountTotalPrice: 0, batch: "", quantity: 0, discountPercentage: 0, batchId: "" },
   ]);
+  
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalOrders, setTotalOrders] = useState(0);
+
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
-      getCreditInventory();
-    }, []);
+    getCreditInventory(page, debouncedSearch);
+  }, [page, debouncedSearch]);
 
-    const getCreditInventory = async () => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+    const getCreditInventory = async (pageNumber = 1, searchText = "") => {
       setLoader(true);
       try {
-          const res = await fetch("/api/creditInventory");
+          const res = await fetch(`/api/creditInventory?page=${pageNumber}&limit=${limit}&search=${searchText}`);
 
           const data = await res.json();
           if(data.success){
-            const finalData = data.data;
-            setCreditInventory(finalData);
+            setCreditInventory(data.data || []);
+            setTotalPages(data.pagination?.totalPages || 1);
+            setPage(data.pagination?.page || 1);
+            setTotalOrders(data.pagination?.total || 0);
           } else {
             toast.error(data.message);
           }
@@ -226,13 +247,19 @@ const CreditInventory = () => {
         <div className={styles.header}>
           <h1>
             Credit Inventory
-            <span>{creditInventory?.length}</span>
+            <span>{creditInventory?.length} out of {totalOrders}</span>
           </h1>
 
           <button onClick={() => setShowModal(true)}>
             + Add Credit Inventory
           </button>
         </div>
+
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Search by customer name or phone..."
+        />
 
         {/* Table */}
         <div className={styles.tableWrapper}>
@@ -283,6 +310,11 @@ const CreditInventory = () => {
             <p className={styles.empty}>No credit inventory yet</p>
           )}
         </div>
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={(p) => setPage(p)}
+        />
       </div>
 
       {/* Modal */}

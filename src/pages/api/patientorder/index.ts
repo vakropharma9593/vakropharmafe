@@ -5,6 +5,7 @@ import "@/models/Product";
 import "@/models/Inventory";
 import { OrderStatusType, PaymentModeType } from "@/lib/utils";
 import PatientOrder from "@/models/PatientOrder";
+import Customer from "@/models/Customer";
 
 interface OrderWithCustomer {
   _id: string;
@@ -13,6 +14,7 @@ interface OrderWithCustomer {
     phone: string;
   };
   date: Date;
+  paymentDate: Date;
   status: string;
   deliveryService: string;
   deliveryTrackNumber: string;
@@ -46,7 +48,7 @@ export default async function handler(
 
     // CREATE ORDER
     if (req.method === "POST") {
-      const { customerId, date, status, products, paymentType } = req.body;
+      const { customerId, date, status, products, paymentType, paymentDate } = req.body;
     
 
       // Calculate payment amount
@@ -75,6 +77,7 @@ export default async function handler(
         customerId: customerId,
         date,
         status,
+        paymentDate,
         products: products,
         totalAmount: finalTotalAmount,
         totalAccountAmount,
@@ -99,35 +102,68 @@ export default async function handler(
 
     // GET ORDERS
     if (req.method === "GET") {
-      const orders = await PatientOrder.find()
+
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = (req.query.search as string) || "";
+
+      const skip = (page - 1) * limit;
+
+      // 🔍 Step 1: Find matching customers (for search)
+      let customerFilter: Record<string, unknown> = {};
+
+      if (search) {
+        const searchRegex = new RegExp(`^${search}`, "i"); // prefix for index usage
+
+        const customers = await Customer.find({
+          $or: [
+            { name: searchRegex },
+            { phone: searchRegex },
+          ],
+        }).select("_id");
+
+        const customerIds = customers.map((c) => c._id);
+
+        customerFilter = { customerId: { $in: customerIds } };
+      }
+
+      // ✅ Step 2: Total count (with filter)
+      const total = await PatientOrder.countDocuments(customerFilter);
+
+      // ✅ Step 3: Fetch paginated orders
+      const orders = await PatientOrder.find(customerFilter)
         .populate("customerId", "name phone")
-        .populate("products.productId", "name mrp")
+        .populate("products.productId", "name mrp costPrice")
         .populate("products.batchId", "batch")
+        .sort({ date: -1 })
+        .skip(skip)
+        .limit(limit)
         .lean();
 
+      // ✅ Step 5: Transform response
       const result = orders.map((o: OrderWithCustomer) => {
-
         return {
-            _id: o._id,
-            customerId: o.customerId,
-            customerName: o.customerId?.name,
-            customerPhone: o.customerId?.phone,
-            date: o.date,
-            status: o.status,
-            deliveryService: o.deliveryService,
-            deliveryTrackNumber: o.deliveryTrackNumber,
-            products: o.products.map((p) => ({
-                        productId: p?.productId?._id,
-                        productName: p?.productId?.name,
-                        batch: p.batchId?.batch,
-                        quantity: p.quantity,
-                        totalPrice: p.totalPrice,
-                        accountTotalPrice: p.accountTotalPrice,
-                        discountPercentage: p.discountPercentage
-                      })),
-            totalAmountPaid: o?.totalAmount || 0,
-            totalAccountAmountPaid: o?.totalAccountAmount,
-            paymentType: o?.paymentType || null,
+          _id: o._id,
+          customerId: o.customerId,
+          customerName: o.customerId?.name,
+          customerPhone: o.customerId?.phone,
+          date: o.date,
+          status: o.status,
+          paymentDate: o.paymentDate,
+          deliveryService: o.deliveryService,
+          deliveryTrackNumber: o.deliveryTrackNumber,
+          products: o.products.map((p) => ({
+            productId: p?.productId?._id,
+            productName: p?.productId?.name,
+            batch: p.batchId?.batch,
+            quantity: p.quantity,
+            totalPrice: p.totalPrice,
+            accountTotalPrice: p.accountTotalPrice,
+            discountPercentage: p.discountPercentage
+          })),
+          totalAmountPaid: o?.totalAmount || 0,
+          totalAccountAmountPaid: o?.totalAccountAmount,
+          paymentType: o?.paymentType || null,
         };
       });
 
