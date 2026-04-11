@@ -634,17 +634,28 @@
 
 .productImage {
   background: white;
-  padding: 20px;
   border-radius: 12px;
   margin-bottom: 15px;
   position: relative;
   aspect-ratio: 1 / 1;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.productImage img {
-  width: 100%;
-  height: auto;
+.imageInner {
+  position: relative;
+  width: 90%;
+  height: 90%;
+}
+
+.productCard:hover .imageInner {
+  transform: scale(1.05);
+}
+
+.imageInner {
+  transition: transform 0.3s ease;
 }
 
 /* TEXT */
@@ -713,29 +724,28 @@
   font-weight: 600;
 }
 
+
+
 .zoomWrapper {
+  position: relative;
+  width: 100%;
+  height: 420px; /* desktop control */
   overflow: hidden;
   border-radius: 12px;
-  position: relative; /* 🔥 REQUIRED for fill */
-  width: 100%;
-  aspect-ratio: 1 / 1; /* prevents layout shift */
-}
-
-.zoomWrapper img {
-  transition: transform 0.4s ease;
-  width:100%;
-  height:auto;
 }
 
 .zoomWrapper:hover img {
   transform: scale(1.08);
 }
 
-.heroImage{
-  background:white;
-  padding:28px;
-  border-radius:16px;
-  box-shadow:0 20px 40px rgba(0,0,0,0.06);
+.heroImage {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .heroImage img{
@@ -755,4 +765,10 @@
 .buyButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 900px) {
+  .zoomWrapper {
+    height: 300px;
+  }
 }

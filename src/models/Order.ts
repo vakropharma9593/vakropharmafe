@@ -43,11 +43,13 @@ const OrderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
       required: true,
+      index: true, // ✅ helps filtering
     },
 
     date: {
       type: Date,
       required: true,
+      index: true, // ✅ helps sorting
     },
 
     paymentDate: {
@@ -58,6 +60,7 @@ const OrderSchema = new mongoose.Schema(
       type: String,
       enum: Object.values(OrderStatusType),
       default: OrderStatusType.PAYMENT_PENDING,
+      index: true, // ✅ useful if filtering by status later
     },
 
     orderType: {
@@ -86,6 +89,15 @@ const OrderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+
+// 🔥 MOST IMPORTANT (for your API)
+OrderSchema.index({ customerId: 1, date: -1 });
+
+// 🔥 Optional (future-proofing)
+OrderSchema.index({ date: -1 }); // global sorting
+OrderSchema.index({ status: 1, date: -1 }); // status + sorting
+
 
 export default mongoose.models.Order ||
   mongoose.model("Order", OrderSchema);

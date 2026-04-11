@@ -27,7 +27,7 @@ interface OrderModalInterface {
 
 const OrderUpdateModal:React.FC<OrderModalInterface> = ({ setShowStatusModal, selectedOrder, source, callAfterSave }) => {
     const [statusUpdate, setStatusUpdate] = useState("");
-    const [paymentModeForUpdate, setPaymentModeForUpdate] = useState("");
+    const [paymentModeForUpdate, setPaymentModeForUpdate] = useState("Cash");
     const [paymentDate, setPaymentDate] = useState("");
     const [deliveryInfo, setDeliveryInfo] = useState({ deliveryService: "", deliveryTrackNumber: "" });
     const [loader, setLoader] = useState(false);

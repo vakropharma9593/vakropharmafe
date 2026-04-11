@@ -5,11 +5,13 @@ const CustomerSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      index: true,
     },
     phone: {
       type: String,
       required: true,
       unique: true,
+      index: true,
     },
     address: {
       type: String,

@@ -1,0 +1,28 @@
+.searchContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.searchInput {
+  width: 300px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid #EAE6DF;
+  background: var(--vakro-cream);
+  color: var(--vakro-green);
+  font-size: 14px;
+  outline: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.searchInput::placeholder {
+  color: #6B6B6B;
+}
+
+.searchInput:focus {
+  border-color: var(--vakro-gold);
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(201,162,94,0.2);
+}
