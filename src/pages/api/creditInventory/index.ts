@@ -4,7 +4,7 @@ import CreditInventory from "@/models/CreditInventory";
 import "@/models/Customer";
 import "@/models/Inventory";
 import "@/models/Product";
-import { ObjectId } from "mongoose";
+import Customer from "@/models/Customer";
 
 export default async function handler(
   req: NextApiRequest,
@@ -59,68 +59,85 @@ export default async function handler(
     // ✅ GET: Fetch with optional filters
     // =========================
     if (req.method === "GET") {
-      // const { fromDate, toDate, customerId } = req.query;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = (req.query.search as string) || "";
 
-      // const filter: Record<string, unknown> = {};
+      const skip = (page - 1) * limit;
 
-      // // 🔹 Filter by date range
-      // if (fromDate && toDate) {
-      //   filter.dateOfInventory = {
-      //     $gte: new Date(fromDate as string),
-      //     $lte: new Date(toDate as string),
-      //   };
-      // }
+      // 🔍 Step 1: Find matching customers
+      let customerFilter: Record<string, unknown> = {};
 
-      // // 🔹 Filter by customer
-      // if (customerId) {
-      //   filter.customerId = customerId;
-      // }
+      if (search) {
+        const searchRegex = new RegExp(`^${search}`, "i");
 
-      const creditInventory = await CreditInventory.find()
+        const customers = await Customer.find({
+          $or: [
+            { name: searchRegex },
+            { phone: searchRegex },
+          ],
+        }).select("_id");
+
+        const customerIds = customers.map((c) => c._id);
+
+        // If no customers found → return empty directly
+        if (customerIds.length === 0) {
+          return res.status(200).json({
+            success: true,
+            data: [],
+            pagination: {
+              total: 0,
+              page,
+              limit,
+              totalPages: 0,
+            },
+          });
+        }
+
+        customerFilter = { customerId: { $in: customerIds } };
+      }
+
+      // ✅ Step 2: Total count
+      const total = await CreditInventory.countDocuments(customerFilter);
+
+      // ✅ Step 3: Fetch paginated data
+      const creditInventory = await CreditInventory.find(customerFilter)
         .populate("customerId", "name phone")
         .populate("products.productId", "name")
         .populate("products.batchId", "batch")
-        .sort({ dateOfInventory: -1, createdAt: -1 });
+        .sort({ dateOfInventory: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean();
 
-      const creditInventoryToSend: {
-        _id: ObjectId;
-        products: {
-          productId: ObjectId;
-          productName: string;
-          batchId: ObjectId;
-          batch: string;
-          totalUnit: number;
-          remainingUnit: number;
-        }[];
-        customerId: ObjectId;
-        customerName: string;
-        customerPhone: string;
-        dateOfInventory: Date;
-      }[] = [];
+      // ✅ Step 4: Transform response
+      const creditInventoryToSend = creditInventory.map((item) => ({
+        _id: item?._id,
 
-      creditInventory.forEach((item) => {
-        creditInventoryToSend.push({
-          _id: item?._id,
-          products: item?.products?.map((each: { productId: { _id: ObjectId, name: string }, batchId: { _id: ObjectId, batch: string }, totalUnit: number, remainingUnit: number }) => {
-            return {
-              productId: each.productId._id,
-              productName: each.productId.name,
-              batchId: each.batchId._id,
-              batch: each.batchId.batch,
-              totalUnit: each.totalUnit,
-              remainingUnit: each.remainingUnit,
-            }
-          }),
-          customerId: item?.customerId?._id,
-          customerName: item?.customerId?.name,
-          customerPhone: item?.customerId?.phone,
-          dateOfInventory: item?.dateOfInventory,
-        });
-      });
+        products: item?.products?.map((each: { productId: { _id: string, name: string }, batchId: { _id: string, batch: string }, totalUnit: number, remainingUnit: number  }) => ({
+          productId: each.productId?._id,
+          productName: each.productId?.name,
+          batchId: each.batchId?._id,
+          batch: each.batchId?.batch,
+          totalUnit: each.totalUnit,
+          remainingUnit: each.remainingUnit,
+        })),
+
+        customerId: item?.customerId?._id,
+        customerName: item?.customerId?.name,
+        customerPhone: item?.customerId?.phone,
+        dateOfInventory: item?.dateOfInventory,
+      }));
 
       return res.status(200).json({
         success: true,
         data: creditInventoryToSend,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
       });
     }
 

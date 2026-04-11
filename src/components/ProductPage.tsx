@@ -118,6 +118,7 @@ const ProductPage = ({
                   priority
                   sizes="(max-width: 900px) 100vw, 50vw"
                   placeholder="blur"
+                  style={{ objectFit: "contain" }} // 🔥 IMPORTANT
                 />
               </div>
             </div>
@@ -233,19 +234,20 @@ const ProductPage = ({
               if (slug === product.slug) return null;
               const p: ProductUIData = productData[slug as ProductSlug];
               const otherProduct = allProducts?.find((item: ProductType ) => item?.slug === slug);
-              // debugger;
               return (
                 <div key={i} className={styles.productCard}>
 
                 <div className={styles.productImage}>
-                  <Image
-                    src={p?.heroImage}
-                    alt={p?.homepageData?.alt}
-                    fill
-                    sizes="(max-width: 600px) 50vw, 25vw"
-                    placeholder="blur"
-                    loading="lazy"
-                  />
+                  <div className={styles.imageInner}>
+                    <Image
+                      src={p?.heroImage}
+                      alt={p?.homepageData?.alt}
+                      fill
+                      sizes="(max-width: 600px) 50vw, 25vw"
+                      placeholder="blur"
+                      style={{ objectFit: "contain" }}
+                    />
+                  </div>
                 </div>
 
                 <h3>{otherProduct?.name}</h3>

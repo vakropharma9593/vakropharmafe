@@ -35,11 +35,8 @@ export default async function handler(
       }
 
       existing.status = status;
-      console.info("before saving", existing);
 
       const order = await existing.save();
-
-      console.info("adsfneew order", order);
 
       if (status === OrderStatusType.PAYMENT_DONE && !alreadyProcessed) {
         await Payment.create({

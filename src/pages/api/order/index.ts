@@ -8,6 +8,7 @@ import "@/models/Customer";
 import Product from "@/models/Product";
 import { OrderStatusType, OrderType } from "@/lib/utils";
 import { ObjectId } from "mongoose";
+import Customer from "@/models/Customer";
 
 interface OrderWithCustomer {
   _id: string;
@@ -175,60 +176,115 @@ export default async function handler(
 
     // GET ORDERS
     if (req.method === "GET") {
-      const orders = await Order.find()
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = (req.query.search as string) || "";
+
+      const skip = (page - 1) * limit;
+
+      // 🔍 Step 1: Find matching customers (for search)
+      let customerFilter: Record<string, unknown> = {};
+
+      if (search) {
+        const searchRegex = new RegExp(`^${search}`, "i"); // prefix for index usage
+
+        const customers = await Customer.find({
+          $or: [
+            { name: searchRegex },
+            { phone: searchRegex },
+          ],
+        }).select("_id");
+
+        const customerIds = customers.map((c) => c._id);
+
+        customerFilter = { customerId: { $in: customerIds } };
+      }
+
+      // ✅ Step 2: Total count (with filter)
+      const total = await Order.countDocuments(customerFilter);
+
+      // ✅ Step 3: Fetch paginated orders
+      const orders = await Order.find(customerFilter)
         .populate("customerId", "name phone")
         .populate("products.productId", "name mrp costPrice")
         .populate("products.batchId", "batch")
         .sort({ date: -1 })
+        .skip(skip)
+        .limit(limit)
         .lean();
 
-      const payments = await Payment.find();
+      // ✅ Step 4: Get payments only for fetched orders
+      const orderIds = orders.map((o) => o._id);
+
+      const payments = await Payment.find({
+        orderId: { $in: orderIds },
+      });
 
       const paymentMap = new Map<
         string,
         { totalAmount: number; paymentType: string }
       >();
+
       payments.forEach((p) => {
         paymentMap.set(p.orderId.toString(), {
-            totalAmount: p.totalAmount,
-            paymentType: p.paymentType,
+          totalAmount: p.totalAmount,
+          paymentType: p.paymentType,
         });
       });
 
+      // ✅ Step 5: Transform response
       const result = orders.map((o: OrderWithCustomer) => {
         const payment = paymentMap.get(o._id.toString());
 
         return {
-            _id: o._id,
-            customerId: o.customerId,
-            customerName: o.customerId?.name,
-            customerPhone: o.customerId?.phone,
-            date: o.date,
-            status: o.status,
-            orderType: o.orderType,
-            paymentDate: o.paymentDate,
-            deliveryService: o.deliveryService,
-            deliveryTrackNumber: o.deliveryTrackNumber,
-            products: o.products.map((p) => ({
-                        productId: p?.productId?._id,
-                        productName: p?.productId?.name,
-                        batch: p.batchId?.batch,
-                        quantity: p.quantity,
-                        totalPrice: p.totalPrice,
-                        sellingPrice: p.sellingPrice,
-                        discountPercentage: Number((((p?.productId?.mrp - p.totalPrice)/p?.productId?.mrp)*100).toFixed(2)),
-                        totalCostPrice: Number((p?.productId?.costPrice * p.quantity).toFixed(2)),
-                        totalGstPayable: Number(((p.totalPrice - p.sellingPrice)*p.quantity).toFixed(2)),
-                        totalProfit: Number((p.profit*p.quantity).toFixed(2)),
-                      })),
-            totalAmountPaid: o?.totalAmount || 0,
-            paymentType: payment?.paymentType || null,
+          _id: o._id,
+          customerId: o.customerId,
+          customerName: o.customerId?.name,
+          customerPhone: o.customerId?.phone,
+          date: o.date,
+          status: o.status,
+          orderType: o.orderType,
+          paymentDate: o.paymentDate,
+          deliveryService: o.deliveryService,
+          deliveryTrackNumber: o.deliveryTrackNumber,
+
+          products: o.products.map((p) => ({
+            productId: p?.productId?._id,
+            productName: p?.productId?.name,
+            batch: p.batchId?.batch,
+            quantity: p.quantity,
+            totalPrice: p.totalPrice,
+            sellingPrice: p.sellingPrice,
+            discountPercentage: Number(
+              (
+                ((p?.productId?.mrp - p.totalPrice) /
+                  p?.productId?.mrp) *
+                100
+              ).toFixed(2)
+            ),
+            totalCostPrice: Number(
+              (p?.productId?.costPrice * p.quantity).toFixed(2)
+            ),
+            totalGstPayable: Number(
+              ((p.totalPrice - p.sellingPrice) * p.quantity).toFixed(2)
+            ),
+            totalProfit: Number((p.profit * p.quantity).toFixed(2)),
+          })),
+
+          totalAmountPaid: o?.totalAmount || 0,
+          paymentType: payment?.paymentType || null,
         };
       });
 
       return res.status(200).json({
         success: true,
-        data: result
+        data: result,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
       });
     }
 
