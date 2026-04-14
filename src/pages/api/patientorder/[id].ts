@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/mongodb";
-import { OrderStatusType } from "@/lib/utils";
+import { OrderStatusType, PaymentStatusType } from "@/lib/utils";
 import PatientOrder from "@/models/PatientOrder";
 
 export default async function handler(
@@ -12,7 +12,7 @@ export default async function handler(
 
     if (req.method === "PATCH") {
       const { id } = req.query;
-      const { status } = req.body;
+      const { status, paymentStatus } = req.body;
 
       const existing = await PatientOrder.findById(id);
       if (!existing) {
@@ -22,17 +22,21 @@ export default async function handler(
           });
       }
 
-      if (status === OrderStatusType.PAYMENT_DONE) {
+      if (paymentStatus === PaymentStatusType.PAYMENT_DONE) {
         existing.paymentDate = req.body?.paymentDate || "";
-        existing.paymentType = req.body?.paymentType || "";
+        existing.paymentType = req.body?.paymentType;
+        existing.paymentStatus = paymentStatus;
       }
 
       if (status === OrderStatusType.DISPATCHED) {
         existing.deliveryService = req.body?.deliveryService;
-        existing.deliveryTrackNumber= req.body?.deliveryTrackNumber;
+        existing.deliveryTrackNumber = req.body?.deliveryTrackNumber;
+        existing.status = status;
       }
 
-       existing.status = status;
+      if (status === OrderStatusType.DELIVERED) {
+        existing.status = status;
+      }
 
       const order = await existing.save();
 
