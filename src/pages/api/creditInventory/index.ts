@@ -39,7 +39,7 @@ export default async function handler(
       const finalProducts = [];
       
       for (const product of products) {
-        const newProduct = { ...product, totalUnit: parseInt(product.totalUnit), remainingUnit: parseInt(product.totalUnit) };
+        const newProduct = { ...product, totalQuantity: parseInt(product.totalQuantity), remainingQuantity: parseInt(product.totalQuantity), freeQuantity: parseInt(product.freeQuantity), remainingFreeQuantity: parseInt(product.freeQuantity) };
         finalProducts.push(newProduct);
       }
 
@@ -102,7 +102,7 @@ export default async function handler(
 
       // ✅ Step 3: Fetch paginated data
       const creditInventory = await CreditInventory.find(customerFilter)
-        .populate("customerId", "name phone")
+        .populate("customerId", "name phone type")
         .populate("products.productId", "name")
         .populate("products.batchId", "batch")
         .sort({ dateOfInventory: -1, createdAt: -1 })
@@ -114,18 +114,21 @@ export default async function handler(
       const creditInventoryToSend = creditInventory.map((item) => ({
         _id: item?._id,
 
-        products: item?.products?.map((each: { productId: { _id: string, name: string }, batchId: { _id: string, batch: string }, totalUnit: number, remainingUnit: number  }) => ({
+        products: item?.products?.map((each: { productId: { _id: string, name: string }, batchId: { _id: string, batch: string }, totalQuantity: number, remainingQuantity: number, freeQuantity: number, remainingFreeQuantity: number  }) => ({
           productId: each.productId?._id,
           productName: each.productId?.name,
           batchId: each.batchId?._id,
           batch: each.batchId?.batch,
-          totalUnit: each.totalUnit,
-          remainingUnit: each.remainingUnit,
+          totalQuantity: each.totalQuantity,
+          remainingQuantity: each.remainingQuantity,
+          freeQuantity: each.freeQuantity,
+          remainingFreeQuantity: each.remainingFreeQuantity,
         })),
 
         customerId: item?.customerId?._id,
         customerName: item?.customerId?.name,
         customerPhone: item?.customerId?.phone,
+        customerType: item?.customerId?.type,
         dateOfInventory: item?.dateOfInventory,
       }));
 

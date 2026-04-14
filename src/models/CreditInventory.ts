@@ -14,12 +14,18 @@ const ProductSchema = new mongoose.Schema({
     ref: "Inventory",
     required: true,
   },
-  totalUnit: {
+  totalQuantity: {
     type: Number,
     required: true,
     min: 0,
   },
-  remainingUnit: {
+  freeQuantity: {
+    type: Number,
+  },
+  remainingFreeQuantity: {
+    type: Number,
+  },
+  remainingQuantity: {
     type: Number,
     required: true,
     min: 0,

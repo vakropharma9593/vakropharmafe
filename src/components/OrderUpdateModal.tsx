@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import styles from "../styles/orderModal.module.css";
-import { OrderStatusType, PaymentModeType } from "@/lib/utils";
+import { OrderStatusType, PaymentModeType, PaymentStatusType } from "@/lib/utils";
 import { toast } from "react-toastify";
 import Loader from "./Loader";
 
@@ -10,6 +10,7 @@ type Order = {
     date: string;
     paymentDate?: string;
     status: string;
+    paymentStatus: string;
     deliveryService?: string;
     deliveryTrackNumber?: string;
     paymentType?: string;
@@ -27,6 +28,7 @@ interface OrderModalInterface {
 
 const OrderUpdateModal:React.FC<OrderModalInterface> = ({ setShowStatusModal, selectedOrder, source, callAfterSave }) => {
     const [statusUpdate, setStatusUpdate] = useState("");
+    const [paymentStatusUpdate, setPaymentStatusUpdate] = useState("");
     const [paymentModeForUpdate, setPaymentModeForUpdate] = useState("Cash");
     const [paymentDate, setPaymentDate] = useState("");
     const [deliveryInfo, setDeliveryInfo] = useState({ deliveryService: "", deliveryTrackNumber: "" });
@@ -34,22 +36,9 @@ const OrderUpdateModal:React.FC<OrderModalInterface> = ({ setShowStatusModal, se
 
     useEffect(() => {
         const updateStatus = () => {
-            switch (selectedOrder.status) {
-                case OrderStatusType.PAYMENT_PENDING:
-                    setStatusUpdate(OrderStatusType.PAYMENT_DONE);
-                    break;
-                case OrderStatusType.PAYMENT_DONE:
-                    setStatusUpdate(OrderStatusType.PREPARING);
-                    break;
-                case OrderStatusType.PREPARING:
-                    setStatusUpdate(OrderStatusType.DISPATCHED);
-                    break;
-                case OrderStatusType.DISPATCHED:
-                    setStatusUpdate(OrderStatusType.DELIVERED);
-                    break;
-                default:
-                    break;
-            }
+            debugger;
+            setStatusUpdate(selectedOrder.status);
+            setPaymentStatusUpdate(selectedOrder.paymentStatus);
         }
         if (selectedOrder) {
             updateStatus();
@@ -58,17 +47,22 @@ const OrderUpdateModal:React.FC<OrderModalInterface> = ({ setShowStatusModal, se
 
     const isStatusAllowed = (item: string) => {
         switch (selectedOrder?.status) {
-            case OrderStatusType.PAYMENT_PENDING:
-                return true;
-                break;
-            case OrderStatusType.PAYMENT_DONE:
+            case OrderStatusType.PREPARING:
                 if (item === OrderStatusType.PREPARING || item === OrderStatusType.DISPATCHED || item === OrderStatusType.DELIVERED) return true;
                 break;
-            case OrderStatusType.PREPARING:
+            case OrderStatusType.DISPATCHED:
                 if (item === OrderStatusType.DISPATCHED || item === OrderStatusType.DELIVERED) return true;
                 break;
-            case OrderStatusType.DISPATCHED:
-                if (item === OrderStatusType.DELIVERED) return true;
+            default:
+                break;
+        }
+        return false;
+    }
+
+    const isPaymentStatusAllowed = (item: string) => {
+        switch (selectedOrder?.paymentStatus) {
+            case PaymentStatusType.PAYMENT_PENDING:
+                if (item === PaymentStatusType.PAYMENT_PENDING || item === PaymentStatusType.PAYMENT_DONE) return true;
                 break;
             default:
                 break;
@@ -81,24 +75,37 @@ const OrderUpdateModal:React.FC<OrderModalInterface> = ({ setShowStatusModal, se
         try {
             setLoader(true);
 
-            let dataToSend: { status: string, deliveryService?: string, deliveryTrackNumber?: string, paymentType?: string, paymentDate?: string } = {
-                status: statusUpdate
+            let dataToSend: { status?: string, deliveryService?: string, deliveryTrackNumber?: string, paymentType?: string, paymentDate?: string, paymentStatus?: string } = {
             }
 
-            if (statusUpdate === OrderStatusType.PAYMENT_DONE && paymentModeForUpdate && paymentDate) {
+            if (selectedOrder.status !== statusUpdate && statusUpdate === OrderStatusType.DISPATCHED) {
+                dataToSend = {
+                    ...dataToSend,
+                    status: statusUpdate,
+                    deliveryService: deliveryInfo.deliveryService,
+                    deliveryTrackNumber: deliveryInfo.deliveryTrackNumber,
+                }
+            }
+
+            if (selectedOrder.status !== statusUpdate && statusUpdate === OrderStatusType.DELIVERED) {
+                dataToSend = {
+                    ...dataToSend,
+                    status: statusUpdate,
+                }
+            }
+
+            if (selectedOrder.paymentStatus === PaymentStatusType.PAYMENT_PENDING && paymentStatusUpdate === PaymentStatusType.PAYMENT_DONE && paymentModeForUpdate && paymentDate) {
                 dataToSend = {
                     ...dataToSend,
                     paymentType: paymentModeForUpdate,
                     paymentDate,
+                    paymentStatus: paymentStatusUpdate,
                 }
             }
 
-            if (statusUpdate === OrderStatusType.DISPATCHED) {
-                dataToSend = {
-                    ...dataToSend,
-                    deliveryService: deliveryInfo.deliveryService,
-                    deliveryTrackNumber: deliveryInfo.deliveryTrackNumber,
-                }
+            if (Object.keys(dataToSend)?.length === 0 ) {
+                toast.error("Please update any field.");
+                return;
             }
 
             let url = "/api/order";
@@ -137,7 +144,7 @@ const OrderUpdateModal:React.FC<OrderModalInterface> = ({ setShowStatusModal, se
 
             <div className={styles.form}>
               <p>{selectedOrder.customerName}</p>
-              <div className={styles.formGroup}>
+              {selectedOrder?.status !== OrderStatusType.DELIVERED && <div className={styles.formGroup}>
                 <label>Order Status</label>
                 <select
                   value={statusUpdate}
@@ -150,8 +157,8 @@ const OrderUpdateModal:React.FC<OrderModalInterface> = ({ setShowStatusModal, se
                     )
                   })}
                 </select>
-              </div>
-              {selectedOrder?.status !== OrderStatusType.DISPATCHED && statusUpdate === OrderStatusType.DISPATCHED &&
+              </div>}
+              {selectedOrder?.status === OrderStatusType.PREPARING && statusUpdate === OrderStatusType.DISPATCHED &&
                 <div className={styles.formGroup}>
                     <label>Delivery Service</label>
                     <input className={styles.dateField} type="text" name="deliveryService" onChange={(e) => {
@@ -160,7 +167,7 @@ const OrderUpdateModal:React.FC<OrderModalInterface> = ({ setShowStatusModal, se
                 </div>
               }
 
-              {selectedOrder?.status !== OrderStatusType.DISPATCHED && statusUpdate === OrderStatusType.DISPATCHED &&
+              {selectedOrder?.status === OrderStatusType.PREPARING && statusUpdate === OrderStatusType.DISPATCHED &&
                 <div className={styles.formGroup}>
                     <label>Delivery Track No.</label>
                     <input className={styles.dateField} type="text" name="deliveryTrackNumber" onChange={(e) => {
@@ -169,7 +176,22 @@ const OrderUpdateModal:React.FC<OrderModalInterface> = ({ setShowStatusModal, se
                 </div>
               }
 
-              {statusUpdate === OrderStatusType.PAYMENT_DONE &&
+              {selectedOrder?.paymentStatus !== PaymentStatusType.PAYMENT_DONE && <div className={styles.formGroup}>
+                <label>Payment Status</label>
+                <select
+                  value={paymentStatusUpdate}
+                  onChange={(e) => setPaymentStatusUpdate(e.target.value)}
+                >
+                  {Object.values(PaymentStatusType)?.map((item: string) => {
+                    if (!isPaymentStatusAllowed(item)) return null;
+                    return (
+                      <option key={item} value={item} >{item}</option>
+                    )
+                  })}
+                </select>
+              </div>}
+
+              {selectedOrder.paymentStatus !== PaymentStatusType.PAYMENT_DONE && paymentStatusUpdate === PaymentStatusType.PAYMENT_DONE &&
                 <div className={styles.formGroup}>
                   <label>Payment Mode</label>
                   <select name="paymentType" onChange={(e) => setPaymentModeForUpdate(e.target.value)}>
@@ -181,7 +203,7 @@ const OrderUpdateModal:React.FC<OrderModalInterface> = ({ setShowStatusModal, se
                   </select>
                 </div>
               }
-              {statusUpdate === OrderStatusType.PAYMENT_DONE &&
+              {selectedOrder.paymentStatus !== PaymentStatusType.PAYMENT_DONE && paymentStatusUpdate === PaymentStatusType.PAYMENT_DONE &&
                 <div className={styles.formGroup}>
                     <label>Payment Date</label>
                     <input className={styles.dateField} type="date" name="paymentDate" onChange={(e) => setPaymentDate(e.target.value)} />

@@ -87,7 +87,7 @@
 /* MODAL BASE */
 .modal {
   width: 95%;
-  max-width: 480px;
+  max-width: 520px;
   background: linear-gradient(135deg, #173f36, #0f2f2a);
   border-radius: 18px;
   padding: 22px;
@@ -154,13 +154,6 @@
 .form input:focus,
 .form select:focus {
   box-shadow: 0 0 0 2px #00c896;
-}
-
-/* PRODUCT ROW */
-.productRow {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr 0.8fr;
-  gap: 10px;
 }
 
 /* ADD PRODUCT BUTTON */
@@ -453,13 +446,28 @@
     grid-template-columns: 0.4fr 0.4fr 0.4fr 0.4fr 0.4fr 0.2fr;
     padding: 10px 2px;
   }
+
+  .productRowCreditInv {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .deleteBtn {
+    grid-column: span 2;
+    justify-self: flex-end;
+  }
 }
 
 .productRow {
   display: grid;
   grid-template-columns: 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr 0.2fr;
   gap: 10px;
-  align-items: center;
+}
+
+.productRowCreditInv {
+  display: grid;
+  grid-template-columns: 2fr 3fr 3fr 2fr;
+  gap: 8px;
 }
 
 .eachProduct {
@@ -468,6 +476,7 @@
   background: rgba(255, 255, 255, 0.04);
   padding: 10px;
   border-radius: 12px;
+  margin-bottom: 12px;
 }
 
 .productHeader {
@@ -526,4 +535,8 @@
 .infoBox span {
   font-size: 10px;
   opacity: 0.7;
+}
+
+.addButton {
+  margin-right: 24px;
 }
