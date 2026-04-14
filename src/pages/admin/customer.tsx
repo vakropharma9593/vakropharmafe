@@ -6,7 +6,7 @@ import styles from "../../styles/customer.module.css";
 import OrderModal from "@/components/OrderModal";
 import Pagination from "@/components/Pagination";
 import SearchBar from "@/components/SearchBar";
-import { CustomerType } from "@/lib/utils";
+import { CustomerType, OrderStatusType, PaymentModeType, PaymentStatusType } from "@/lib/utils";
 
 type Customer = {
   name: string;
@@ -40,6 +40,7 @@ const Customers = () => {
     customerName: string,
     date: string,
     status: string,
+    paymentStatus: string;
     paymentType: string,
     customerType: CustomerType | null,
   }>({
@@ -47,8 +48,9 @@ const Customers = () => {
     customerId: "",
     customerName: "",
     date: "",
-    status: "Payment_Pending",
-    paymentType: "UPI",
+    paymentStatus: PaymentStatusType.PAYMENT_PENDING,
+    status: OrderStatusType.PREPARING,
+    paymentType: PaymentModeType.UPI,
     customerType: null
   });
 
