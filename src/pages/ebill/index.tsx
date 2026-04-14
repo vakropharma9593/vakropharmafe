@@ -121,7 +121,37 @@ const Invoice = () => {
   if (loading) {
     return (
       <div className={styles.wrapper}>
-        <p>Loading invoice...</p>
+        <div className={styles.outerContainer}>
+          <div className={styles.zigzagTop}></div>
+
+          <div className={styles.topHeader}>
+            <div className={styles.topHeaderContent}>
+              <div className={styles.shimmerLogo}></div>
+              <div className={styles.shimmerBtn}></div>
+            </div>
+          </div>
+
+          <div className={styles.card}>
+            <div className={styles.billContent}>
+              
+              {/* Info rows */}
+              {[1,2,3].map(i => (
+                <div key={i} className={styles.shimmerRow}></div>
+              ))}
+
+              <div className={styles.dottedLine} />
+
+              {/* Summary */}
+              <div className={styles.shimmerSummary}></div>
+
+              {/* Table shimmer */}
+              {[1,2,3,4].map(i => (
+                <div key={i} className={styles.shimmerTableRow}></div>
+              ))}
+
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -129,7 +159,14 @@ const Invoice = () => {
   if (!orderId || !token) {
     return (
       <div className={styles.wrapper}>
-        <p>Invalid invoice link ❌</p>
+        <div className={styles.emptyState}>
+          <h2>Invalid Link</h2>
+          <p>This invoice link seems broken or expired.</p>
+
+          <Link href="/">
+            <button className={styles.primaryBtn}>Go to Store</button>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -137,7 +174,14 @@ const Invoice = () => {
   if (!order) {
     return (
       <div className={styles.wrapper}>
-        <p>Invoice not found / Unauthorized ❌</p>
+        <div className={styles.emptyState}>
+          <h2>Invoice Not Found</h2>
+          <p>We couldn’t find this invoice or you don’t have access.</p>
+
+          <Link href="/">
+            <button className={styles.primaryBtn}>Visit Store</button>
+          </Link>
+        </div>
       </div>
     );
   }

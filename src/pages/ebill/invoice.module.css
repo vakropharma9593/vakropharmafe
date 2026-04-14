@@ -496,6 +496,93 @@
   }
 }
 
+/* shimmer animation */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.shimmerBase {
+  background: linear-gradient(
+    90deg,
+    #e0e0e0 25%,
+    #f5f5f5 37%,
+    #e0e0e0 63%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 6px;
+}
+
+/* elements */
+.shimmerLogo {
+  width: 120px;
+  height: 28px;
+  composes: shimmerBase;
+}
+
+.shimmerBtn {
+  width: 90px;
+  height: 28px;
+  composes: shimmerBase;
+}
+
+.shimmerRow {
+  height: 40px;
+  margin: 12px 16px;
+  composes: shimmerBase;
+}
+
+.shimmerSummary {
+  height: 60px;
+  margin: 16px;
+  composes: shimmerBase;
+}
+
+.shimmerTableRow {
+  height: 20px;
+  margin: 10px 16px;
+  composes: shimmerBase;
+}
+
+.emptyState {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  color: #173F36;
+}
+
+.emptyState h2 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.emptyState p {
+  font-size: 13px;
+  opacity: 0.7;
+  margin-bottom: 16px;
+}
+
+.primaryBtn {
+  background: #173F36;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.25s;
+}
+
+.primaryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+
 /*  */
 
 
