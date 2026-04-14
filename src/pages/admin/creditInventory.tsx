@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { toast, Bounce } from "react-toastify";
 import styles from "../../styles/inventory.module.css";
 import OrderModal from "@/components/OrderModal";
-import { dateToShow, isLastRowEmpty, Product, ProductType } from "@/lib/utils";
+import { CustomerType, dateToShow, isLastRowEmpty, OrderStatusType, PaymentStatusType, Product, ProductType } from "@/lib/utils";
 import { useStore } from "@/store";
 import { InventoryItem } from "@/store/adminStore";
 import SearchBar from "@/components/SearchBar";
@@ -17,12 +17,15 @@ type CreditInventoryItem = {
     productName: string;
     batchId: string;
     batch: string;
-    totalUnit: number;
-    remainingUnit: number;
+    totalQuantity: number;
+    remainingQuantity: number;
+    freeQuantity: number;
+    remainingFreeQuantity: number;
   }[];
   customerName: string;
   customerId: string;
   customerPhone: number;
+  customerType: CustomerType | null;
   dateOfInventory: string;
 }
 
@@ -39,8 +42,10 @@ const CreditInventory = () => {
     customerPhone: string;
     customerId: string;
     customerName: string;
+    customerType: CustomerType | null;
     date: string;
     status: string;
+    paymentStatus: string;
     paymentType: string;
     selectedProductId: string[];
     creditId: string;
@@ -48,22 +53,31 @@ const CreditInventory = () => {
     customerPhone: "", // to show
     customerId: "",
     customerName: "", // to show
+    customerType: null,
     date: "",
-    status: "Payment_Pending",
+    paymentStatus: PaymentStatusType.PAYMENT_PENDING,
+    status: OrderStatusType.PREPARING,
     paymentType: "UPI",
     selectedProductId: [],
     creditId: "",
   });
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{ 
+    customerId: string,
+    customerNumber: string,
+    customerName: string,
+    dateOfInventory: string,
+    customerType: CustomerType | null
+  }>({
     customerId: "",
     customerNumber: "",
     customerName: "",
     dateOfInventory: "",
+    customerType: null,
   });
 
   const [products, setProducts] = useState<Product[]>([
-        { productId: "", productName: "", totalPrice: 0, accountTotalPrice: 0, batch: "", quantity: 0, discountPercentage: 0, batchId: "" },
+        { productId: "", productName: "", totalPrice: 0, accountTotalPrice: 0, batch: "", quantity: 0, discountPercentage: 0, batchId: "", freeQuantity: 0 },
   ]);
   
   const [page, setPage] = useState(1);
@@ -131,7 +145,8 @@ const CreditInventory = () => {
           return {
             productId: item?.productId,
             batchId: item?.batchId,
-            totalUnit: item?.quantity,
+            totalQuantity: item?.quantity,
+            freeQuantity: item?.freeQuantity
           }
         })
       }
@@ -171,7 +186,7 @@ const CreditInventory = () => {
 
       const data = await res.json();
       if (data.success) {
-        setFormData({ ...formData, customerNumber: phone, customerName: data.data.name, customerId: data.data?._id})
+        setFormData({ ...formData, customerNumber: phone, customerName: data.data.name, customerId: data.data?._id, customerType: data.data.type })
 
         toast.success("Customer fetched successfully");
       } else {
@@ -286,7 +301,7 @@ const CreditInventory = () => {
                     <td>
                       {item.products.map((p, i) => (
                         <div key={i} className={styles.productItem}>
-                          {p.productName} × {p.remainingUnit + "/" + p.totalUnit}
+                          {p.productName} × {"(" + p.remainingQuantity + "+" + (p.remainingFreeQuantity || 0) + ")" + "/" + "(" + p.totalQuantity + "+" + (p.freeQuantity || 0) + ")"}
                         </div>
                       ))}
                     </td>
@@ -296,7 +311,7 @@ const CreditInventory = () => {
                         item?.products?.forEach((e: {productId: string }) => {
                           currentProductsName.push(e.productId);
                         })
-                        setOrderFormData({ ...orderFormData, date: item?.dateOfInventory, customerPhone: JSON.stringify(item?.customerPhone), customerName: item?.customerName, selectedProductId: currentProductsName, customerId: item?.customerId || "", creditId: item?._id || "" });
+                        setOrderFormData({ ...orderFormData, date: item?.dateOfInventory, customerPhone: JSON.stringify(item?.customerPhone), customerName: item?.customerName, selectedProductId: currentProductsName, customerId: item?.customerId || "", customerType: item.customerType, creditId: item?._id || "" });
                         setShowOrderModal(true);
                       }}>
                         Place Order
@@ -339,7 +354,8 @@ const CreditInventory = () => {
                       ...formData,
                       customerNumber: value,
                       customerId: "",
-                      customerName: ""
+                      customerName: "",
+                      customerType: null,
                     })
                     if (value?.length === 10) {
                       getCustomer(value);
@@ -352,91 +368,113 @@ const CreditInventory = () => {
                 )}
               </div>
 
-              {formData?.customerName && <h4>Customer Details :: {formData?.customerName}</h4>}
+              {formData?.customerName && <h4>Customer Details :: {formData?.customerName} ({formData.customerType})</h4>}
 
-              <div className={styles.formGroup}>
-                <label>Date of Inventory Given</label>
-                <input className={styles.dateField} type="date" name="dateOfInventory" onChange={(e) => setFormData({ ...formData, dateOfInventory: e.target.value})} />
-              </div>
 
-              <h4>Products</h4>
+              {formData.customerType && (formData.customerType === CustomerType.WHOLE_SALE || formData.customerType === CustomerType.RETAIL) ? 
+                <div>
+                  <div className={styles.formGroup}>
+                    <label>Date of Inventory Given</label>
+                    <input className={styles.dateField} type="date" name="dateOfInventory" onChange={(e) => setFormData({ ...formData, dateOfInventory: e.target.value})} />
+                  </div>
 
-              {products.map((p, index) => {
-                const allBatchesOfProduct = stateInventory?.filter((item: InventoryItem) => item?.productId === p.productId);
-                return (
-                    <div key={index} className={styles.eachProduct}>
-                        <div className={styles.productRowOne} >
-                            {/* PRODUCT */}
-                            <div className={styles.formGroup}>
-                                <label>Product Name</label>
-                                <select value={p.productId} onChange={(e) => handleProductChange(index, "productId", e.target.value)}>
-                                    <option value="">Select Product</option>
-                                    {stateProducts?.map((item: ProductType) => {
-                                        return (
-                                        <option key={item?._id} value={item?._id}>{item?.name}</option>
-                                        )
-                                    })}
-                                </select>
+                  <h4>Products</h4>
+
+                  {products.map((p, index) => {
+                    const allBatchesOfProduct = stateInventory?.filter((item: InventoryItem) => item?.productId === p.productId);
+                    return (
+                        <div key={index} className={styles.eachProduct}>
+                            <div className={styles.productRowOne} >
+                                {/* PRODUCT */}
+                                <div className={styles.formGroup}>
+                                    <label>Product Name</label>
+                                    <select value={p.productId} onChange={(e) => handleProductChange(index, "productId", e.target.value)}>
+                                        <option value="">Select Product</option>
+                                        {stateProducts?.map((item: ProductType) => {
+                                            return (
+                                            <option key={item?._id} value={item?._id}>{item?.name}</option>
+                                            )
+                                        })}
+                                    </select>
+                                </div>
+
+                                {/* BATCH */}
+                                <div className={styles.formGroup}>
+                                    <label>Batch Name</label>
+                                    <select
+                                        value={p.batchId}
+                                        className={styles.productRowOneBatch}
+                                        onChange={(e) => handleProductChange(index, "batchId", e.target.value, undefined, allBatchesOfProduct)}
+                                    >
+                                        <option value="">Batch</option>
+                                        {allBatchesOfProduct.map((b) => (
+                                            <option key={b._id} value={b._id}>{b.batch}</option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
 
-                            {/* BATCH */}
-                            <div className={styles.formGroup}>
-                                <label>Batch Name</label>
-                                <select
-                                    value={p.batchId}
-                                    className={styles.productRowOneBatch}
-                                    onChange={(e) => handleProductChange(index, "batchId", e.target.value, undefined, allBatchesOfProduct)}
-                                >
-                                    <option value="">Batch</option>
-                                    {allBatchesOfProduct.map((b) => (
-                                        <option key={b._id} value={b._id}>{b.batch}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className={styles.productRow}>
-                            {/* MRP */}
-                            <div className={styles.infoBox}>
-                                <span>MRP</span>
-                                ₹{
-                                    stateProducts?.filter((b) => b._id === p.productId)[0]?.mrp || 0
-                                }
-                            </div>
-
-                            {/* QTY */}
-                            <div className={styles.formGroup}>
-                                <label>Quantity</label>
-                                <input
-                                    type="number"
-                                    className={styles.smallInput}
-                                    placeholder="Qty"
-                                    onChange={(e) =>
-                                    handleProductChange(
-                                        index,
-                                        "quantity",
-                                        Number(e.target.value)
-                                    )
+                            <div className={styles.productRowCreditInv}>
+                                {/* MRP */}
+                                <div className={styles.infoBox}>
+                                    <span>MRP</span>
+                                    ₹{
+                                        stateProducts?.filter((b) => b._id === p.productId)[0]?.mrp || 0
                                     }
-                                />
+                                </div>
+
+                                {/* QTY */}
+                                <div className={styles.formGroup}>
+                                    <label>Quantity</label>
+                                    <input
+                                        type="number"
+                                        className={styles.smallInput}
+                                        placeholder="Qty"
+                                        onChange={(e) =>
+                                        handleProductChange(
+                                            index,
+                                            "quantity",
+                                            Number(e.target.value)
+                                        )
+                                        }
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label>Free Quantity</label>
+                                    <input
+                                        type="number"
+                                        className={styles.smallInput}
+                                        placeholder="Free Quantity"
+                                        onChange={(e) =>
+                                        handleProductChange(
+                                            index,
+                                            "freeQuantity",
+                                            Number(e.target.value)
+                                        )
+                                        }
+                                    />
+                                </div>
+                                {!(index === 0 && products?.length === 1) && <button
+                                    type="button"
+                                    className={styles.deleteBtn}
+                                    onClick={() => removeProduct(index)}
+                                >
+                                    ✕
+                                </button>}
                             </div>
-                            {!(index === 0 && products?.length === 1) && <button
-                                type="button"
-                                className={styles.deleteBtn}
-                                onClick={() => removeProduct(index)}
-                            >
-                                ✕
-                            </button>}
                         </div>
-                    </div>
-                )
-              })}
+                    )
+                  })}
 
-              <button type="button" disabled={isLastRowEmpty(products)} onClick={addProduct}>
-                + Add Product
-              </button>
+                  <button type="button" className={styles.addButton} disabled={isLastRowEmpty(products)} onClick={addProduct}>
+                    + Add Product
+                  </button>
 
-              <button type="submit">Submit</button>
+                  <button type="submit" disabled={isLastRowEmpty(products)}>Submit</button>
+                </div>
+              :
+                <h4>Credit products can be given to retailer or whole sale customer only.</h4>
+              }
             </form>
           </div>
         </div>

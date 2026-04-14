@@ -6,13 +6,14 @@ import styles from "../../styles/customer.module.css";
 import OrderModal from "@/components/OrderModal";
 import Pagination from "@/components/Pagination";
 import SearchBar from "@/components/SearchBar";
+import { CustomerType, OrderStatusType, PaymentModeType, PaymentStatusType } from "@/lib/utils";
 
 type Customer = {
-  id?: string;
   name: string;
   phone: string;
   address?: string;
-  type: "Individual" | "Retail" | "Doctor" | "Whole_Sale";
+  type: CustomerType;
+  gst?: string;
   _id?: string;
 };
 
@@ -28,18 +29,29 @@ const Customers = () => {
     name: "",
     phone: "",
     address: "",
-    type: "Individual",
-    _id: "",
+    type: CustomerType.INDIVIDUAL,
+    gst: "",
   });
 
   const [showOrderModal, setShowOrderModal] = useState(false);
-  const [orderFormData, setOrderFormData] = useState({
+  const [orderFormData, setOrderFormData] = useState<{
+    customerPhone: string,
+    customerId: string,
+    customerName: string,
+    date: string,
+    status: string,
+    paymentStatus: string;
+    paymentType: string,
+    customerType: CustomerType | null,
+  }>({
     customerPhone: "",
     customerId: "",
     customerName: "",
     date: "",
-    status: "Payment_Pending",
-    paymentType: "UPI",
+    paymentStatus: PaymentStatusType.PAYMENT_PENDING,
+    status: OrderStatusType.PREPARING,
+    paymentType: PaymentModeType.UPI,
+    customerType: null
   });
 
   const [page, setPage] = useState(1);
@@ -96,22 +108,39 @@ const Customers = () => {
     setLoader(true);
     if (formData?.phone !== "" && formData?.name !== "" && formData?.address !== "" && formData?.type) {
       try {
+        let dataToSave: {
+          phone?: string,
+          name?: string,
+          address?: string,
+          type?: string,
+          gst?: string,
+        } = {}
+        if (isEdit) {
+          dataToSave = {
+            address: formData.address,
+          }
+          if (formData.gst && formData.gst !== "") {
+            dataToSave = {
+              gst: formData.gst,
+            }
+          }
+        } else {
+          dataToSave = {
+            phone: formData.phone,
+            name: formData.name,
+            address: formData.address,
+            type: formData.type
+          }
+        }
         const res = await fetch(isEdit ? `/api/customer/${formData?._id}` :"/api/customer", {
           method: isEdit ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(dataToSave),
         });
 
         const data = await res.json();
         if (data.success){
-          if (isEdit) {
-            setCustomers((prev) =>
-              prev.map((c) => (c._id === formData._id ? data.data : c))
-            );
-          } else {
-            setCustomers((prev) => [...prev, data.data]);
-          }
-
+          getCustomers(1);
           setShowModal(false);
           setIsEdit(false);
 
@@ -176,7 +205,7 @@ const Customers = () => {
                 name: "",
                 phone: "",
                 address: "",
-                type: "Individual",
+                type: CustomerType.INDIVIDUAL,
               });
             }}
           >
@@ -201,23 +230,25 @@ const Customers = () => {
                   <th>Phone</th>
                   <th>Address</th>
                   <th>Type</th>
+                  <th>GST</th>
                   <th>Actions</th>
                 </tr>
               </thead>
 
               <tbody>
                 {customers.map((item, index) => (
-                  <tr key={item.id || index}>
+                  <tr key={item?._id || index}>
                     <td>{index + 1}</td>
                     <td>{item.name}</td>
                     <td>{item.phone}</td>
                     <td>{item.address}</td>
                     <td>{item.type}</td>
+                    <td>{item?.gst}</td>
 
                     <td className={styles.actions}>
                       <button onClick={() => handleEdit(item)}>Edit</button>
                       <button onClick={() => {
-                        setOrderFormData({ ...orderFormData, customerPhone: item?.phone, customerName: item?.name, customerId: item?._id || "" });
+                        setOrderFormData({ ...orderFormData, customerPhone: item?.phone, customerName: item?.name, customerId: item?._id || "", customerType: item?.type });
                         setShowOrderModal(true);
                       }}>
                         Place Order
@@ -249,33 +280,41 @@ const Customers = () => {
             </div>
 
             <form className={styles.form} onSubmit={handleSubmit}>
-              <div className={styles.formGroup}>
-                <label>Customer Name</label>
-                <input
-                  name="name"
-                  placeholder="Name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  onBlur={() => validateName(formData.name)}
-                />
-                {errors.name && <p className={styles.error}>{errors.name}</p>}
-              </div>
-              <div className={styles.formGroup}>
-                <label>Phone Number</label>
-                <input
-                  placeholder="Phone"
-                  value={formData.phone}
-                  maxLength={10}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      phone: e.target.value.replace(/\D/g, ""),
-                    })
-                  }
-                  onBlur={() => validatePhone(formData.phone)}
-                />
-                {errors.phone && <p className={styles.error}>{errors.phone}</p>}
-              </div>
+              {isEdit ? 
+                <h4>Customer Name: {formData.name} </h4>
+              :
+                <div className={styles.formGroup}>
+                  <label>Customer Name</label>
+                  <input
+                    name="name"
+                    placeholder="Name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    onBlur={() => validateName(formData.name)}
+                  />
+                  {errors.name && <p className={styles.error}>{errors.name}</p>}
+                </div>
+              }
+              {isEdit ? 
+                <h4>Customer Phone: {formData.phone} </h4>
+              :
+                <div className={styles.formGroup}>
+                  <label>Phone Number</label>
+                  <input
+                    placeholder="Phone"
+                    value={formData.phone}
+                    maxLength={10}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        phone: e.target.value.replace(/\D/g, ""),
+                      })
+                    }
+                    onBlur={() => validatePhone(formData.phone)}
+                  />
+                  {errors.phone && <p className={styles.error}>{errors.phone}</p>}
+                </div>
+              }
               <div className={styles.formGroup}>
                 <label>Address</label>
                 <input
@@ -285,18 +324,29 @@ const Customers = () => {
                   onChange={handleChange}
                 />
               </div>
+              {!isEdit && 
+                <div className={styles.formGroup}>
+                  <label>Customer Type</label>
+                  <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleChange}
+                  >
+                    <option value="Individual">Individual</option>
+                    <option value="Whole_Sale">Whole Sale</option>
+                    <option value="Retail">Retail</option>
+                    <option value="Doctor">Doctor</option>
+                  </select>
+                </div>
+              }
               <div className={styles.formGroup}>
-                <label>Customer Type</label>
-                <select
-                  name="type"
-                  value={formData.type}
+                <label>GST Number</label>
+                <input
+                  name="gst"
+                  placeholder="GST Number"
+                  value={formData.gst}
                   onChange={handleChange}
-                >
-                  <option value="Individual">Individual</option>
-                  <option value="Whole_Sale">Whole Sale</option>
-                  <option value="Retail">Retail</option>
-                  <option value="Doctor">Doctor</option>
-                </select>
+                />
               </div>
 
               <button type="submit">

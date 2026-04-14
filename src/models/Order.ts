@@ -1,4 +1,4 @@
-import { OrderStatusType, OrderType } from "@/lib/utils";
+import { OrderStatusType, OrderType, PaymentStatusType } from "@/lib/utils";
 import mongoose from "mongoose";
 
 /**
@@ -23,6 +23,9 @@ const ProductSchema = new mongoose.Schema({
     type: Number,
     required: true,
     min: 1,
+  },
+  freeQuantity: {
+    type: Number,
   },
   sellingPrice: {
     type: Number,
@@ -56,10 +59,17 @@ const OrderSchema = new mongoose.Schema(
       type: Date,
     },
 
+    paymentStatus: {
+      type: String,
+      enum: Object.values(PaymentStatusType),
+      default: PaymentStatusType.PAYMENT_PENDING,
+      index: true, // ✅ useful if filtering by status later
+    },
+
     status: {
       type: String,
       enum: Object.values(OrderStatusType),
-      default: OrderStatusType.PAYMENT_PENDING,
+      default: OrderStatusType.PREPARING,
       index: true, // ✅ useful if filtering by status later
     },
 

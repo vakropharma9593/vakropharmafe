@@ -6,7 +6,7 @@ import Inventory from "@/models/Inventory";
 import CreditInventory from "@/models/CreditInventory";
 import "@/models/Customer"; 
 import Product from "@/models/Product";
-import { OrderStatusType, OrderType } from "@/lib/utils";
+import { CustomerType, OrderStatusType, OrderType, PaymentStatusType } from "@/lib/utils";
 import { ObjectId } from "mongoose";
 import Customer from "@/models/Customer";
 
@@ -15,11 +15,13 @@ interface OrderWithCustomer {
   customerId?: {
     name: string;
     phone: string;
+    type: CustomerType;
   };
   date: Date;
   paymentDate: Date;
-  status: string;
+  status: OrderStatusType;
   orderType: string;
+  paymentStatus: PaymentStatusType;
   deliveryService: string;
   deliveryTrackNumber: string;
   totalAmount: number;
@@ -37,6 +39,7 @@ interface OrderWithCustomer {
     sellingPrice: number;
     batch: string;
     quantity: number;
+    freeQuantity: number;
     totalPrice: number;
     profit: number;
   }[];
@@ -51,7 +54,7 @@ export default async function handler(
 
     // CREATE ORDER
     if (req.method === "POST") {
-      const { customerId, date, status, paymentDate, products, paymentType, orderType, creditId } = req.body;
+      const { customerId, date, status, paymentDate, products, paymentType, paymentStatus, orderType, creditId } = req.body;
 
       const finalProducts = [];
 
@@ -86,13 +89,15 @@ export default async function handler(
           });
         }
 
-        inventory.remainingCount -= product.quantity;
+        inventory.remainingCount = orderType === "CREDIT" ? inventory.remainingCount - product.quantity - (product.freeQuantity || 0) : inventory.remainingCount - product.quantity;
 
         if (orderType === "CREDIT") {
           const index = creditProducts.findIndex((item: { productId: ObjectId }) => item.productId.toString() === product.productId)
           if (index !== -1) {
             const currentProduct = creditProducts[index];
-            currentProduct.remainingUnit = currentProduct.remainingUnit - product.quantity
+            console.info("asdfas", currentProduct);
+            currentProduct.remainingQuantity = currentProduct.remainingQuantity - product.quantity;
+            currentProduct.remainingFreeQuantity = currentProduct.remainingFreeQuantity - product.freeQuantity;
             creditProducts[index] = currentProduct;
           } else {
             return res.status(400).json({
@@ -143,6 +148,7 @@ export default async function handler(
         customerId: customerId,
         date,
         status,
+        paymentStatus,
         paymentDate,
         orderType: orderTypeToSave,
         products: finalProducts,
@@ -151,7 +157,7 @@ export default async function handler(
         deliveryTrackNumber
       });
 
-      if (status !== OrderStatusType.PAYMENT_PENDING) {
+      if (paymentStatus === PaymentStatusType.PAYMENT_DONE) {
         // Save payment if order is paid or above status
         await Payment.create({
           orderId: order._id,
@@ -205,7 +211,7 @@ export default async function handler(
 
       // ✅ Step 3: Fetch paginated orders
       const orders = await Order.find(customerFilter)
-        .populate("customerId", "name phone")
+        .populate("customerId", "name phone type")
         .populate("products.productId", "name mrp costPrice")
         .populate("products.batchId", "batch")
         .sort({ date: -1 })
@@ -241,8 +247,10 @@ export default async function handler(
           customerId: o.customerId,
           customerName: o.customerId?.name,
           customerPhone: o.customerId?.phone,
+          customerType: o.customerId?.type,
           date: o.date,
           status: o.status,
+          paymentStatus: o.paymentStatus,
           orderType: o.orderType,
           paymentDate: o.paymentDate,
           deliveryService: o.deliveryService,
@@ -253,6 +261,7 @@ export default async function handler(
             productName: p?.productId?.name,
             batch: p.batchId?.batch,
             quantity: p.quantity,
+            freeQuantity: p.freeQuantity,
             totalPrice: p.totalPrice,
             sellingPrice: p.sellingPrice,
             discountPercentage: Number(

@@ -4,7 +4,7 @@ import Product from "@/models/Product";
 import Inventory from "@/models/Inventory";
 import { Types } from "mongoose";
 import Expense from "@/models/Expense";
-import { ExpenseCategoryType, OrderStatusType } from "@/lib/utils";
+import { ExpenseCategoryType, OrderStatusType, PaymentStatusType } from "@/lib/utils";
 import Payment from "@/models/Payment";
 import Order from "@/models/Order";
 import ReturnRefund from "@/models/ReturnRefund";
@@ -255,12 +255,6 @@ export default async function getInsights(
 
     orders.forEach((order) => {
       switch (order.status) {
-        case OrderStatusType.PAYMENT_PENDING:
-          unPaidOrders += 1;
-          break;
-        case OrderStatusType.PAYMENT_DONE:
-          paidOrders += 1;
-          break;
         case OrderStatusType.PREPARING:
           preparingOrders += 1;
           break;
@@ -273,7 +267,18 @@ export default async function getInsights(
         default:
           break;
       }
-      if (order.status === OrderStatusType.PAYMENT_DONE || order.status === OrderStatusType.PREPARING || order.status === OrderStatusType.DISPATCHED || order.status === OrderStatusType.DELIVERED) {
+
+      switch (order.paymentStatus) {
+        case PaymentStatusType.PAYMENT_PENDING:
+          unPaidOrders += 1;
+          break;
+        case PaymentStatusType.PAYMENT_DONE:
+          paidOrders += 1;
+          break;
+        default:
+          break;
+      }
+      if (order.paymentStatus === PaymentStatusType.PAYMENT_DONE) {
         order.products?.map((product: { totalPrice: number, sellingPrice: number, quantity: number, productId: { name: string, _id: Types.ObjectId, costPrice: number, gstPercentage: number, gstPercentageOnCostPrice: number } }) => {
           const totalSale = productWiseSales[product.productId._id.toString()].totalSale + product.totalPrice * product.quantity;
           const netSale = productWiseSales[product.productId._id.toString()].netSale + product.sellingPrice * product.quantity;

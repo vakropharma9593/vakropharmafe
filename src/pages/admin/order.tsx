@@ -1,6 +1,6 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
-import { dateToShow, formatStatus, OrderStatusType, Product, ProductType } from "@/lib/utils";
+import { dateToShow, formatStatus, OrderStatusType, PaymentStatusType, Product, ProductType } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/order.module.css";
@@ -18,6 +18,7 @@ type Order = {
   paymentDate?: string;
   orderType: string;
   status: string;
+  paymentStatus: string;
   deliveryService?: string;
   deliveryTrackNumber?: string;
   products: Product[];
@@ -58,6 +59,41 @@ const Orders = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
+  const getInvoiceLink = async () => {
+    if (!selectedOrder?._id) return "";
+
+    const res = await fetch(
+      `/api/miscellaneous?id=${selectedOrder._id}`
+    );
+    const data = await res.json();
+
+    return data?.data?.link || "";
+  };
+
+  const handleCopyLink = async () => {
+    const link = await getInvoiceLink();
+    if (!link) return;
+
+    await navigator.clipboard.writeText(link);
+    toast.success("Invoice link copied ✅");
+  };
+
+  const handleWhatsAppShare = async () => {
+    const link = await getInvoiceLink();
+    if (!link) return;
+
+    const message = `🧾 *Vakro Invoice*
+      Order ID: ${selectedOrder?._id}
+      Amount: ₹${selectedOrder?.totalAmountPaid}
+
+      View Bill: ${link}
+
+      Thank you ❤️`;
+
+    const url = `https://wa.me/${selectedOrder?.customerPhone}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+  };
+
   const getOrders = async (pageNumber = 1, searchText = "") => {
     try {
       showStatusModal && setShowStatusModal(false);
@@ -87,8 +123,8 @@ const Orders = () => {
   };
 
   const STATUS_COLORS: Record<string, string> = {
-    [OrderStatusType.PAYMENT_PENDING]: styles.pending,
-    [OrderStatusType.PAYMENT_DONE]: styles.paid,
+    [PaymentStatusType.PAYMENT_PENDING]: styles.pending,
+    [PaymentStatusType.PAYMENT_DONE]: styles.paid,
     [OrderStatusType.PREPARING]: styles.preparing,
     [OrderStatusType.DISPATCHED]: styles.dispatched,
     [OrderStatusType.DELIVERED]: styles.delivered,
@@ -122,7 +158,6 @@ const Orders = () => {
                 <tr>
                   <th>#</th>
                   <th>Customer</th>
-                  <th>Phone</th>
                   <th>Type</th>
                   <th>Date</th>
                   <th>Status</th>
@@ -144,14 +179,19 @@ const Orders = () => {
                     }}
                   >
                     <td>{index + 1}</td>
-                    <td>{order.customerName}</td>
-                    <td>{order.customerPhone}</td>
+                    <td>{order.customerName}
+                      <br/>
+                      {order.customerPhone}
+                    </td>
                     <td>{order.orderType}</td>
                     <td>{dateToShow(order.date)}</td>
 
-                    <td>
+                    <td className={styles.secondStatus}>
                       <span className={`${styles.badge} ${STATUS_COLORS[order.status]}`}>
                         {formatStatus(order.status)}
+                      </span>
+                      <span className={`${styles.badge} ${STATUS_COLORS[order.paymentStatus]} ${styles.secondStatus}`}>
+                        {formatStatus(order.paymentStatus)}
                       </span>
                     </td>
 
@@ -162,7 +202,7 @@ const Orders = () => {
                     <td>
                       {order.products.map((p, i) => (
                         <div key={i} className={styles.productItem}>
-                          {p.productName} × {p.quantity}
+                          {p.productName} × {p.freeQuantity && p.freeQuantity > 0 ? "(" + p.quantity + "+" + p.freeQuantity + ")" : p.quantity }
                         </div>
                       ))}
                     </td>
@@ -177,8 +217,8 @@ const Orders = () => {
                           setSelectedOrder(order);
                           setShowStatusModal(true);
                         }}
-                        disabled={order.status === "Delivered"}
-                        style={{ cursor: order.status === "Delivered" ? "not-allowed" : "pointer"}}
+                        disabled={order.status === OrderStatusType.DELIVERED && order.paymentStatus === PaymentStatusType.PAYMENT_DONE}
+                        style={{ cursor: order.status === OrderStatusType.DELIVERED && order.paymentStatus === PaymentStatusType.PAYMENT_DONE ? "not-allowed" : "pointer"}}
                       >
                         Update
                       </button>
@@ -217,6 +257,22 @@ const Orders = () => {
               <button onClick={() => setShowViewModal(false)}>✕</button>
             </div>
 
+            <div className={styles.actionButtons}>
+              <button
+                className={styles.copyBtn}
+                onClick={handleCopyLink}
+              >
+                Copy Bill Link
+              </button>
+
+              <button
+                className={styles.whatsappBtn}
+                onClick={handleWhatsAppShare}
+              >
+                Share on WhatsApp
+              </button>
+            </div>
+
             <div className={styles.detailsContainer}>
               {/* ORDER INFO */}
               <div className={styles.detailsGrid}>
@@ -238,6 +294,11 @@ const Orders = () => {
                 <div>
                   <span>Status</span>
                   <p>{formatStatus(selectedOrder.status)}</p>
+                </div>
+
+                <div>
+                  <span>Payment Status</span>
+                  <p>{formatStatus(selectedOrder.paymentStatus)}</p>
                 </div>
 
                 {selectedOrder.deliveryService && <div>
@@ -288,10 +349,10 @@ const Orders = () => {
                               <td>{p.productName}</td>
                               <td>{p.batch}</td>
                               <td>₹{mrp}</td>
-                              <td>{Number(((mrp - p.totalPrice)/mrp)*100).toFixed(2)}%</td>
+                              <td>{p.discountPercentage}%</td>
                               <td>₹{p.totalPrice}</td>
                               <td>₹{Number(sellingPrice.toFixed(2))}</td>
-                              <td>{p.quantity}</td>
+                              <td>{p.freeQuantity && p.freeQuantity > 0 ? p.quantity + " + " + p.freeQuantity : p.quantity}</td>
                               <td>₹{p.totalPrice * p.quantity}</td>
                               <td>₹{p.totalGstPayable} </td>
                               <td>₹{p.totalCostPrice}</td>
@@ -306,7 +367,7 @@ const Orders = () => {
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td>{selectedOrder.products?.reduce((total, item ) => { return total + item?.quantity}, 0)}</td>
+                        <td>{selectedOrder.products?.reduce((total, item ) => { return total + (item?.freeQuantity || 0)}, 0) > 0 ? selectedOrder.products?.reduce((total, item ) => { return total + item?.quantity}, 0) + " + " + selectedOrder.products?.reduce((total, item ) => { return total + (item?.freeQuantity || 0)}, 0) : selectedOrder.products?.reduce((total, item ) => { return total + (item?.quantity || 0)}, 0)}</td>
                         <td>₹{Number((selectedOrder.products?.reduce((total, item ) => { return total + item.totalPrice * item.quantity}, 0)).toFixed(2))}</td>
                         <td>₹{Number((selectedOrder.products?.reduce((total, item ) => { return total + (item?.totalGstPayable || 0)}, 0)).toFixed(2))} </td>
                         <td>₹{Number((selectedOrder.products?.reduce((total, item ) => { return total + (item?.totalCostPrice || 0)}, 0)).toFixed(2))} </td>

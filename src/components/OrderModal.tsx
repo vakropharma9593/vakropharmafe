@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import styles from "../styles/orderModal.module.css";
-import { dateToShow, isLastRowEmpty, OrderStatusType, PaymentModeType, Product, ProductType } from "@/lib/utils";
+import { CustomerType, dateToShow, isLastRowEmpty, OrderStatusType, PaymentModeType, PaymentStatusType, Product, ProductType } from "@/lib/utils";
 import { toast } from "react-toastify";
 import Loader from "./Loader";
 import { useStore } from "@/store";
@@ -10,9 +10,11 @@ type Order = {
     customerPhone: string;
     customerId: string;
     customerName: string;
+    customerType: CustomerType | null;
     date: string;
     paymentDate?: string;
     status: string;
+    paymentStatus: string;
     deliveryService?: string;
     deliveryTrackNumber?: string;
     paymentType?: string;
@@ -36,9 +38,11 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
         customerPhone: "",
         customerId: "",
         customerName: "",
+        customerType: null,
         date: "",
         paymentDate: "",
         status: "",
+        paymentStatus: "",
         deliveryService: "",
         deliveryTrackNumber: "",
         paymentType: "",
@@ -54,7 +58,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
     });
 
     const [products, setProducts] = useState<Product[]>([
-          { productId: "", productName: "", totalPrice: NaN, accountTotalPrice: 0, batch: "", quantity: NaN, discountPercentage: NaN, batchId: "" },
+          { productId: "", productName: "", totalPrice: NaN, accountTotalPrice: 0, batch: "", quantity: NaN, discountPercentage: NaN, batchId: "", totalAmountReceived: NaN },
     ]);
     const [errors, setErrors] = useState({ customerPhone: "" });
 
@@ -86,7 +90,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
         if (orderFormData?.customerId !== "" && orderFormData?.date !== "" && orderFormData?.status && products?.length > 0 && !isLastRowEmpty(products)) {
           try {
             const dataToSend = { ...orderFormData, products, orderType: source === "creditInventory" ? "CREDIT" : "" }
-            if (orderFormData.status === OrderStatusType.PAYMENT_PENDING) {
+            if (orderFormData.status === PaymentStatusType.PAYMENT_PENDING) {
                 delete dataToSend.paymentType;
             }
             let url = "/api/order";
@@ -129,8 +133,9 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
         const returnedValue = products.reduce(
         (final, product) => {
             const selectedProduct = stateProducts?.find((item: ProductType) => item?._id === product.productId);
-            const gstAmount = (product?.totalPrice*(selectedProduct?.gstPercentage || 0))/(100+(selectedProduct?.gstPercentage || 0));
-            const amountReceived = Number((final.totalAmountReceived + product.totalPrice * product.quantity).toFixed(2));
+            const totalPrice = product.totalPrice;
+            const gstAmount = (totalPrice*(selectedProduct?.gstPercentage || 0))/(100+(selectedProduct?.gstPercentage || 0));
+            const amountReceived = Number((final.totalAmountReceived + totalPrice * product.quantity).toFixed(2));
             const costPrice = Number((final.totalCostPrice + (selectedProduct?.costPrice || 0) * product.quantity).toFixed(2));
             const gstPayable = Number((final.totalGstPayable + (gstAmount*product.quantity)).toFixed(2));
             const currentFinal = {
@@ -184,13 +189,16 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
             const currentTotalInfo = calculateTotal(updated);
             setTotalInfo(currentTotalInfo);
         }
-        if ((field === "discountPercentage" || field === "totalPrice") && p) {
+        if ((field === "discountPercentage" || field === "totalPrice" || (field === "quantity" && orderFormData.customerType === CustomerType.WHOLE_SALE)) && p) {
             const mrp = stateProducts?.filter((b: ProductType) => b._id === p.productId)[0].mrp;
             let totalPrice = updated[index].totalPrice;
             let discountPercentage = updated[index].discountPercentage;
             if (field === "discountPercentage") {
                 totalPrice = Number((mrp*(1 - parseFloat(value as string)/ 100)).toFixed(2));
             } else if (field === "totalPrice") {
+                discountPercentage = Number((((mrp - totalPrice)/mrp)*100).toFixed(2));
+            } else if (field === "quantity") {
+                totalPrice = (updated[index].totalAmountReceived || 0)/updated[index].quantity;
                 discountPercentage = Number((((mrp - totalPrice)/mrp)*100).toFixed(2));
             }
             updated[index] = {
@@ -220,7 +228,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
 
         const data = await res.json();
         if(data.success) {
-            setOrderFormData({ ...orderFormData, customerPhone: phone, customerName: data.data.name, customerId: data.data?._id})
+            setOrderFormData({ ...orderFormData, customerPhone: phone, customerName: data.data.name, customerId: data.data?._id, customerType: data.data?.type })
 
             toast.success("Customer fetched successfully");
         } else {
@@ -249,7 +257,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
             <div className={styles.modalHeader}>
               <h2>Create Order</h2>
               <button onClick={() => setShowOrderModal(false)}>✕</button>
-            </div>
+            </div> 
 
             <form className={styles.form} onSubmit={handleOrderSubmit}>
               {source === "orderPage" || source === "patientOrderPage" ? 
@@ -275,13 +283,13 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                         <p className={styles.error}>{errors.customerPhone}</p>
                     )}
 
-                    {orderFormData?.customerName && <h4>Customer Details :: {orderFormData?.customerName}</h4>}
+                    {orderFormData?.customerName && <h4>Customer Details :: {orderFormData?.customerName} ({orderFormData.customerType})</h4>}
                 </div>
               :
                 <>
                     <h4>Customer Phone : {orderFormData?.customerPhone}</h4>
 
-                    {orderFormData?.customerName && <h4>Customer Name :: {orderFormData?.customerName}</h4>}
+                    {orderFormData?.customerName && <h4>Customer Name :: {orderFormData?.customerName} ({orderFormData.customerType})</h4>}
                 </>
               }
               {source === "creditInventory" ? 
@@ -304,10 +312,36 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                 </select>
               </div>
 
-              {(orderFormData.status === OrderStatusType.PAYMENT_DONE || orderFormData.status === OrderStatusType.PREPARING || orderFormData.status === OrderStatusType.DISPATCHED || orderFormData.status === OrderStatusType.DELIVERED) &&
+              <div className={styles.formGroup}>
+                <label>Payment Status</label>
+                <select name="paymentStatus" onChange={handleOrderChange}>
+                    <option value="">Select Status</option>
+                    {Object.values(PaymentStatusType)?.map((item: string) => {
+                        return (
+                            <option key={item} >{item}</option>
+                        )
+                    })}
+                </select>
+              </div>
+
+              {(orderFormData.paymentStatus === PaymentStatusType.PAYMENT_DONE) &&
                 <div className={styles.formGroup}>
                     <label>Payment Date</label>
                     <input className={styles.dateField} type="date" name="paymentDate" onChange={handleOrderChange} />
+                </div>
+              }
+
+              {(orderFormData.paymentStatus === PaymentStatusType.PAYMENT_DONE ) && 
+                <div className={styles.formGroup}>
+                    <label>Payment Mode</label>
+                    <select name="paymentType" onChange={handleOrderChange}>
+                        <option value="">Payment Mode</option>
+                        {Object.values(PaymentModeType)?.map((item: string) => {
+                            return (
+                                <option key={item}>{item}</option>
+                            )
+                        })}
+                    </select>
                 </div>
               }
 
@@ -322,20 +356,6 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                 <div className={styles.formGroup}>
                     <label>Delivery Track No.</label>
                     <input className={styles.dateField} type="text" name="deliveryTrackNumber" onChange={handleOrderChange} />
-                </div>
-              }
-
-              {(orderFormData.status === OrderStatusType.PAYMENT_DONE || orderFormData.status === OrderStatusType.PREPARING || orderFormData.status === OrderStatusType.DISPATCHED || orderFormData.status === OrderStatusType.DELIVERED) && 
-                <div className={styles.formGroup}>
-                    <label>Payment Mode</label>
-                    <select name="paymentType" onChange={handleOrderChange}>
-                        <option value="">Payment Mode</option>
-                        {Object.values(PaymentModeType)?.map((item: string) => {
-                            return (
-                                <option key={item}>{item}</option>
-                            )
-                        })}
-                    </select>
                 </div>
               }
 
@@ -379,7 +399,78 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                             </div>
                         </div>
 
-                        <div className={styles.productRow}>
+                        {orderFormData?.customerType === CustomerType.WHOLE_SALE && 
+                            <div>
+                                <div className={styles.productRow}>
+                                    <div className={styles.infoBox}>
+                                        <span>MRP</span>
+                                        ₹{
+                                            stateProducts?.filter((b) => b._id === p.productId)[0]?.mrp || 0
+                                        }
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label>Total Amount Paid (₹)</label>
+                                        <input
+                                            type="number"
+                                            className={styles.smallInput}
+                                            placeholder="₹"
+                                            onChange={(e) =>
+                                                handleProductChange(
+                                                    index,
+                                                    "totalAmountReceived",
+                                                    Number(e.target.value),
+                                                    p,
+                                                )
+                                            }
+                                            value={p.totalAmountReceived}
+                                        />
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label>Quantity</label>
+                                        <input
+                                            type="number"
+                                            className={styles.smallInput}
+                                            placeholder="Qty"
+                                            value={p.quantity}
+                                            onChange={(e) =>
+                                            handleProductChange(
+                                                index,
+                                                "quantity",
+                                                Number(e.target.value),
+                                                p
+                                            )
+                                            }
+                                        />
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label>Free Quantity</label>
+                                        <input
+                                            type="number"
+                                            className={styles.smallInput}
+                                            placeholder="Qty"
+                                            value={p.freeQuantity}
+                                            onChange={(e) =>
+                                            handleProductChange(
+                                                index,
+                                                "freeQuantity",
+                                                Number(e.target.value)
+                                            )
+                                            }
+                                        />
+                                    </div>
+                                    {!(index === 0 && products?.length === 1) && <button
+                                        type="button"
+                                        className={styles.deleteBtn}
+                                        onClick={() => removeProduct(index)}
+                                    >
+                                        ✕
+                                    </button>}
+                                </div>
+                                <h4>Discount %: {p.discountPercentage}, 1 Unit Total Price : ₹{p.totalPrice} </h4>
+                            </div>
+                        }
+
+                        {orderFormData?.customerType !== CustomerType.WHOLE_SALE && <div className={styles.productRow}>
                             {/* MRP */}
                             <div className={styles.infoBox}>
                                 <span>MRP</span>
@@ -468,7 +559,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                             >
                                 ✕
                             </button>}
-                        </div>
+                        </div>}
                     </div>
                 )
               })}
