@@ -15,7 +15,7 @@ export default async function handler(
 
     // CREATE CUSTOMER
     if (req.method === "POST") {
-      const { name, phone, address, type } = req.body;
+      const { name, phone, address, type, gst } = req.body;
 
       if (!name || !phone || !address || !type) {
         return res.status(400).json({
@@ -28,7 +28,8 @@ export default async function handler(
         name,
         phone,
         address,
-        type
+        type,
+        gst,
       });
 
       return res.status(201).json({

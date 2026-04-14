@@ -538,5 +538,54 @@
   transform: scale(1.1);
 }
 
+.actionButtons {
+  display: flex;
+  gap: 10px;
+  margin: 12px 0;
+}
 
+.copyBtn {
+  background: var(--vakro-gold);
+  color: var(--vakro-green-dark);
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.copyBtn:hover {
+  background: var(--vakro-green-light);
+}
+
+.copyBtn:active {
+  transform: scale(0.95);
+}
+
+.whatsappBtn {
+  background: #25D366;
+  color: var(--vakro-green-dark);
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.whatsappBtn:hover {
+  background: #1ebe5d;
+}
+
+.whatsappBtn:active {
+  transform: scale(0.95);
+}
+
+.table td.secondStatus {
+  display: flex;
+  flex-direction: column;
+}
+
+.secondStatus span:last-child {
+  margin-top: 3px;
+}
 

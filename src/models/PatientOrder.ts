@@ -1,4 +1,4 @@
-import { OrderStatusType, PaymentModeType } from "@/lib/utils";
+import { OrderStatusType, PaymentModeType, PaymentStatusType } from "@/lib/utils";
 import mongoose from "mongoose";
 
 /**
@@ -55,7 +55,15 @@ const PatientOrderSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: Object.values(OrderStatusType),
-      default: OrderStatusType.PAYMENT_PENDING,
+      default: OrderStatusType.PREPARING,
+      index: true, // ✅ useful if filtering by status later
+    },
+  
+    paymentStatus: {
+      type: String,
+      enum: Object.values(PaymentStatusType),
+      default: PaymentStatusType.PAYMENT_PENDING,
+      index: true, // ✅ useful if filtering by status later
     },
 
     deliveryService: {

@@ -41,8 +41,12 @@ export const getExpiryClass = (expiryDate: string) => {
   return "basic";
 };
 
-export const formatStatus = (status: string) =>
-  status.replace(/_/g, " ");
+export const formatStatus = (status: string) => {
+  if (status && status !== "") {
+    return status.replace(/_/g, " ");
+  } else return "";
+}
+  
 
 export type Product = {
   productId: string;
@@ -51,11 +55,13 @@ export type Product = {
   batch: string;
   batchId: string;
   quantity: number;
+  freeQuantity?: number;
   discountPercentage: number;
   accountTotalPrice?: number;
   totalGstPayable?: number;
   totalCostPrice?: number;
   totalProfit?: number;
+  totalAmountReceived?: number;
 };
 
 export const isLastRowEmpty = (products: Product[]) => {
@@ -107,11 +113,21 @@ export enum PaymentModeType {
 }
 
 export enum OrderStatusType  {
-  PAYMENT_PENDING = "Payment Pending",
-  PAYMENT_DONE = "Payment Done",
   PREPARING = "Preparing",
   DISPATCHED = "Dispatched",
   DELIVERED = "Delivered",
+}
+
+export enum PaymentStatusType  {
+  PAYMENT_PENDING = "Payment Pending",
+  PAYMENT_DONE = "Payment Done",
+}
+
+export enum CustomerType {
+  INDIVIDUAL = "Individual",
+  WHOLE_SALE = "Whole_Sale",
+  RETAIL = "Retail",
+  DOCTOR = "Doctor",
 }
 
 export enum OrderType { 

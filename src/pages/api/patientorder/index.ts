@@ -16,6 +16,7 @@ interface OrderWithCustomer {
   date: Date;
   paymentDate: Date;
   status: string;
+  paymentStatus: string;
   deliveryService: string;
   deliveryTrackNumber: string;
   totalAmount: number;
@@ -48,7 +49,7 @@ export default async function handler(
 
     // CREATE ORDER
     if (req.method === "POST") {
-      const { customerId, date, status, products, paymentType, paymentDate } = req.body;
+      const { customerId, date, status, products, paymentStatus, paymentType, paymentDate } = req.body;
     
 
       // Calculate payment amount
@@ -77,6 +78,7 @@ export default async function handler(
         customerId: customerId,
         date,
         status,
+        paymentStatus,
         paymentDate,
         products: products,
         totalAmount: finalTotalAmount,
@@ -149,6 +151,7 @@ export default async function handler(
           customerPhone: o.customerId?.phone,
           date: o.date,
           status: o.status,
+          paymentStatus: o.paymentStatus,
           paymentDate: o.paymentDate,
           deliveryService: o.deliveryService,
           deliveryTrackNumber: o.deliveryTrackNumber,

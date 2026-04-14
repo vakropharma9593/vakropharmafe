@@ -1,6 +1,6 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
-import { dateToShow, formatStatus, OrderStatusType, Product, ProductType } from "@/lib/utils";
+import { dateToShow, formatStatus, OrderStatusType, PaymentStatusType, Product, ProductType } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/order.module.css";
@@ -16,6 +16,7 @@ type Order = {
   customerPhone: string;
   date: string;
   status: string;
+  paymentStatus: string;
   paymentDate: string;
   deliveryService?: string;
   deliveryTrackNumber?: string;
@@ -81,8 +82,8 @@ const PatientOrders = () => {
   };
 
   const STATUS_COLORS: Record<string, string> = {
-    [OrderStatusType.PAYMENT_PENDING]: styles.pending,
-    [OrderStatusType.PAYMENT_DONE]: styles.paid,
+    [PaymentStatusType.PAYMENT_PENDING]: styles.pending,
+    [PaymentStatusType.PAYMENT_DONE]: styles.paid,
     [OrderStatusType.PREPARING]: styles.preparing,
     [OrderStatusType.DISPATCHED]: styles.dispatched,
     [OrderStatusType.DELIVERED]: styles.delivered,
@@ -116,7 +117,6 @@ const PatientOrders = () => {
                 <tr>
                   <th>#</th>
                   <th>Customer</th>
-                  <th>Phone</th>
                   <th>Date</th>
                   <th>Status</th>
                   <th>Total ₹</th>
@@ -138,13 +138,18 @@ const PatientOrders = () => {
                     }}
                   >
                     <td>{index + 1}</td>
-                    <td>{order.customerName}</td>
-                    <td>{order.customerPhone}</td>
+                    <td>{order.customerName}
+                      <br/>
+                      {order.customerPhone}
+                    </td>
                     <td>{dateToShow(order.date)}</td>
 
-                    <td>
+                    <td className={styles.secondStatus}>
                       <span className={`${styles.badge} ${STATUS_COLORS[order.status]}`}>
                         {formatStatus(order.status)}
+                      </span>
+                      <span className={`${styles.badge} ${STATUS_COLORS[order.paymentStatus]} ${styles.secondStatus}`}>
+                        {formatStatus(order.paymentStatus)}
                       </span>
                     </td>
 
@@ -229,6 +234,11 @@ const PatientOrders = () => {
                 <div>
                   <span>Status</span>
                   <p>{formatStatus(selectedOrder.status)}</p>
+                </div>
+
+                <div>
+                  <span>Payment Status</span>
+                  <p>{formatStatus(selectedOrder.paymentStatus)}</p>
                 </div>
 
                 {selectedOrder.deliveryService && <div>

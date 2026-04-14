@@ -1,3 +1,4 @@
+import { CustomerType } from "@/lib/utils";
 import mongoose from "mongoose";
 
 const CustomerSchema = new mongoose.Schema(
@@ -16,10 +17,14 @@ const CustomerSchema = new mongoose.Schema(
     address: {
       type: String,
     },
+    gst: {
+      type: String,
+    },
     type: {
       type: String,
-      enum: ["Individual", "Whole_Sale", "Retail", "Doctor"],
-      required: true
+      enum: Object.values(CustomerType),
+      default: CustomerType.INDIVIDUAL,
+      index: true, 
     }
   },
   { timestamps: true }
