@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { toast, Bounce } from "react-toastify";
 import styles from "../../styles/inventory.module.css";
 import OrderModal from "@/components/OrderModal";
-import { CustomerType, dateToShow, isLastRowEmpty, Product, ProductType } from "@/lib/utils";
+import { CustomerType, dateToShow, isLastRowEmpty, OrderStatusType, PaymentStatusType, Product, ProductType } from "@/lib/utils";
 import { useStore } from "@/store";
 import { InventoryItem } from "@/store/adminStore";
 import SearchBar from "@/components/SearchBar";
@@ -45,6 +45,7 @@ const CreditInventory = () => {
     customerType: CustomerType | null;
     date: string;
     status: string;
+    paymentStatus: string;
     paymentType: string;
     selectedProductId: string[];
     creditId: string;
@@ -54,7 +55,8 @@ const CreditInventory = () => {
     customerName: "", // to show
     customerType: null,
     date: "",
-    status: "Payment_Pending",
+    paymentStatus: PaymentStatusType.PAYMENT_PENDING,
+    status: OrderStatusType.PREPARING,
     paymentType: "UPI",
     selectedProductId: [],
     creditId: "",
