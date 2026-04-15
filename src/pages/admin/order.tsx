@@ -292,6 +292,11 @@ const Orders = () => {
                 </div>
 
                 <div>
+                  <span>Order Type</span>
+                  <p>{selectedOrder.orderType}</p>
+                </div>
+
+                <div>
                   <span>Status</span>
                   <p>{formatStatus(selectedOrder.status)}</p>
                 </div>

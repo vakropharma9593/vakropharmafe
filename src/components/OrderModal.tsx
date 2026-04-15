@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import styles from "../styles/orderModal.module.css";
-import { CustomerType, dateToShow, isLastRowEmpty, OrderStatusType, PaymentModeType, PaymentStatusType, Product, ProductType } from "@/lib/utils";
+import { CustomerType, dateToShow, isLastRowEmpty, OrderStatusType, OrderType, PaymentModeType, PaymentStatusType, Product, ProductType } from "@/lib/utils";
 import { toast } from "react-toastify";
 import Loader from "./Loader";
 import { useStore } from "@/store";
@@ -14,6 +14,7 @@ type Order = {
     date: string;
     paymentDate?: string;
     status: string;
+    orderType: OrderType;
     paymentStatus: string;
     deliveryService?: string;
     deliveryTrackNumber?: string;
@@ -39,6 +40,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
         customerId: "",
         customerName: "",
         customerType: null,
+        orderType: OrderType.DIRECT_CUSTOMER,
         date: "",
         paymentDate: "",
         status: "",
@@ -87,10 +89,21 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
     const handleOrderSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoader(true);
-        if (orderFormData?.customerId !== "" && orderFormData?.date !== "" && orderFormData?.status && products?.length > 0 && !isLastRowEmpty(products)) {
+        if (orderFormData?.customerId !== "" && orderFormData?.date !== "" && products?.length > 0 && !isLastRowEmpty(products)) {
           try {
-            const dataToSend = { ...orderFormData, products, orderType: source === "creditInventory" ? "CREDIT" : "" }
-            if (orderFormData.status === PaymentStatusType.PAYMENT_PENDING) {
+            const dataToSend = { 
+                ...orderFormData,
+                status: orderFormData.orderType === OrderType.SAMPLE ? OrderStatusType.DELIVERED : orderFormData.status,
+                paymentStatus: orderFormData.orderType === OrderType.SAMPLE ? PaymentStatusType.PAYMENT_DONE : orderFormData.paymentStatus,
+                products: orderFormData.orderType === OrderType.SAMPLE ? products.map((p: Product) => {
+                    return {
+                        ...p,
+                        totalPrice: 0,
+                        totalAmountReceived: 0,
+                    }
+                }) : products,
+            }
+            if (orderFormData.status === PaymentStatusType.PAYMENT_PENDING || orderFormData.orderType === OrderType.SAMPLE) {
                 delete dataToSend.paymentType;
             }
             let url = "/api/order";
@@ -292,15 +305,34 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                     {orderFormData?.customerName && <h4>Customer Name :: {orderFormData?.customerName} ({orderFormData.customerType})</h4>}
                 </>
               }
-              {source === "creditInventory" ? 
+              {orderFormData.orderType === OrderType.CREDIT_ORDER && 
                 <h5>Credit Inventory Date : {dateToShow(orderFormData?.date)}</h5>
-              :
+              }
+              <div className={styles.formGroup}>
+                <label>Order Type</label>
+                {orderFormData?.orderType === OrderType.CREDIT_ORDER ?
+                    <h6>{orderData?.orderType}</h6>
+                :   
+                    <select name="orderType" onChange={handleOrderChange}>
+                        <option value="">Select Type</option>
+                        {Object.values(OrderType)?.map((item: string) => {
+                            if (item === OrderType.CREDIT_ORDER) return null;
+                            if (orderFormData.customerType !== CustomerType.DOCTOR && item === OrderType.SAMPLE) return null; 
+                            return (
+                                <option key={item} >{item}</option>
+                            )
+                        })}
+                    </select>
+                }
+              </div>
+
+              {orderFormData?.orderType !== OrderType.CREDIT_ORDER &&
                 <div className={styles.formGroup}>
                     <label>Order Date</label>
                     <input className={styles.dateField} type="date" name="date" onChange={handleOrderChange} />
                 </div>
               }
-              <div className={styles.formGroup}>
+              {orderFormData?.orderType !== OrderType.SAMPLE && <div className={styles.formGroup}>
                 <label>Order Status</label>
                 <select name="status" onChange={handleOrderChange}>
                     <option value="">Select Status</option>
@@ -310,9 +342,9 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                         )
                     })}
                 </select>
-              </div>
+              </div>}
 
-              <div className={styles.formGroup}>
+              {orderFormData?.orderType !== OrderType.SAMPLE && <div className={styles.formGroup}>
                 <label>Payment Status</label>
                 <select name="paymentStatus" onChange={handleOrderChange}>
                     <option value="">Select Status</option>
@@ -322,7 +354,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                         )
                     })}
                 </select>
-              </div>
+              </div>}
 
               {(orderFormData.paymentStatus === PaymentStatusType.PAYMENT_DONE) &&
                 <div className={styles.formGroup}>
@@ -399,7 +431,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                             </div>
                         </div>
 
-                        {orderFormData?.customerType === CustomerType.WHOLE_SALE && 
+                        {orderFormData?.orderType === OrderType.CREDIT_ORDER && 
                             <div>
                                 <div className={styles.productRow}>
                                     <div className={styles.infoBox}>
@@ -470,7 +502,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                             </div>
                         }
 
-                        {orderFormData?.customerType !== CustomerType.WHOLE_SALE && <div className={styles.productRow}>
+                        {orderFormData?.orderType !== OrderType.CREDIT_ORDER && <div className={styles.productRow}>
                             {/* MRP */}
                             <div className={styles.infoBox}>
                                 <span>MRP</span>
@@ -480,7 +512,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                             </div>
 
                             {/* DISCOUNT */}
-                            <div className={styles.formGroup}>
+                            {orderFormData?.orderType === OrderType.DIRECT_CUSTOMER && <div className={styles.formGroup}>
                                 <label>Discount (%)</label>
                                 <input
                                     type="number"
@@ -496,10 +528,10 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                                     }
                                     value={p.discountPercentage}
                                 />
-                            </div>
+                            </div>}
 
                             {/* Total PRICE */}
-                            <div className={styles.infoBox}>
+                            {orderFormData?.orderType === OrderType.DIRECT_CUSTOMER && <div className={styles.infoBox}>
                                 <span>Total ₹</span>
                                 <input
                                     type="number"
@@ -515,7 +547,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                                     }
                                     value={p.totalPrice}
                                 />
-                            </div>
+                            </div>}
 
                             {source === "patientOrderPage" && 
                                 <div className={styles.formGroup}>
@@ -568,7 +600,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                 + Add Product
               </button>
 
-              <div className={styles.totalInfo}>
+              {orderFormData?.orderType !== OrderType.SAMPLE && <div className={styles.totalInfo}>
                 <div className={styles.totalInfoEach} >
                     <div>
                         Total Amount Received:
@@ -606,7 +638,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
                         (Total Amount Received - Total Cost Price - Total Payable Gst)
                     </span>
                 </div>
-              </div>
+              </div>}
 
               <button>Create Order</button>
             </form>
