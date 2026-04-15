@@ -94,7 +94,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
             const dataToSend = { 
                 ...orderFormData,
                 status: orderFormData.orderType === OrderType.SAMPLE ? OrderStatusType.DELIVERED : orderFormData.status,
-                paymentStatus: orderFormData.orderType === OrderType.SAMPLE ? PaymentStatusType.PAYMENT_DONE : orderFormData.paymentStatus,
+                paymentStatus: orderFormData.orderType === OrderType.SAMPLE ? null : orderFormData.paymentStatus,
                 products: orderFormData.orderType === OrderType.SAMPLE ? products.map((p: Product) => {
                     return {
                         ...p,

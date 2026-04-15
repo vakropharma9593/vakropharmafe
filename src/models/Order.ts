@@ -62,8 +62,6 @@ const OrderSchema = new mongoose.Schema(
     paymentStatus: {
       type: String,
       enum: Object.values(PaymentStatusType),
-      default: PaymentStatusType.PAYMENT_PENDING,
-      index: true, // ✅ useful if filtering by status later
     },
 
     status: {

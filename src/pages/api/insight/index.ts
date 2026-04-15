@@ -4,7 +4,7 @@ import Product from "@/models/Product";
 import Inventory from "@/models/Inventory";
 import { Types } from "mongoose";
 import Expense from "@/models/Expense";
-import { ExpenseCategoryType, OrderStatusType, PaymentStatusType } from "@/lib/utils";
+import { ExpenseCategoryType, OrderStatusType, OrderType, PaymentStatusType } from "@/lib/utils";
 import Payment from "@/models/Payment";
 import Order from "@/models/Order";
 import ReturnRefund from "@/models/ReturnRefund";
@@ -278,7 +278,7 @@ export default async function getInsights(
         default:
           break;
       }
-      if (order.paymentStatus === PaymentStatusType.PAYMENT_DONE) {
+      if (order.paymentStatus === PaymentStatusType.PAYMENT_DONE || order.orderType === OrderType.SAMPLE) {
         order.products?.map((product: { totalPrice: number, sellingPrice: number, quantity: number, productId: { name: string, _id: Types.ObjectId, costPrice: number, gstPercentage: number, gstPercentageOnCostPrice: number } }) => {
           const totalSale = productWiseSales[product.productId._id.toString()].totalSale + product.totalPrice * product.quantity;
           const netSale = productWiseSales[product.productId._id.toString()].netSale + product.sellingPrice * product.quantity;
@@ -290,7 +290,6 @@ export default async function getInsights(
           gstToBePaidForOrders += gstAmount;
           const gstCollected = productWiseSales[product.productId._id.toString()].gstCollected + gstAmount;
           const gstPaidInCP = productWiseSales[product.productId._id.toString()].gstPaidInCP + gstCP;
-          // console.info("aa", gstAmount, product.totalPrice, product.sellingPrice, product.quantity);
       
           productWiseSales[product.productId._id.toString()] = {
             ...productWiseSales[product.productId._id.toString()],
