@@ -54,14 +54,14 @@ export default async function handler(
 
     // CREATE ORDER
     if (req.method === "POST") {
-      const { customerId, date, status, paymentDate, products, paymentType, paymentStatus, orderType, creditId } = req.body;
+      const { customerId, date, status, paymentDate, orderType, products, paymentType, paymentStatus, creditId } = req.body;
 
       const finalProducts = [];
 
       let creditInventory;
       let creditProducts;
 
-      if (orderType === "CREDIT" && creditId) {
+      if (orderType === OrderType.CREDIT_ORDER && creditId) {
         creditInventory = await CreditInventory.findOne({
               _id: creditId
             });
@@ -89,13 +89,12 @@ export default async function handler(
           });
         }
 
-        inventory.remainingCount = orderType === "CREDIT" ? inventory.remainingCount - product.quantity - (product.freeQuantity || 0) : inventory.remainingCount - product.quantity;
+        inventory.remainingCount = orderType === OrderType.CREDIT_ORDER ? inventory.remainingCount - product.quantity - (product.freeQuantity || 0) : inventory.remainingCount - product.quantity;
 
-        if (orderType === "CREDIT") {
+        if (orderType === OrderType.CREDIT_ORDER && creditId) {
           const index = creditProducts.findIndex((item: { productId: ObjectId }) => item.productId.toString() === product.productId)
           if (index !== -1) {
             const currentProduct = creditProducts[index];
-            console.info("asdfas", currentProduct);
             currentProduct.remainingQuantity = currentProduct.remainingQuantity - product.quantity;
             currentProduct.remainingFreeQuantity = currentProduct.remainingFreeQuantity - product.freeQuantity;
             creditProducts[index] = currentProduct;
@@ -111,7 +110,8 @@ export default async function handler(
           _id: product.productId,
         });
 
-        const sellingPrice = parseFloat(product.totalPrice)/(1 + (productData.gstPercentage/100));
+        const totalPrice = orderType === OrderType.SAMPLE ? 0 : product.totalPrice;
+        const sellingPrice = parseFloat(totalPrice)/(1 + (productData.gstPercentage/100));
         const sellingPriceToSave = Number(sellingPrice.toFixed(2));
         const profit = sellingPriceToSave - productData?.costPrice;
         const newProduct = { ...product, sellingPrice: sellingPriceToSave, costPrice: productData.costPrice, profit };
@@ -120,13 +120,13 @@ export default async function handler(
         await inventory.save();
       }
 
-      if (orderType === "CREDIT" && creditId) {
+      if (orderType === OrderType.CREDIT_ORDER && creditId) {
         creditInventory.products = creditProducts;
         await creditInventory.save();
       }
 
       // Calculate payment amount
-      const totalAmount = products.reduce(
+      const totalAmount = orderType === OrderType.SAMPLE ? 0 : products.reduce(
         (sum: number, p: { totalPrice: number, quantity: number }) => sum + p.totalPrice * p.quantity,
         0
       );
@@ -140,8 +140,6 @@ export default async function handler(
         deliveryService = req.body?.deliveryService;
         deliveryTrackNumber= req.body?.deliveryTrackNumber;
       }
-
-      const orderTypeToSave = orderType === "CREDIT" ? OrderType.CREDIT_ORDER :  OrderType.DIRECT_CUSTOMER;
       
       // Create order
       const order = await Order.create({
@@ -150,14 +148,14 @@ export default async function handler(
         status,
         paymentStatus,
         paymentDate,
-        orderType: orderTypeToSave,
+        orderType,
         products: finalProducts,
         totalAmount: finalTotalAmount,
         deliveryService,
         deliveryTrackNumber
       });
 
-      if (paymentStatus === PaymentStatusType.PAYMENT_DONE) {
+      if (orderType !== OrderType.SAMPLE && paymentStatus === PaymentStatusType.PAYMENT_DONE) {
         // Save payment if order is paid or above status
         await Payment.create({
           orderId: order._id,

@@ -62,6 +62,7 @@ export default async function handler(
           customerPhone: order.customerId?.phone,
           customerType: order.customerId?.type,
           customerGst: order.customerId?.gst,
+          orderType: order.orderType,
           paymentStatus: order.paymentStatus,
           date: order.date,
           products: order.products.map((p: { productId: { name: string, mrp: number }, quantity: number, totalPrice: number, sellingPrice: number, freeQuantity: number, }) => ({
