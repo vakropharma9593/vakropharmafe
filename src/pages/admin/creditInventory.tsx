@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { toast, Bounce } from "react-toastify";
 import styles from "../../styles/inventory.module.css";
 import OrderModal from "@/components/OrderModal";
-import { CustomerType, dateToShow, isLastRowEmpty, OrderStatusType, PaymentStatusType, Product, ProductType } from "@/lib/utils";
+import { CustomerType, dateToShow, isLastRowEmpty, OrderStatusType, OrderType, PaymentStatusType, Product, ProductType } from "@/lib/utils";
 import { useStore } from "@/store";
 import { InventoryItem } from "@/store/adminStore";
 import SearchBar from "@/components/SearchBar";
@@ -45,6 +45,7 @@ const CreditInventory = () => {
     customerType: CustomerType | null;
     date: string;
     status: string;
+    orderType: OrderType,
     paymentStatus: string;
     paymentType: string;
     selectedProductId: string[];
@@ -55,6 +56,7 @@ const CreditInventory = () => {
     customerName: "", // to show
     customerType: null,
     date: "",
+    orderType: OrderType.CREDIT_ORDER,
     paymentStatus: PaymentStatusType.PAYMENT_PENDING,
     status: OrderStatusType.PREPARING,
     paymentType: "UPI",
@@ -308,8 +310,8 @@ const CreditInventory = () => {
                     <td className={styles.actions}>
                       <button onClick={() => {
                         const currentProductsName: string[] = [];
-                        item?.products?.forEach((e: {productId: string }) => {
-                          currentProductsName.push(e.productId);
+                        item?.products?.forEach((e: {productId: string, remainingQuantity: number }) => {
+                          if (e.remainingQuantity > 0) currentProductsName.push(e.productId);
                         })
                         setOrderFormData({ ...orderFormData, date: item?.dateOfInventory, customerPhone: JSON.stringify(item?.customerPhone), customerName: item?.customerName, selectedProductId: currentProductsName, customerId: item?.customerId || "", customerType: item.customerType, creditId: item?._id || "" });
                         setShowOrderModal(true);

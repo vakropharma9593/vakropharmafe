@@ -36,7 +36,6 @@ const OrderUpdateModal:React.FC<OrderModalInterface> = ({ setShowStatusModal, se
 
     useEffect(() => {
         const updateStatus = () => {
-            debugger;
             setStatusUpdate(selectedOrder.status);
             setPaymentStatusUpdate(selectedOrder.paymentStatus);
         }

@@ -133,6 +133,7 @@ export enum CustomerType {
 export enum OrderType { 
   CREDIT_ORDER = "Credit Order",
   DIRECT_CUSTOMER = "Direct Customer",
+  SAMPLE = "Sample"
 }
 
 export enum ExpenseCategoryType {
