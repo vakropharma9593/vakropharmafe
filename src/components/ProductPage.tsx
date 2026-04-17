@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { useStore } from "@/store";
 import Link from "next/link";
 import ProductSkeleton from "./ProductSkeleton";
+import Loader from "./Loader";
 
 type ProductPageProps = {
   product: {
@@ -38,6 +39,7 @@ const ProductPage = ({
   });
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [loader, setLoader] = useState<boolean>(false);
+  const [reviewLoader, setReviewLoader] = useState<boolean>(false);
   const setProducts = useStore((state) => state.setProducts);
   const allProducts = useStore((state) => state.adminData.products);
 
@@ -75,7 +77,7 @@ const ProductPage = ({
 
   const getAllReviews = async (id: string) => {
     setOpenModal(false);
-    setLoader(true);
+    setReviewLoader(true);
     try {
       const res = await fetch(`/api/review?productId=${id}`);
       const data = await res.json();
@@ -87,7 +89,7 @@ const ProductPage = ({
     } catch (error) {
       toast.error("Failed to fetch reviews.");
     } finally {
-      setLoader(false);
+      setReviewLoader(false);
     }
   }
 
@@ -396,6 +398,7 @@ const ProductPage = ({
         </div>
       </div>
       {loader && <ProductSkeleton />}
+      {reviewLoader && <Loader />}
     </main>
   );
 };

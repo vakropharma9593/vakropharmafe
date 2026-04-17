@@ -1,0 +1,90 @@
+/* ================= MONTHLY SECTION ================= */
+.container {
+  margin-top: 30px;
+  background: #fff;
+  padding: 22px;
+  border-radius: 14px;
+  border: 1px solid #EFEAE2;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #173F36;
+  margin-bottom: 16px;
+}
+
+/* ===== Growth ===== */
+.growthBox {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.growthCard {
+  min-width: 140px;
+  background: #faf9f6;
+  border: 1px solid #EFEAE2;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 12px;
+}
+
+.month {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #173F36;
+}
+
+.green {
+  color: green;
+  font-weight: 600;
+}
+
+.red {
+  color: red;
+  font-weight: 600;
+}
+
+/* ===== Toggle ===== */
+.toggleContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.toggleBtn {
+  padding: 6px 10px;
+  border-radius: 20px;
+  border: 1px solid #2E5E52;
+  background: #fff;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.activeToggle {
+  background: #2E5E52;
+  color: #fff;
+}
+
+/* ===== Tooltip ===== */
+.tooltipBox {
+  background: #fff;
+  border: 1px solid #EFEAE2;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.tooltipTitle {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #173F36;
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}

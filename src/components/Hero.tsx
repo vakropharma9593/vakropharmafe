@@ -2,8 +2,10 @@ import heroImage from "../../public/assets/vakroallproducts.webp";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Image from "next/image";
 import styles from "../styles/hero.module.css";
+import { useStore } from "@/store";
 
 const Hero = () => {
+  const products = useStore((state) => state.adminData.products);
   const scrollToProducts = () => {
     const element = document.getElementById("products");
     if (element) {
@@ -52,7 +54,7 @@ const Hero = () => {
             <div className={styles.stats}>
               
               <div className={styles.stat}>
-                <div className={styles.statNumber}>4</div>
+                <div className={styles.statNumber}>{products?.length}</div>
                 <div className={styles.statLabel}>Premium Products</div>
               </div>
 
