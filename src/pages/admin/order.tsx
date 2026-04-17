@@ -1,6 +1,6 @@
 import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
-import { dateToShow, formatStatus, OrderStatusType, PaymentStatusType, Product, ProductType } from "@/lib/utils";
+import { dateToShow, formatStatus, OrderStatusType, OrderType, PaymentStatusType, Product, ProductType } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/order.module.css";
@@ -72,7 +72,10 @@ const Orders = () => {
 
   const handleCopyLink = async () => {
     const link = await getInvoiceLink();
-    if (!link) return;
+    if (!link) {
+      toast.error("Error while creating link");
+      return;
+    };
 
     await navigator.clipboard.writeText(link);
     toast.success("Invoice link copied ✅");
@@ -217,8 +220,8 @@ const Orders = () => {
                           setSelectedOrder(order);
                           setShowStatusModal(true);
                         }}
-                        disabled={order.status === OrderStatusType.DELIVERED && order.paymentStatus === PaymentStatusType.PAYMENT_DONE}
-                        style={{ cursor: order.status === OrderStatusType.DELIVERED && order.paymentStatus === PaymentStatusType.PAYMENT_DONE ? "not-allowed" : "pointer"}}
+                        disabled={(order.status === OrderStatusType.DELIVERED && order.paymentStatus === PaymentStatusType.PAYMENT_DONE) || order.orderType === OrderType.SAMPLE}
+                        style={{ cursor: (order.status === OrderStatusType.DELIVERED && order.paymentStatus === PaymentStatusType.PAYMENT_DONE) || order.orderType === OrderType.SAMPLE ? "not-allowed" : "pointer"}}
                       >
                         Update
                       </button>

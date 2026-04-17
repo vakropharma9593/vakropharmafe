@@ -80,6 +80,79 @@ export default async function getInsights(
       ReturnRefund.find().lean()
     ]);
 
+    //  MONTH WISE DATA
+
+    const getMonthKey = (date: Date) => {
+      const d = new Date(date);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    };
+
+    const generateMonthKeys = (start: Date, end: Date) => {
+      const months: string[] = [];
+      const current = new Date(start);
+
+      while (
+        current.getFullYear() < end.getFullYear() ||
+        (current.getFullYear() === end.getFullYear() &&
+          current.getMonth() <= end.getMonth())
+      ) {
+        const key = `${current.getFullYear()}-${String(
+          current.getMonth() + 1
+        ).padStart(2, "0")}`;
+
+        months.push(key);
+        current.setMonth(current.getMonth() + 1);
+      }
+
+      return months;
+    };
+
+    const startDate = new Date(2026, 2, 1); // March 2026
+    const endDate = new Date();
+
+    const monthKeys = generateMonthKeys(startDate, endDate);
+
+    const monthlyData: Record<string, {
+        totalRevenue: number;
+        netRevenue: number;
+        cogs: number;
+        variable: number;
+        marketing: number;
+        fixedOpex: number;
+        cm1: number;
+        cm2: number;
+        cm3: number;
+        finalProfit: number;
+        gstCollected: number;
+        gstPaidInCP: number;
+        orders: number;
+        revenueGrowthPercentage: number;
+        profitGrowthPercentage: number;
+      }> = {};
+
+    monthKeys.forEach((month) => {
+      monthlyData[month] = {
+        totalRevenue: 0,
+        netRevenue: 0,
+        cogs: 0,
+        variable: 0,
+        marketing: 0,
+        fixedOpex: 0,
+        cm1: 0,
+        cm2: 0,
+        cm3: 0,
+        finalProfit: 0,
+        gstCollected: 0,
+        gstPaidInCP: 0,
+        orders: 0,
+        revenueGrowthPercentage: 0,
+        profitGrowthPercentage: 0,
+      };
+    });
+
+    
+    // MONTH WISE DATA
+
     const typedProducts = products as ProductType[];
 
     /** =========================
@@ -99,15 +172,12 @@ export default async function getInsights(
     const today = new Date();
     const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 
-    let totalGstPaidInCP = 0;
-
     for (const inv of inventories) {
         const productId = inv.productId?._id;
         const costPrice = inv.productId?.costPrice || 0;
 
         if (!productId) continue;
 
-        totalGstPaidInCP += inv.productId?.gstPercentageOnCostPrice * inv.remainingCount;
         const inventoryValue = inv.remainingCount * costPrice;
 
         // Initialize product bucket
@@ -172,6 +242,27 @@ export default async function getInsights(
           totalExpenses.variable += exp.amountPaid;
           break;
       }
+
+      // monthly data start
+      // monthly expenses on sold products
+
+      const monthKey = getMonthKey(exp.paymentDate);
+
+      if (!monthlyData[monthKey]) return;
+
+      switch (exp.expenseCategory) {
+        case ExpenseCategoryType.MARKETING:
+          monthlyData[monthKey].marketing += exp.amountPaid;
+          break;
+        case ExpenseCategoryType.FIXED_OPEX:
+          monthlyData[monthKey].fixedOpex += exp.amountPaid;
+          break;
+        case ExpenseCategoryType.VARIABLE:
+          monthlyData[monthKey].variable += exp.amountPaid;
+          break;
+      }
+
+      // monthly data end
     });
 
     const totalExpensesAmount = Object.values(totalExpenses)?.reduce((sum: number, item: number) => {
@@ -221,6 +312,7 @@ export default async function getInsights(
       productWiseExpenses[pid].variable = Number(variablePerProduct.toFixed(2));
     });
 
+
     /** =========================
      * Orders metrics
     ========================== */
@@ -268,24 +360,27 @@ export default async function getInsights(
           break;
       }
 
-      switch (order.paymentStatus) {
-        case PaymentStatusType.PAYMENT_PENDING:
-          unPaidOrders += 1;
-          break;
-        case PaymentStatusType.PAYMENT_DONE:
-          paidOrders += 1;
-          break;
-        default:
-          break;
-      }
       if (order.paymentStatus === PaymentStatusType.PAYMENT_DONE || order.orderType === OrderType.SAMPLE) {
-        order.products?.map((product: { totalPrice: number, sellingPrice: number, quantity: number, productId: { name: string, _id: Types.ObjectId, costPrice: number, gstPercentage: number, gstPercentageOnCostPrice: number } }) => {
+        paidOrders += 1;
+      } else if (order.paymentStatus === PaymentStatusType.PAYMENT_PENDING) {
+        unPaidOrders += 1;
+      }
+
+      if (order.paymentStatus === PaymentStatusType.PAYMENT_DONE || order.orderType === OrderType.SAMPLE) {
+        // monthly data start
+        const monthKey = getMonthKey(order.date);
+        // ignore anything before March 2026
+        if (!monthlyData[monthKey]) return;
+        monthlyData[monthKey].orders += 1;
+        // monthly data end
+
+        order.products?.map((product: { totalPrice: number, sellingPrice: number, quantity: number, freeQuantity: number, productId: { name: string, _id: Types.ObjectId, costPrice: number, gstPercentage: number, gstPercentageOnCostPrice: number } }) => {
           const totalSale = productWiseSales[product.productId._id.toString()].totalSale + product.totalPrice * product.quantity;
           const netSale = productWiseSales[product.productId._id.toString()].netSale + product.sellingPrice * product.quantity;
-          const cogs = (productWiseExpenses[product.productId._id.toString()].cogs / productWiseInventory[product.productId._id.toString()].totalUnits)* product.quantity;
-          const unitCount = productWiseSales[product.productId._id.toString()].unitCount + product.quantity;
+          const cogs = productWiseSales[product.productId._id.toString()].cogs + (productWiseExpenses[product.productId._id.toString()].cogs / productWiseInventory[product.productId._id.toString()].totalUnits)* (product.quantity + (product.freeQuantity || 0));
+          const unitCount = productWiseSales[product.productId._id.toString()].unitCount + product.quantity + (product.freeQuantity || 0);
           const gstAmount = (product.totalPrice - product.sellingPrice)*product.quantity;
-          const gstCP = ((product.productId.costPrice*product.productId.gstPercentageOnCostPrice)/(100 + product.productId.gstPercentageOnCostPrice))*product.quantity;
+          const gstCP = ((product.productId.costPrice*product.productId.gstPercentageOnCostPrice)/(100 + product.productId.gstPercentageOnCostPrice))*(product.quantity + (product.freeQuantity || 0));
           gstPaidInCPForOrders += gstCP;
           gstToBePaidForOrders += gstAmount;
           const gstCollected = productWiseSales[product.productId._id.toString()].gstCollected + gstAmount;
@@ -300,10 +395,32 @@ export default async function getInsights(
             gstPaidInCP: Number(gstPaidInCP.toFixed(2)),
             unitCount,
           }
+
+          // monthly data start
+          monthlyData[monthKey].totalRevenue += product.totalPrice * product.quantity;
+          monthlyData[monthKey].netRevenue += product.sellingPrice * product.quantity;
+
+          const cogsMonthly =
+            (productWiseExpenses[product.productId._id.toString()].cogs /
+              productWiseInventory[product.productId._id.toString()].totalUnits) *
+            (product.quantity + (product.freeQuantity || 0));
+
+          monthlyData[monthKey].cogs += cogsMonthly;
+
+          const gstAmountMonthly = (product.totalPrice - product.sellingPrice) * product.quantity;
+
+          const gstCPMonthly =
+            ((product.productId.costPrice *
+              product.productId.gstPercentageOnCostPrice) /
+              (100 + product.productId.gstPercentageOnCostPrice)) *
+            (product.quantity + (product.freeQuantity || 0));
+
+          monthlyData[monthKey].gstCollected += gstAmountMonthly;
+          monthlyData[monthKey].gstPaidInCP += gstCPMonthly;
+          // monthly data end
         })
       }
     });
-
 
     const totalAmountReceived = payments?.reduce((sum: number, item: { totalAmount: number }) => {
       sum += item.totalAmount;
@@ -353,27 +470,27 @@ export default async function getInsights(
     finalProfit = cm3 - totalExpenses.fixedOpex;
 
     //unit economics
-    const aov = Number((totalRevenue / ordersCount).toFixed(2));
-    const cac = Number((totalExpenses.marketing/ordersCount).toFixed(2));
-    const unitsPerOrder = Number((totalUnitsSold/ordersCount).toFixed(2));
+    const aov = Number((totalRevenue / paidOrders).toFixed(2));
+    const cac = Number((totalExpenses.marketing/paidOrders).toFixed(2));
+    const unitsPerOrder = Number((totalUnitsSold/paidOrders).toFixed(2));
 
     const unitEconomics = {
       totalRevenue: aov,
-      netRevenue: Number((netRevenue / ordersCount).toFixed(2)),
+      netRevenue: Number((netRevenue / paidOrders).toFixed(2)),
       cm1: {
-        value: Number((cm1/ordersCount).toFixed(2)),
+        value: Number((cm1/paidOrders).toFixed(2)),
         percentage: Number(((cm1/netRevenue)*100).toFixed(2)),
       },
       cm2: {
-        value: Number((cm2/ordersCount).toFixed(2)),
+        value: Number((cm2/paidOrders).toFixed(2)),
         percentage: Number(((cm2/netRevenue)*100).toFixed(2)),
       },
       cm3: {
-        value: Number((cm3/ordersCount).toFixed(2)),
+        value: Number((cm3/paidOrders).toFixed(2)),
         percentage: Number(((cm3/netRevenue)*100).toFixed(2)),
       },
       finalProfit: {
-        value: Number((finalProfit/ordersCount).toFixed(2)),
+        value: Number((finalProfit/paidOrders).toFixed(2)),
         percentage: Number(((finalProfit/netRevenue)*100).toFixed(2)),
       }
     }
@@ -415,9 +532,63 @@ export default async function getInsights(
       };
     });
 
+    // monthly data start
+
+    Object.keys(monthlyData).forEach((month) => {
+      const m = monthlyData[month];
+
+      m.cm1 = m.netRevenue - m.cogs;
+      m.cm2 = m.cm1 - m.variable;
+      m.cm3 = m.cm2 - m.marketing;
+      m.finalProfit = m.cm3 - m.fixedOpex;
+
+      // round values
+      m.totalRevenue = Number(m.totalRevenue.toFixed(2));
+      m.netRevenue = Number(m.netRevenue.toFixed(2));
+      m.cogs = Number(m.cogs.toFixed(2));
+      m.cm1 = Number(m.cm1.toFixed(2));
+      m.cm2 = Number(m.cm2.toFixed(2));
+      m.cm3 = Number(m.cm3.toFixed(2));
+      m.finalProfit = Number(m.finalProfit.toFixed(2));
+      m.gstCollected = Number(m.gstCollected.toFixed(2));
+      m.gstPaidInCP = Number(m.gstPaidInCP.toFixed(2));
+    });
+    // monthly data end
+
+    // monthly data start
+    const months = Object.keys(monthlyData);
+
+    for (let i = 0; i < months.length; i++) {
+      const current = monthlyData[months[i]];
+      const prev = monthlyData[months[i - 1]];
+
+      if (!prev) {
+        current.revenueGrowthPercentage = 0;
+        current.profitGrowthPercentage = 0;
+        continue;
+      }
+
+      current.revenueGrowthPercentage =
+        prev.totalRevenue === 0
+          ? 0
+          : Number(
+              (((current.totalRevenue - prev.totalRevenue) / prev.totalRevenue) * 100).toFixed(2)
+            );
+
+      current.profitGrowthPercentage =
+        prev.finalProfit === 0
+          ? 0
+          : Number(
+              (((current.finalProfit - prev.finalProfit) / prev.finalProfit) * 100).toFixed(2)
+            );
+    }
+    
+    // monthly data end
+
     return res.status(200).json({
         success: true,
         data: {
+          monthlyData,
           productWiseData,
           inventory: {
             totalInventoryValue,
@@ -433,9 +604,9 @@ export default async function getInsights(
               cm2: Number(cm2.toFixed(2)),
               cm3: Number(cm3.toFixed(2)),
               finalProfit: Number(finalProfit.toFixed(2)),
-              totalGstPaidInCP: Number(totalGstPaidInCP.toFixed(2)),
           },
           totalOrders: ordersCount,
+          paidOrders: paidOrders,
           gstPaidInCPForOrders: Number(gstPaidInCPForOrders.toFixed(2)),
           gstToBePaidForOrders: Number(gstToBePaidForOrders.toFixed(2)),
           unitEconomics,

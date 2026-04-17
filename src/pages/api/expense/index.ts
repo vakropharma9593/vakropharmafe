@@ -57,7 +57,7 @@ export default async function handler(
 
     // GET Expenses
     if (req.method === "GET") {
-        const inventory = await Expense.find().lean();
+        const inventory = await Expense.find().sort({ createdAt: -1 }).lean();
       
         return res.status(200).json({
             success: true,
