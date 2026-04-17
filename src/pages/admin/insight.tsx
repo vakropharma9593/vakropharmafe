@@ -14,6 +14,7 @@ import { UnitEconomicsBarChart } from "@/components/UnitEconomicsBarChart";
 import AdminNavbar from "@/components/AdminNavbar";
 import { ExpensePieChart } from "@/components/ExpensePieChart";
 import Loader from "@/components/Loader";
+import MonthlyDataLineChart from "@/components/MonthlyDataLineChart";
 
 type ProductData = {
   name: string;
@@ -58,7 +59,6 @@ type RevenueType = {
   cm2: number;
   cm3: number;
   finalProfit: number;
-  totalGstPaidInCP: number;
 }
 
 type ExpenseType = {
@@ -85,7 +85,26 @@ type UnitEconomicsType = {
   finalProfit: UnitEcoEach;
 }
 
+type MonthlyData = {
+  totalRevenue: number;
+  netRevenue: number;
+  cogs: number;
+  variable: number;
+  marketing: number;
+  fixedOpex: number;
+  cm1: number;
+  cm2: number;
+  cm3: number;
+  finalProfit: number;
+  gstCollected: number;
+  gstPaidInCP: number;
+  orders: number;
+  revenueGrowthPercentage: number;
+  profitGrowthPercentage: number;
+}
+
 type InsightResponse = {
+  monthlyData: Record<string, MonthlyData>;
   productWiseData: Record<string, ProductData>;
   revenues: RevenueType;
   expenses: ExpenseType;
@@ -93,6 +112,7 @@ type InsightResponse = {
     totalInventoryValue: number;
   };
   totalOrders: number;
+  paidOrders: number;
   unitEconomics: UnitEconomicsType;
   cac: number;
   unitsPerOrder: number;
@@ -308,13 +328,17 @@ const InsightPage = () => {
           <Card title="Profit" value={data.revenues.finalProfit} isAmount highlight />
           <Card title="Total Expenses" value={data.expenses.totalExpensesAmount} isAmount highlight />
           <Card title="Inventory Value" value={data.inventory.totalInventoryValue} isAmount highlight />
-          <Card title="GST Paid In CP" value={data.revenues.totalGstPaidInCP} isAmount highlight />
           <Card title="GST Paid In CP(Order)" value={data.gstPaidInCPForOrders} isAmount />
           <Card title="GST Collected (Order)" value={data.gstToBePaidForOrders} isAmount />
           <Card title="Health Score" value={healthScore} />
-          <Card title="Orders" value={data.totalOrders} />
+          <Card title="Orders (Paid/Total)" value={data.paidOrders + "/" + data.totalOrders} />
           <Card title="CAC" value={data.cac} isAmount />
         </div>
+
+        {/* Monthly data start */}
+        {/* ================= MONTHLY WISE COMPARISON ================= */}
+        <MonthlyDataLineChart monthlyData={data.monthlyData} />
+        {/* Monthly data end */}
 
         {/* Overall ECONOMICS */}
         <div className={styles.unitBox}>
@@ -453,7 +477,7 @@ function Card({
   isAmount,
 }: {
   title: string;
-  value: number;
+  value: number | string;
   highlight?: boolean;
   isAmount?: boolean;
 }) {

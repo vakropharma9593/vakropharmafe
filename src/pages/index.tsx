@@ -8,7 +8,7 @@ import { ToastContainer, Bounce, toast } from 'react-toastify';
 import SEO from "@/components/SEO";
 import { useEffect, useState } from "react";
 import { useStore } from "@/store";
-import Loader from "@/components/Loader";
+import styles from "../styles/routeTransition.module.css";
 // import Dermatologist from "@/components/Dermatologist";
 
 const Index = () => {
@@ -41,6 +41,7 @@ const Index = () => {
   }
   return (
     <>
+      {loader && <div className={styles.bar} />}
       <SEO
         title="Vakro Pharma | Dermatologist Developed Skincare"
         description="Vakro Pharma offers dermatologist-formulated skincare including facewash, sunscreen, face serum and moisturizer designed for Indian skin."
@@ -90,7 +91,6 @@ const Index = () => {
           theme="light"
           transition={Bounce}
         />
-        {loader && <Loader />}
       </main>
     </>
   );

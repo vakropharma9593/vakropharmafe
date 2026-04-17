@@ -3,7 +3,7 @@
 import { useState } from "react";
 import styles from "../styles/addReviewModal.module.css";
 import { ProductType, Review } from "@/lib/utils";
-import { toast } from "react-toastify";
+import { Bounce, toast, ToastContainer } from "react-toastify";
 import { Loader } from "lucide-react";
 import Image from "next/image";
 import vakroLogo from "../../public/assets/darkGreenLogo.svg";
@@ -255,6 +255,19 @@ const AddReviewModal = ({ onClose, productId, afterSuccessCall, source, products
 
       </div>
       {loader && <Loader />}
+      <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick={false}
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          transition={Bounce}
+        />
     </div>
   );
 };
