@@ -137,7 +137,7 @@ export default async function handler(
         .populate("customerId", "name phone")
         .populate("products.productId", "name mrp costPrice")
         .populate("products.batchId", "batch")
-        .sort({ date: -1 })
+        .sort({ date: -1, createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean();

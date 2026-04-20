@@ -9,14 +9,6 @@ import vakroLogo from "../../../public/assets/darkGreenLogo.svg";
 import Link from "next/link";
 import { CustomerType, dateToShow, PaymentStatusType } from "@/lib/utils";
 
-type Item = {
-  name: string;
-  qty: number;
-  mrp: number;
-  price: number;
-  gst: number;
-};
-
 type Product = {
     productName: string;
     quantity: number;
@@ -79,40 +71,10 @@ const Invoice = () => {
     fetchOrder();
   }, [orderId, token]);
 
-  // 🔥 Transform API → UI
-  const items: Item[] =
-    order?.products?.map((p: Product) => ({
-      name: p.productName,
-      qty: p.quantity,
-      mrp: p.mrp,
-      price: p.sellingPrice,
-      gst: Math.round(p.sellingPrice * 0.05), // better: send from backend
-    })) || [];
-
-  const subtotal = items.reduce((acc, i) => acc + i.price, 0);
-  const gstTotal = items.reduce((acc, i) => acc + i.gst, 0);
-  const grandTotal = subtotal + gstTotal;
-
-  // 🔥 WhatsApp Share (secure link)
-  const shareOnWhatsApp = () => {
-    const link = `${window.location.origin}/ebill?o=${orderId}&t=${token}`;
-
-    const message = `🧾 *Vakro Invoice*
-        Order ID: ${orderId}
-        Amount Paid: ₹${grandTotal}
-
-        View Bill: ${link}
-
-        Thank you ❤️`;
-
-    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank");
-  };
-
   // 🔥 Download PDF (secure)
   const downloadInvoice = () => {
     window.open(
-      `/api/invoice?orderId=${orderId}&t=${token}`,
+      `/api/invoice/download?id=${orderId}&t=${token}`,
       "_blank"
     );
   };

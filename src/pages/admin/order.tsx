@@ -63,7 +63,7 @@ const Orders = () => {
     if (!selectedOrder?._id) return "";
 
     const res = await fetch(
-      `/api/miscellaneous?id=${selectedOrder._id}`
+      `/api/invoice/link?id=${selectedOrder._id}`
     );
     const data = await res.json();
 
