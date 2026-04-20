@@ -4,6 +4,7 @@ import { booleanToYesNo, Review } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/order.module.css";
+import Pagination from "@/components/Pagination";
 
 
 const Reviews = () => {
@@ -14,17 +15,25 @@ const Reviews = () => {
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
 
-  useEffect(() => {
-    getAllReviews();
-  }, []);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalReviews, setTotalReviews] = useState(0);
 
-  const getAllReviews = async () => {
+  useEffect(() => {
+    getAllReviews(page);
+  }, [page]);
+
+  const getAllReviews = async (pageNumber = 1) => {
     setLoader(true);
     try {
-      const res = await fetch(`/api/review`);
+      const res = await fetch(`/api/review?page=${pageNumber}&limit=${limit}`);
       const data = await res.json();
       if(data.success) {
         setReviews(data.data || []);
+        setTotalPages(data.pagination?.totalPages || 1);
+        setPage(data.pagination?.page || 1);
+        setTotalReviews(data.pagination?.total || 0);
       } else {
         toast.error(data.message);
       }
@@ -69,7 +78,7 @@ const Reviews = () => {
       <div className={styles.content}>
         <div className={styles.header}>
           <h1>
-            Reviews <span>{reviews.length}</span>
+            Reviews <span>{reviews.length} out of {totalReviews}</span>
           </h1>
         </div>
 
@@ -128,6 +137,11 @@ const Reviews = () => {
             <p className={styles.empty}>No reviews yet</p>
           )}
         </div>
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={(p) => setPage(p)}
+        />
       </div>
 
       {/* STATUS MODAL */}
