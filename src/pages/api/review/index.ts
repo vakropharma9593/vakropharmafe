@@ -1,112 +1,166 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import mongoose from "mongoose";
 import { connectDB } from "@/lib/mongodb";
 import Review from "@/models/Review";
-import "@/models/Product";
+import Product from "@/models/Product";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  try {
-    await connectDB();
+  await connectDB();
 
-    // CREATE ORDER
-    if (req.method === "POST") {
-      const { productId, review, rating, reviewerName, skinType, skinConcern, email, phone  } = req.body;
+  // =========================
+  // ✅ CREATE REVIEW (SAFE)
+  // =========================
+  if (req.method === "POST") {
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-       const finalReview = {
-        productId: productId,
+    try {
+      const {
+        productId,
+        review,
+        rating,
         reviewerName,
         skinType,
         skinConcern,
-        rating,
-        review,
         email,
         phone,
-        isVerifiedUser: false
-       };
+      } = req.body;
 
-      const reviewSaved = await Review.create(finalReview);
+      if (email) {
+        // 🚫 Prevent multiple reviews per user (email + product)
+        const existingReview = await Review.findOne({
+          productId,
+          email,
+        }).session(session);
+
+        if (existingReview) {
+          await session.abortTransaction();
+          session.endSession();
+
+          return res.status(400).json({
+            success: false,
+            message: "You have already reviewed this product",
+          });
+        }
+      }
+
+      // ✅ Create Review
+      const reviewDoc = await Review.create(
+        [
+          {
+            productId,
+            review,
+            rating,
+            reviewerName,
+            skinType,
+            skinConcern,
+            email,
+            phone,
+            isVerifiedUser: false,
+          },
+        ],
+        { session }
+      );
+
+      const product = await Product.findById(productId).session(session);
+
+      if (!product) {
+        throw new Error("Product not found");
+      }
+
+      const rounded = Math.floor(rating);
+
+      // ✅ Update breakdown
+      product.ratingBreakdown[rounded] += 1;
+
+      // ✅ Update average
+      const newTotal = product.totalReviews + 1;
+      const newAvg =
+        (product.averageRating * product.totalReviews + rating) / newTotal;
+
+      product.totalReviews = newTotal;
+      product.averageRating = Number(newAvg.toFixed(1));
+
+      await product.save({ session });
+
+      await session.commitTransaction();
+      session.endSession();
 
       return res.status(201).json({
         success: true,
-        data: reviewSaved,
+        data: reviewDoc[0],
+      });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to create review",
       });
     }
-
-    // GET 
-    if (req.method === "GET") {
-      const { productId } = req.query;
-
-      try {
-        // 🔥 CASE 1: Get all reviews (no filter)
-        if (!productId) {
-          const reviews = await Review.find()
-            .populate("productId", "name slug")
-            .sort({ createdAt: -1 })
-            .lean();
-
-          return res.status(200).json({
-            success: true,
-            data: reviews,
-          });
-        }
-
-        // 🔥 CASE 2: Get reviews by productId
-        const reviews = await Review.find({ productId })
-          .populate("productId", "name slug")
-          .sort({ createdAt: -1 })
-          .lean();
-
-        const totalReviews = reviews.length;
-
-        const totalRatings = reviews.reduce((sum, r) => sum + r.rating, 0);
-        const averageRating =
-          totalReviews > 0
-            ? Number((totalRatings / totalReviews).toFixed(1))
-            : 0;
-
-        const ratingBreakdown: Record<number, number> = {
-          5: 0,
-          4: 0,
-          3: 0,
-          2: 0,
-          1: 0,
-        };
-
-        reviews.forEach((r) => {
-          const star = Math.floor(r.rating);
-          if (ratingBreakdown[star] !== undefined) {
-            ratingBreakdown[star]++;
-          }
-        });
-
-        return res.status(200).json({
-          success: true,
-          data: {
-            reviews,
-            totalReviews,
-            averageRating,
-            ratingBreakdown,
-          },
-        });
-
-      } catch (error) {
-        return res.status(500).json({
-          success: false,
-          message: "Failed to fetch reviews",
-        });
-      }
-    }
-
-    res.status(405).json({ message: "Method Not Allowed" });
-
-  } catch (error) {
-    console.error("REVIEW API ERROR:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error"
-    });
   }
+
+  // =========================
+  // ✅ GET REVIEWS (PAGINATED)
+  // =========================
+  if (req.method === "GET") {
+    try {
+      const { productId, page = "1", limit = "10" } = req.query;
+
+      const pageNumber = Math.max(parseInt(page as string, 10), 1);
+      const pageSize = Math.max(parseInt(limit as string, 10), 1);
+      const skip = (pageNumber - 1) * pageSize;
+
+      const query: Record<string, unknown> = productId ? { productId } : {};
+
+      const [reviews, total, product, bestReview] = await Promise.all([
+        Review.find(query)
+          .populate(
+            "productId",
+            "name slug"
+          )
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(pageSize)
+          .lean(),
+        Review.countDocuments(query),
+        productId ? Product.findById(productId).lean() : null,
+        productId
+            ? Review.findOne({ productId })
+                .sort({ rating: -1, createdAt: -1 })
+                .lean()
+            : null,
+      ]);
+
+      return res.status(200).json({
+        success: true,
+        data: reviews,
+        bestReview,
+        productStats: product
+          ? {
+              averageRating: product.averageRating || 0,
+              totalReviews: product.totalReviews || 0,
+              ratingBreakdown: product.ratingBreakdown || {},
+            }
+          : null,
+        pagination: {
+          total,
+          page: pageNumber,
+          limit: pageSize,
+          totalPages: Math.ceil(total / pageSize),
+        },
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch reviews",
+      });
+    }
+  }
+
+  return res.status(405).json({ message: "Method Not Allowed" });
 }

@@ -1,4 +1,3 @@
-import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
 import { dateToShow, formatStatus, OrderStatusType, PaymentStatusType, Product, ProductType } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -9,6 +8,7 @@ import OrderUpdateModal from "@/components/OrderUpdateModal";
 import { useStore } from "@/store";
 import SearchBar from "@/components/SearchBar";
 import Pagination from "@/components/Pagination";
+import AdminLayout from "@/components/AdminLayout";
 
 type Order = {
   id?: string;
@@ -90,220 +90,220 @@ const PatientOrders = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <AdminNavbar />
+    <AdminLayout>
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <div className={styles.header}>
+            <h1>
+              Orders <span>{orders.length} out of {totalOrders}</span>
+            </h1>
 
-      <div className={styles.content}>
-        <div className={styles.header}>
-          <h1>
-            Orders <span>{orders.length} out of {totalOrders}</span>
-          </h1>
+            <button style={{ cursor: "pointer", backgroundColor: "#C9A25E", color: "#173F36"}} onClick={() => setShowModal(true)}>
+              + Add New Order
+            </button>
+          </div>
 
-          <button style={{ cursor: "pointer", backgroundColor: "#C9A25E", color: "#173F36"}} onClick={() => setShowModal(true)}>
-            + Add New Order
-          </button>
-        </div>
+          <SearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Search by customer name or phone..."
+          />
 
-        <SearchBar
-          value={search}
-          onChange={setSearch}
-          placeholder="Search by customer name or phone..."
-        />
-
-        <div className={styles.tableWrapper}>
-          {orders.length > 0 ? (
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Customer</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Total ₹</th>
-                  <th>Account ₹</th>
-                  <th>Products</th>
-                  <th>Payment</th>
-                  <th>Payment Date</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {orders.map((order, index) => (
-                  <tr 
-                    key={order.id || index} 
-                    onClick={() => {
-                      setSelectedOrder(order);
-                      setShowViewModal(true);
-                    }}
-                  >
-                    <td>{index + 1}</td>
-                    <td>{order.customerName}
-                      <br/>
-                      {order.customerPhone}
-                    </td>
-                    <td>{dateToShow(order.date)}</td>
-
-                    <td className={styles.secondStatus}>
-                      <span className={`${styles.badge} ${STATUS_COLORS[order.status]}`}>
-                        {formatStatus(order.status)}
-                      </span>
-                      <span className={`${styles.badge} ${STATUS_COLORS[order.paymentStatus]} ${styles.secondStatus}`}>
-                        {formatStatus(order.paymentStatus)}
-                      </span>
-                    </td>
-
-                    <td>₹{order.totalAmountPaid}</td>
-                    <td>₹{order.totalAccountAmountPaid}</td>
-
-                    <td>
-                      {order.products.map((p, i) => (
-                        <div key={i} className={styles.productItem}>
-                          {p.productName} × {p.quantity}
-                        </div>
-                      ))}
-                    </td>
-
-                    <td>{order.paymentType}</td>
-                    <td>{dateToShow(order.paymentDate)}</td>
-                    <td>
-                      <button
-                        className={styles.updateBtn}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedOrder(order);
-                          setShowStatusModal(true);
-                        }}
-                        disabled={order.status === "Delivered"}
-                        style={{ cursor: order.status === "Delivered" ? "not-allowed" : "pointer"}}
-                      >
-                        Update
-                      </button>
-                    </td>
+          <div className={styles.tableWrapper}>
+            {orders.length > 0 ? (
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Total ₹</th>
+                    <th>Account ₹</th>
+                    <th>Products</th>
+                    <th>Payment</th>
+                    <th>Payment Date</th>
+                    <th>Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className={styles.empty}>No orders yet</p>
-          )}
+                </thead>
+
+                <tbody>
+                  {orders.map((order, index) => (
+                    <tr 
+                      key={order.id || index} 
+                      onClick={() => {
+                        setSelectedOrder(order);
+                        setShowViewModal(true);
+                      }}
+                    >
+                      <td>{index + 1}</td>
+                      <td>{order.customerName}
+                        <br/>
+                        {order.customerPhone}
+                      </td>
+                      <td>{dateToShow(order.date)}</td>
+
+                      <td className={styles.secondStatus}>
+                        <span className={`${styles.badge} ${STATUS_COLORS[order.status]}`}>
+                          {formatStatus(order.status)}
+                        </span>
+                        <span className={`${styles.badge} ${STATUS_COLORS[order.paymentStatus]} ${styles.secondStatus}`}>
+                          {formatStatus(order.paymentStatus)}
+                        </span>
+                      </td>
+
+                      <td>₹{order.totalAmountPaid}</td>
+                      <td>₹{order.totalAccountAmountPaid}</td>
+
+                      <td>
+                        {order.products.map((p, i) => (
+                          <div key={i} className={styles.productItem}>
+                            {p.productName} × {p.quantity}
+                          </div>
+                        ))}
+                      </td>
+
+                      <td>{order.paymentType}</td>
+                      <td>{dateToShow(order.paymentDate)}</td>
+                      <td>
+                        <button
+                          className={styles.updateBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedOrder(order);
+                            setShowStatusModal(true);
+                          }}
+                          disabled={order.status === "Delivered"}
+                          style={{ cursor: order.status === "Delivered" ? "not-allowed" : "pointer"}}
+                        >
+                          Update
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className={styles.empty}>No orders yet</p>
+            )}
+          </div>
+
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(p)}
+          />
         </div>
 
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={(p) => setPage(p)}
-        />
-      </div>
+        {/* MODAL */}
+        {showModal && (
+          <OrderModal setShowOrderModal={setShowModal} source="patientOrderPage" callAfterSave={getOrders} />
+        )}
 
-      {/* MODAL */}
-      {showModal && (
-        <OrderModal setShowOrderModal={setShowModal} source="patientOrderPage" callAfterSave={getOrders} />
-      )}
+        {showStatusModal && selectedOrder && (
+          <OrderUpdateModal source="patientOrderPage" callAfterSave={getOrders} selectedOrder={selectedOrder} setShowStatusModal={setShowStatusModal}  />
+        )}
 
-      {showStatusModal && selectedOrder && (
-        <OrderUpdateModal source="patientOrderPage" callAfterSave={getOrders} selectedOrder={selectedOrder} setShowStatusModal={setShowStatusModal}  />
-      )}
-
-      {showViewModal && selectedOrder && (
-        <div className={styles.modalOverlay}>
-          <div className={`${styles.modal} ${styles.large}`}>
-            <div className={styles.modalHeader}>
-              <h2>Order Details</h2>
-              <button onClick={() => setShowViewModal(false)}>✕</button>
-            </div>
-
-            <div className={styles.detailsContainer}>
-              {/* ORDER INFO */}
-              <div className={styles.detailsGrid}>
-                <div>
-                  <span>Customer</span>
-                  <p>{selectedOrder.customerName}</p>
-                </div>
-
-                <div>
-                  <span>Customer Phone</span>
-                  <p>{selectedOrder.customerPhone}</p>
-                </div>
-
-                <div>
-                  <span>Date</span>
-                  <p>{dateToShow(selectedOrder.date)}</p>
-                </div>
-
-                <div>
-                  <span>Status</span>
-                  <p>{formatStatus(selectedOrder.status)}</p>
-                </div>
-
-                <div>
-                  <span>Payment Status</span>
-                  <p>{formatStatus(selectedOrder.paymentStatus)}</p>
-                </div>
-
-                {selectedOrder.deliveryService && <div>
-                  <span>Delivery Service</span>
-                  <p>{selectedOrder.deliveryService}</p>
-                </div>}
-
-                {selectedOrder.deliveryTrackNumber && <div>
-                  <span>Delivery Track No.</span>
-                  <p>{selectedOrder.deliveryTrackNumber}</p>
-                </div>}
-
-                <div>
-                  <span>Payment</span>
-                  <p>{selectedOrder.paymentType}</p>
-                </div>
+        {showViewModal && selectedOrder && (
+          <div className={styles.modalOverlay}>
+            <div className={`${styles.modal} ${styles.large}`}>
+              <div className={styles.modalHeader}>
+                <h2>Order Details</h2>
+                <button onClick={() => setShowViewModal(false)}>✕</button>
               </div>
 
-              {/* PRODUCTS */}
-              <h4 style={{ marginTop: "20px" }}>Products</h4>
+              <div className={styles.detailsContainer}>
+                {/* ORDER INFO */}
+                <div className={styles.detailsGrid}>
+                  <div>
+                    <span>Customer</span>
+                    <p>{selectedOrder.customerName}</p>
+                  </div>
 
-              <div className={styles.detailsTable}>
-                <div className={styles.detailsHeader}>
-                  <div>Product</div>
-                  <div>Batch</div>
-                  <div>MRP</div>
-                  <div>Discount %</div>
-                  <div>Total Price</div>
-                  <div>Account Price</div>
-                  <div>Qty</div>
-                  <div>Total</div>
+                  <div>
+                    <span>Customer Phone</span>
+                    <p>{selectedOrder.customerPhone}</p>
+                  </div>
+
+                  <div>
+                    <span>Date</span>
+                    <p>{dateToShow(selectedOrder.date)}</p>
+                  </div>
+
+                  <div>
+                    <span>Status</span>
+                    <p>{formatStatus(selectedOrder.status)}</p>
+                  </div>
+
+                  <div>
+                    <span>Payment Status</span>
+                    <p>{formatStatus(selectedOrder.paymentStatus)}</p>
+                  </div>
+
+                  {selectedOrder.deliveryService && <div>
+                    <span>Delivery Service</span>
+                    <p>{selectedOrder.deliveryService}</p>
+                  </div>}
+
+                  {selectedOrder.deliveryTrackNumber && <div>
+                    <span>Delivery Track No.</span>
+                    <p>{selectedOrder.deliveryTrackNumber}</p>
+                  </div>}
+
+                  <div>
+                    <span>Payment</span>
+                    <p>{selectedOrder.paymentType}</p>
+                  </div>
                 </div>
 
-                {selectedOrder.products.map((p, i) => {
-                  const productInfo = stateProducts?.find((item: ProductType) => item?._id === p.productId);
-                  const mrp = productInfo?.mrp || 0;
-                  // const gst = productInfo?.gstPercentage || 0;
-                  // const sellingPrice = p.totalPrice/(1 + gst/100);
+                {/* PRODUCTS */}
+                <h4 style={{ marginTop: "20px" }}>Products</h4>
 
-                  return (
-                    <div key={i} className={styles.detailsRow}>
-                      <div>{p.productName}</div>
-                      <div>{p.batch}</div>
-                      <div>₹{mrp}</div>
-                      <div>{Number(((mrp - p.totalPrice)/mrp)*100).toFixed(2)}%</div>
-                      <div>₹{p.totalPrice}</div>
-                      <div>₹{p.accountTotalPrice}</div>
-                      <div>{p.quantity}</div>
-                      <div>₹{p.totalPrice * p.quantity}</div>
-                    </div>
-                  );
-                })}
-              </div>
+                <div className={styles.detailsTable}>
+                  <div className={styles.detailsHeader}>
+                    <div>Product</div>
+                    <div>Batch</div>
+                    <div>MRP</div>
+                    <div>Discount %</div>
+                    <div>Total Price</div>
+                    <div>Account Price</div>
+                    <div>Qty</div>
+                    <div>Total</div>
+                  </div>
 
-              {/* TOTAL */}
-              <div className={styles.detailsTotal}>
-                Total Amount: ₹{selectedOrder.totalAmountPaid}
+                  {selectedOrder.products.map((p, i) => {
+                    const productInfo = stateProducts?.find((item: ProductType) => item?._id === p.productId);
+                    const mrp = productInfo?.mrp || 0;
+                    // const gst = productInfo?.gstPercentage || 0;
+                    // const sellingPrice = p.totalPrice/(1 + gst/100);
+
+                    return (
+                      <div key={i} className={styles.detailsRow}>
+                        <div>{p.productName}</div>
+                        <div>{p.batch}</div>
+                        <div>₹{mrp}</div>
+                        <div>{Number(((mrp - p.totalPrice)/mrp)*100).toFixed(2)}%</div>
+                        <div>₹{p.totalPrice}</div>
+                        <div>₹{p.accountTotalPrice}</div>
+                        <div>{p.quantity}</div>
+                        <div>₹{p.totalPrice * p.quantity}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* TOTAL */}
+                <div className={styles.detailsTotal}>
+                  Total Amount: ₹{selectedOrder.totalAmountPaid}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {loader && <Loader />}
-    </div>
+        {loader && <Loader />}
+      </div>
+    </AdminLayout>
   );
 };
 

@@ -3,19 +3,17 @@
 import styles from "../../styles/admin.module.css";
 import { useEffect, useState } from "react";
 import { toast, Bounce } from "react-toastify";
-import AdminNavbar from "@/components/AdminNavbar";
 import { useRouter } from "next/router";
 import Loader from "@/components/Loader";
 import { useStore } from "@/store";
-
+import AdminLayout from "@/components/AdminLayout"; // 👈 add this
 
 const Admin = () => {
-  const [loader, setLoader] = useState(false);
+  const [loader, setLoader] = useState(true);
   const router = useRouter();
   const setInventory = useStore((state) => state.setInventory);
   const setProducts = useStore((state) => state.setProducts);
 
-  /* REQUIRED CODE */
   useEffect(() => {
     const getInventory = async () => {
       try {
@@ -28,15 +26,17 @@ const Admin = () => {
           toast.error("Failed to fetch inventory");
         }
       } catch (error) {
-        toast.error(`Inventory error: ${error}`, { type: "error", transition: Bounce });
-      } finally {
-        setLoader(false);
+        toast.error(`Inventory error: ${error}`, {
+          type: "error",
+          transition: Bounce,
+        });
       }
     };
 
     const getProducts = async () => {
+      setLoader(true);
       try {
-        const res = await fetch("api/product");
+        const res = await fetch("/api/product");
         const data = await res.json();
         if (data.success) {
           setProducts(data.data || []);
@@ -54,17 +54,25 @@ const Admin = () => {
     getProducts();
   }, []);
 
+  useEffect(() => {
+    if (!loader) {
+      router.push("/admin/order")
+    }
+  },[loader])
+
   return (
-    <div>
-      <AdminNavbar />
+    <AdminLayout>
       <div className={styles.container}>
         <h1 className={styles.title}>Business Insights</h1>
-        <div className={styles.insightButon} onClick={() => router.push("/admin/insight")} >
+        <div
+          className={styles.insightButon}
+          onClick={() => router.push("/admin/insight")}
+        >
           Go to Insights
         </div>
       </div>
       {loader && <Loader />}
-    </div>
+    </AdminLayout>
   );
 };
 
