@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import styles from "../styles/eachProduct.module.css";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import AddReviewModal from "./AddReviewModal";
 import { ProductType, Review } from "@/lib/utils";
 import { productData, ProductUIData } from "@/lib/productData";
@@ -31,21 +31,30 @@ const ProductPage = ({
   productInfo
 }: ProductPageProps) => {
 
-  const [reviewsData, setReviewsData] = useState<{ reviews: Review[], totalReviews: number, averageRating: number, ratingBreakdown: Record<number, number> }>({ 
-    reviews: [],
-    totalReviews: 0,
-    averageRating: 0,
-    ratingBreakdown: {}
-  });
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [loader, setLoader] = useState<boolean>(false);
   const [reviewLoader, setReviewLoader] = useState<boolean>(false);
   const setProducts = useStore((state) => state.setProducts);
   const allProducts = useStore((state) => state.adminData.products);
 
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  const [stats, setStats] = useState({
+    averageRating: 0,
+    totalReviews: 0,
+    ratingBreakdown: {} as Record<number, number>,
+  });
+
+  const [bestReview, setBestReview] = useState<Review | null>(null);
+
+  const observer = useRef<IntersectionObserver | null>(null);
+
   useEffect(() => {
     if (product) {
-      getAllReviews(product?._id);
+      setPage(1);
+      getAllReviews(1);
     }
   },[product])
 
@@ -75,30 +84,55 @@ const ProductPage = ({
     }
   }
 
-  const getAllReviews = async (id: string) => {
+  const getAllReviews = async (pageNum: number) => {
     setOpenModal(false);
-    setReviewLoader(true);
+    if (!product?._id) return;
+
     try {
-      const res = await fetch(`/api/review?productId=${id}`);
+      setReviewLoader(true);
+
+      const res = await fetch(
+        `/api/review?productId=${product._id}&page=${pageNum}&limit=10`
+      );
       const data = await res.json();
-      if(data.success) {
-        setReviewsData(data.data || []);
-      } else {
-        toast.error(data.message);
+
+      if (data.success) {
+        setReviews((prev) =>
+          pageNum === 1 ? data.data : [...prev, ...data.data]
+        );
+
+        if (pageNum === 1) {
+          setStats(data.productStats);
+          setBestReview(data.bestReview);
+        }
+
+        setHasMore(data.pagination.hasMore);
       }
-    } catch (error) {
-      toast.error("Failed to fetch reviews.");
+    } catch (err) {
+      toast.error("Failed to load reviews");
     } finally {
       setReviewLoader(false);
     }
-  }
+  };
 
- const bestReview =
-  reviewsData.reviews.length > 0
-    ? reviewsData.reviews.reduce((a, b) =>
-        a.rating > b.rating ? a : b
-      )
-    : null;
+  const lastReviewRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (reviewLoader) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (!hasMore) return;
+        if (entries[0].isIntersecting && hasMore) {
+          const nextPage = page + 1;
+          setPage(nextPage);
+          getAllReviews(nextPage);
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [reviewLoader, hasMore, page]
+  );
 
   const handleBuyNow = () => {
     const phoneNumber = 919286382701;
@@ -132,7 +166,7 @@ const ProductPage = ({
                   <div
                     className={styles.starFill}
                     style={{
-                      width: `${(reviewsData.averageRating / 5) * 100}%`
+                      width: `${(stats.averageRating / 5) * 100}%`
                     }}
                   >
                     ★★★★★
@@ -140,7 +174,7 @@ const ProductPage = ({
                   <div className={styles.starBase}>★★★★★</div>
                 </div>
                 <span className={styles.topRatingText}>
-                  {reviewsData.averageRating} ({reviewsData.totalReviews} reviews)
+                  {stats.averageRating} ({stats.totalReviews} reviews)
                 </span>
               </div>
               <p className={styles.tagline}>{productInfo.tagLine}</p>
@@ -273,20 +307,17 @@ const ProductPage = ({
       {/* REVIEWS */}
       <section className={styles.reviews}>
         <div className={styles.container}>
-
           <div className={styles.reviewHeader}>
             <h2>Customer Reviews</h2>
 
-            {/* SUMMARY */}
-            <div className={styles.reviewSummary}>
-              
-              <div className={styles.leftSummary}>
-                <div className={styles.bigRating}>{reviewsData.averageRating}</div>
+            {/* 🔥 STICKY SUMMARY */}
+            <div className={styles.reviewSummarySticky}>
+              <div className={styles.bigRating}>{stats.averageRating}</div>
                 <div className={styles.starWrapper}>
                   <div
                     className={styles.starFill}
                     style={{
-                      width: `${(reviewsData.averageRating / 5) * 100}%`
+                      width: `${(stats.averageRating / 5) * 100}%`
                     }}
                   >
                     ★★★★★
@@ -294,16 +325,15 @@ const ProductPage = ({
                   <div className={styles.starBase}>★★★★★</div>
                 </div>
                 <div className={styles.totalReviews}>
-                  {reviewsData.totalReviews} reviews
+                  {stats.totalReviews} reviews
                 </div>
-              </div>
-
-              {/* ⭐ BREAKDOWN */}
+            </div>
+            <div className={styles.breakdownContainer} >
               <div className={styles.breakdown}>
                 {[5, 4, 3, 2, 1].map((star) => {
-                  const count = reviewsData.ratingBreakdown[star] || 0;
-                  const percentage = reviewsData.totalReviews
-                    ? (count / reviewsData.totalReviews) * 100
+                  const count = stats.ratingBreakdown[star] || 0;
+                  const percentage = stats.totalReviews
+                    ? (count / stats.totalReviews) * 100
                     : 0;
 
                   return (
@@ -322,7 +352,6 @@ const ProductPage = ({
                   );
                 })}
               </div>
-
             </div>
 
             <button
@@ -333,7 +362,7 @@ const ProductPage = ({
             </button>
           </div>
 
-          {/* 🌟 BEST REVIEW */}
+          {/* BEST REVIEW */}
           {bestReview && (
             <div className={styles.bestReview}>
               <div className={styles.badge}>Top Review</div>
@@ -347,32 +376,58 @@ const ProductPage = ({
             </div>
           )}
 
-          {/* ALL REVIEWS */}
+          {/* LIST */}
           <div className={styles.reviewScroll}>
-            {reviewsData.reviews.map((r, i) => (
-              <div key={i} className={styles.reviewCard}>
+            {reviews.map((r, i) => {
+              if (i === reviews.length - 1) {
+                return (
+                  <div ref={lastReviewRef} key={i} className={styles.reviewCard}>
+                    <div className={styles.reviewTop}>
+                      <div>
+                        <strong>{r.reviewerName}</strong>
+                        <div className={styles.reviewMeta}>
+                          {r.skinType} • {r.skinConcern}
+                        </div>
+                      </div>
 
-                <div className={styles.reviewTop}>
-                  <div>
-                    <strong>{r.reviewerName}</strong>
-                    <div className={styles.reviewMeta}>
-                      {r.skinType} • {r.skinConcern}
+                      {r.isVerifiedUser && (
+                        <span className={styles.verified}>✔ Verified</span>
+                      )}
                     </div>
+
+                    <div className={styles.reviewStars}>
+                      {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
+                    </div>
+                    <p className={styles.reviewText}>{r.review}</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div key={i} className={styles.reviewCard}>
+                  <div className={styles.reviewTop}>
+                    <div>
+                      <strong>{r.reviewerName}</strong>
+                      <div className={styles.reviewMeta}>
+                        {r.skinType} • {r.skinConcern}
+                      </div>
+                    </div>
+
+                    {r.isVerifiedUser && (
+                      <span className={styles.verified}>✔ Verified</span>
+                    )}
                   </div>
 
-                  {r.isVerifiedUser && (
-                    <span className={styles.verified}>✔ Verified</span>
-                  )}
+                  <div className={styles.reviewStars}>
+                    {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
+                  </div>
+                  <p className={styles.reviewText}>{r.review}</p>
                 </div>
+              );
+            })}
 
-                <div className={styles.reviewStars}>
-                  {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
-                </div>
-                <p className={styles.reviewText}>{r.review}</p>
-              </div>
-            ))}
+            {reviewLoader && <Loader />}
           </div>
-
         </div>
       </section>
 
@@ -380,7 +435,7 @@ const ProductPage = ({
         <AddReviewModal
           onClose={() => setOpenModal(false)}
           productId={product?._id}
-          afterSuccessCall={() => getAllReviews(product?._id)}
+          afterSuccessCall={() => getAllReviews(1)}
           productName={product?.name}
         />
       )}

@@ -1,4 +1,3 @@
-import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
 import { useEffect, useState } from "react";
 import { toast, Bounce } from "react-toastify";
@@ -9,6 +8,7 @@ import { useStore } from "@/store";
 import { InventoryItem } from "@/store/adminStore";
 import SearchBar from "@/components/SearchBar";
 import Pagination from "@/components/Pagination";
+import AdminLayout from "@/components/AdminLayout";
 
 type CreditInventoryItem = {
   _id?: string;
@@ -257,235 +257,235 @@ const CreditInventory = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <AdminNavbar />
+    <AdminLayout>
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <div className={styles.header}>
+            <h1>
+              Credit Inventory
+              <span>{creditInventory?.length} out of {totalOrders}</span>
+            </h1>
 
-      <div className={styles.content}>
-        <div className={styles.header}>
-          <h1>
-            Credit Inventory
-            <span>{creditInventory?.length} out of {totalOrders}</span>
-          </h1>
+            <button onClick={() => setShowModal(true)}>
+              + Add Credit Inventory
+            </button>
+          </div>
 
-          <button onClick={() => setShowModal(true)}>
-            + Add Credit Inventory
-          </button>
-        </div>
+          <SearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Search by customer name or phone..."
+          />
 
-        <SearchBar
-          value={search}
-          onChange={setSearch}
-          placeholder="Search by customer name or phone..."
-        />
-
-        {/* Table */}
-        <div className={styles.tableWrapper}>
-          {creditInventory?.length > 0 ? (
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Customer Name</th>
-                  <th>Customer Number</th>
-                  <th>Date of Inventory</th>
-                  <th>Products</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {creditInventory.map((item: CreditInventoryItem, i: number) => (
-                  <tr key={item._id}>
-                    <td>{i + 1}</td>
-                    <td>{item?.customerName}</td>
-                    <td>{item?.customerPhone}</td>
-                    <td>{dateToShow(item?.dateOfInventory)}</td>
-                    <td>
-                      {item.products.map((p, i) => (
-                        <div key={i} className={styles.productItem}>
-                          {p.productName} × {"(" + p.remainingQuantity + "+" + (p.remainingFreeQuantity || 0) + ")" + "/" + "(" + p.totalQuantity + "+" + (p.freeQuantity || 0) + ")"}
-                        </div>
-                      ))}
-                    </td>
-                    <td className={styles.actions}>
-                      <button onClick={() => {
-                        const currentProductsName: string[] = [];
-                        item?.products?.forEach((e: {productId: string, remainingQuantity: number }) => {
-                          if (e.remainingQuantity > 0) currentProductsName.push(e.productId);
-                        })
-                        setOrderFormData({ ...orderFormData, date: item?.dateOfInventory, customerPhone: JSON.stringify(item?.customerPhone), customerName: item?.customerName, selectedProductId: currentProductsName, customerId: item?.customerId || "", customerType: item.customerType, creditId: item?._id || "" });
-                        setShowOrderModal(true);
-                      }}>
-                        Place Order
-                      </button>
-                    </td>
+          {/* Table */}
+          <div className={styles.tableWrapper}>
+            {creditInventory?.length > 0 ? (
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Customer Name</th>
+                    <th>Customer Number</th>
+                    <th>Date of Inventory</th>
+                    <th>Products</th>
+                    <th>Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className={styles.empty}>No credit inventory yet</p>
-          )}
+                </thead>
+
+                <tbody>
+                  {creditInventory.map((item: CreditInventoryItem, i: number) => (
+                    <tr key={item._id}>
+                      <td>{i + 1}</td>
+                      <td>{item?.customerName}</td>
+                      <td>{item?.customerPhone}</td>
+                      <td>{dateToShow(item?.dateOfInventory)}</td>
+                      <td>
+                        {item.products.map((p, i) => (
+                          <div key={i} className={styles.productItem}>
+                            {p.productName} × {"(" + p.remainingQuantity + "+" + (p.remainingFreeQuantity || 0) + ")" + "/" + "(" + p.totalQuantity + "+" + (p.freeQuantity || 0) + ")"}
+                          </div>
+                        ))}
+                      </td>
+                      <td className={styles.actions}>
+                        <button onClick={() => {
+                          const currentProductsName: string[] = [];
+                          item?.products?.forEach((e: {productId: string, remainingQuantity: number }) => {
+                            if (e.remainingQuantity > 0) currentProductsName.push(e.productId);
+                          })
+                          setOrderFormData({ ...orderFormData, date: item?.dateOfInventory, customerPhone: JSON.stringify(item?.customerPhone), customerName: item?.customerName, selectedProductId: currentProductsName, customerId: item?.customerId || "", customerType: item.customerType, creditId: item?._id || "" });
+                          setShowOrderModal(true);
+                        }}>
+                          Place Order
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className={styles.empty}>No credit inventory yet</p>
+            )}
+          </div>
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(p)}
+          />
         </div>
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={(p) => setPage(p)}
-        />
-      </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <h2>Add Credit Inventory</h2>
-              <button onClick={() => setShowModal(false)}>✕</button>
-            </div>
-
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.formGroup}>
-                <label>Customer Phone</label>
-                <input
-                  placeholder="Customer Phone"
-                  value={formData.customerNumber}
-                  maxLength={10}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, "");
-                    setFormData({
-                      ...formData,
-                      customerNumber: value,
-                      customerId: "",
-                      customerName: "",
-                      customerType: null,
-                    })
-                    if (value?.length === 10) {
-                      getCustomer(value);
-                    }
-                  }}
-                  onBlur={() => validatePhone(formData.customerNumber)}
-                />
-                {errors.customerNumber !== "" && (
-                  <p className={styles.error}>{errors.customerNumber}</p>
-                )}
+        {/* Modal */}
+        {showModal && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <div className={styles.modalHeader}>
+                <h2>Add Credit Inventory</h2>
+                <button onClick={() => setShowModal(false)}>✕</button>
               </div>
 
-              {formData?.customerName && <h4>Customer Details :: {formData?.customerName} ({formData.customerType})</h4>}
-
-
-              {formData.customerType && (formData.customerType === CustomerType.WHOLE_SALE || formData.customerType === CustomerType.RETAIL) ? 
-                <div>
-                  <div className={styles.formGroup}>
-                    <label>Date of Inventory Given</label>
-                    <input className={styles.dateField} type="date" name="dateOfInventory" onChange={(e) => setFormData({ ...formData, dateOfInventory: e.target.value})} />
-                  </div>
-
-                  <h4>Products</h4>
-
-                  {products.map((p, index) => {
-                    const allBatchesOfProduct = stateInventory?.filter((item: InventoryItem) => item?.productId === p.productId);
-                    return (
-                        <div key={index} className={styles.eachProduct}>
-                            <div className={styles.productRowOne} >
-                                {/* PRODUCT */}
-                                <div className={styles.formGroup}>
-                                    <label>Product Name</label>
-                                    <select value={p.productId} onChange={(e) => handleProductChange(index, "productId", e.target.value)}>
-                                        <option value="">Select Product</option>
-                                        {stateProducts?.map((item: ProductType) => {
-                                            return (
-                                            <option key={item?._id} value={item?._id}>{item?.name}</option>
-                                            )
-                                        })}
-                                    </select>
-                                </div>
-
-                                {/* BATCH */}
-                                <div className={styles.formGroup}>
-                                    <label>Batch Name</label>
-                                    <select
-                                        value={p.batchId}
-                                        className={styles.productRowOneBatch}
-                                        onChange={(e) => handleProductChange(index, "batchId", e.target.value, undefined, allBatchesOfProduct)}
-                                    >
-                                        <option value="">Batch</option>
-                                        {allBatchesOfProduct.map((b) => (
-                                            <option key={b._id} value={b._id}>{b.batch}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className={styles.productRowCreditInv}>
-                                {/* MRP */}
-                                <div className={styles.infoBox}>
-                                    <span>MRP</span>
-                                    ₹{
-                                        stateProducts?.filter((b) => b._id === p.productId)[0]?.mrp || 0
-                                    }
-                                </div>
-
-                                {/* QTY */}
-                                <div className={styles.formGroup}>
-                                    <label>Quantity</label>
-                                    <input
-                                        type="number"
-                                        className={styles.smallInput}
-                                        placeholder="Qty"
-                                        onChange={(e) =>
-                                        handleProductChange(
-                                            index,
-                                            "quantity",
-                                            Number(e.target.value)
-                                        )
-                                        }
-                                    />
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label>Free Quantity</label>
-                                    <input
-                                        type="number"
-                                        className={styles.smallInput}
-                                        placeholder="Free Quantity"
-                                        onChange={(e) =>
-                                        handleProductChange(
-                                            index,
-                                            "freeQuantity",
-                                            Number(e.target.value)
-                                        )
-                                        }
-                                    />
-                                </div>
-                                {!(index === 0 && products?.length === 1) && <button
-                                    type="button"
-                                    className={styles.deleteBtn}
-                                    onClick={() => removeProduct(index)}
-                                >
-                                    ✕
-                                </button>}
-                            </div>
-                        </div>
-                    )
-                  })}
-
-                  <button type="button" className={styles.addButton} disabled={isLastRowEmpty(products)} onClick={addProduct}>
-                    + Add Product
-                  </button>
-
-                  <button type="submit" disabled={isLastRowEmpty(products)}>Submit</button>
+              <form onSubmit={handleSubmit} className={styles.form}>
+                <div className={styles.formGroup}>
+                  <label>Customer Phone</label>
+                  <input
+                    placeholder="Customer Phone"
+                    value={formData.customerNumber}
+                    maxLength={10}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "");
+                      setFormData({
+                        ...formData,
+                        customerNumber: value,
+                        customerId: "",
+                        customerName: "",
+                        customerType: null,
+                      })
+                      if (value?.length === 10) {
+                        getCustomer(value);
+                      }
+                    }}
+                    onBlur={() => validatePhone(formData.customerNumber)}
+                  />
+                  {errors.customerNumber !== "" && (
+                    <p className={styles.error}>{errors.customerNumber}</p>
+                  )}
                 </div>
-              :
-                <h4>Credit products can be given to retailer or whole sale customer only.</h4>
-              }
-            </form>
+
+                {formData?.customerName && <h4>Customer Details :: {formData?.customerName} ({formData.customerType})</h4>}
+
+
+                {formData.customerType && (formData.customerType === CustomerType.WHOLE_SALE || formData.customerType === CustomerType.RETAIL) ? 
+                  <div>
+                    <div className={styles.formGroup}>
+                      <label>Date of Inventory Given</label>
+                      <input className={styles.dateField} type="date" name="dateOfInventory" onChange={(e) => setFormData({ ...formData, dateOfInventory: e.target.value})} />
+                    </div>
+
+                    <h4>Products</h4>
+
+                    {products.map((p, index) => {
+                      const allBatchesOfProduct = stateInventory?.filter((item: InventoryItem) => item?.productId === p.productId);
+                      return (
+                          <div key={index} className={styles.eachProduct}>
+                              <div className={styles.productRowOne} >
+                                  {/* PRODUCT */}
+                                  <div className={styles.formGroup}>
+                                      <label>Product Name</label>
+                                      <select value={p.productId} onChange={(e) => handleProductChange(index, "productId", e.target.value)}>
+                                          <option value="">Select Product</option>
+                                          {stateProducts?.map((item: ProductType) => {
+                                              return (
+                                              <option key={item?._id} value={item?._id}>{item?.name}</option>
+                                              )
+                                          })}
+                                      </select>
+                                  </div>
+
+                                  {/* BATCH */}
+                                  <div className={styles.formGroup}>
+                                      <label>Batch Name</label>
+                                      <select
+                                          value={p.batchId}
+                                          className={styles.productRowOneBatch}
+                                          onChange={(e) => handleProductChange(index, "batchId", e.target.value, undefined, allBatchesOfProduct)}
+                                      >
+                                          <option value="">Batch</option>
+                                          {allBatchesOfProduct.map((b) => (
+                                              <option key={b._id} value={b._id}>{b.batch}</option>
+                                          ))}
+                                      </select>
+                                  </div>
+                              </div>
+
+                              <div className={styles.productRowCreditInv}>
+                                  {/* MRP */}
+                                  <div className={styles.infoBox}>
+                                      <span>MRP</span>
+                                      ₹{
+                                          stateProducts?.filter((b) => b._id === p.productId)[0]?.mrp || 0
+                                      }
+                                  </div>
+
+                                  {/* QTY */}
+                                  <div className={styles.formGroup}>
+                                      <label>Quantity</label>
+                                      <input
+                                          type="number"
+                                          className={styles.smallInput}
+                                          placeholder="Qty"
+                                          onChange={(e) =>
+                                          handleProductChange(
+                                              index,
+                                              "quantity",
+                                              Number(e.target.value)
+                                          )
+                                          }
+                                      />
+                                  </div>
+                                  <div className={styles.formGroup}>
+                                      <label>Free Quantity</label>
+                                      <input
+                                          type="number"
+                                          className={styles.smallInput}
+                                          placeholder="Free Quantity"
+                                          onChange={(e) =>
+                                          handleProductChange(
+                                              index,
+                                              "freeQuantity",
+                                              Number(e.target.value)
+                                          )
+                                          }
+                                      />
+                                  </div>
+                                  {!(index === 0 && products?.length === 1) && <button
+                                      type="button"
+                                      className={styles.deleteBtn}
+                                      onClick={() => removeProduct(index)}
+                                  >
+                                      ✕
+                                  </button>}
+                              </div>
+                          </div>
+                      )
+                    })}
+
+                    <button type="button" className={styles.addButton} disabled={isLastRowEmpty(products)} onClick={addProduct}>
+                      + Add Product
+                    </button>
+
+                    <button type="submit" disabled={isLastRowEmpty(products)}>Submit</button>
+                  </div>
+                :
+                  <h4>Credit products can be given to retailer or whole sale customer only.</h4>
+                }
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {showOrderModal && <OrderModal setShowOrderModal={setShowOrderModal} orderData={orderFormData} source="creditInventory" callAfterSave={getCreditInventory} />}
+        {showOrderModal && <OrderModal setShowOrderModal={setShowOrderModal} orderData={orderFormData} source="creditInventory" callAfterSave={getCreditInventory} />}
 
-      {loader && <Loader />}
-    </div>
+        {loader && <Loader />}
+      </div>
+    </AdminLayout>
   );
 };
 

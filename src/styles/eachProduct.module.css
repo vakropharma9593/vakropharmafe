@@ -207,13 +207,13 @@
 /* REVIEWS */
 
 .reviews {
-  padding: 32px 0;
+  padding: 20px 0 32px 0;
   background: #F9F6F0;
 }
 
 .reviewHeader {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 20px;
 }
 
 .ratingSummary {
@@ -237,7 +237,7 @@
 }
 
 .reviewButton {
-  margin-top: 20px;
+  margin-top: 8px;
   background: #C9A25E;
   color: #173F36;
   border: none;
@@ -254,7 +254,7 @@
 /* SCROLLABLE REVIEW LIST */
 
 .reviewScroll {
-  max-height: 300px;
+  max-height: 460px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -275,7 +275,7 @@
 
 .reviewCard {
   background: white;
-  padding: 12px;
+  padding: 8px 16px;
   border-radius: 14px;
   border: 1px solid #EFE7DA;
   box-shadow: 0 8px 20px rgba(0,0,0,0.04);
@@ -302,7 +302,7 @@
 
 .reviewStars {
   color: #C9A25E;
-  margin: 6px 0 10px;
+  margin: 2px 0;
   font-size: 14px;
   letter-spacing: 1.5px;
 }
@@ -352,6 +352,7 @@
 
 .bigRating {
   font-size: 42px;
+  line-height: 42px;
   font-weight: 600;
   color: #173F36;
 }
@@ -392,9 +393,9 @@
 .bestReview {
   background: white;
   border-left: 4px solid #C9A25E;
-  padding: 24px;
+  padding: 12px;
   border-radius: 10px;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .badge {
@@ -771,4 +772,15 @@
   .zoomWrapper {
     height: 300px;
   }
+}
+
+.reviewSummarySticky {
+  background: #F9F6F0;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.breakdownContainer {
+  display: flex;
+  justify-content: center;
 }

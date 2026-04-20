@@ -1,111 +1,96 @@
-import { useState } from "react";
 import { useRouter } from "next/router";
 import styles from "../styles/adminNavbar.module.css";
 import Image from "next/image";
 import vakroLogo from "../../public/assets/goldenLogo.svg";
 import { useStore } from "@/store";
 
-const AdminNavbar = () => {
+type Props = {
+  open: boolean;
+  setOpen: (val: boolean) => void;
+};
+
+const AdminNavbar = ({ open, setOpen }: Props) => {
   const router = useRouter();
-  const [menuOpen, setMenuOpen] = useState(false);
   const setAuth = useStore((state) => state.setAuth);
 
   const handleLogout = () => {
-    setAuth({username: "", isLoggedIn: false});
+    setAuth({ username: "", isLoggedIn: false });
     router.push("/");
   };
 
   const navItems = [
+    { label: "Orders", path: "/admin/order" },
     { label: "Products", path: "/admin/product" },
     { label: "Inventory", path: "/admin/inventory" },
     { label: "Customers", path: "/admin/customer" },
-    { label: "Orders", path: "/admin/order" },
     { label: "Expenses", path: "/admin/expense" },
     { label: "Payments", path: "/admin/payment" },
     { label: "Credit Inventory", path: "/admin/creditInventory" },
     { label: "Patient Order", path: "/admin/patientOrder" },
     { label: "Reviews", path: "/admin/review" },
+    { label: "Insights", path: "/admin/insight" },
     { label: "Contact Forms", path: "/admin/contactus" },
     { label: "QR", path: "/admin/qrCode" },
   ];
 
   return (
     <>
-      <nav className={styles.navbar}>
-        {/* LEFT */}
-        <div className={styles.logo} onClick={() => router.push("/admin")}>
-          <Image
-            src={vakroLogo}
-            alt="Vakro"
-            width={80}
-            height={80}
-            style={{ transform: "scale(1.5)" }}
-          />
-        </div>
-
-        {/* DESKTOP LINKS */}
-        <div className={styles.links}>
-          {navItems.map((item) => (
-            <button
-              key={item.path}
-              className={router.pathname === item.path ? styles.active : ""}
-              onClick={() => router.push(item.path)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        {/* RIGHT */}
-        <div className={styles.actions}>
-          <button className={styles.logout} onClick={handleLogout}>
-            Logout
-          </button>
-
-          {/* HAMBURGER */}
-          <div
-            className={styles.hamburger}
-            onClick={() => setMenuOpen(true)}
-          >
+      {/* MOBILE TOP BAR */}
+      <div className={styles.mobileTop}>
+        <div className={styles.mobileHeader}>
+          {/* <Image src={vakroLogo} alt="Vakro" width={60} height={60} /> */}
+          <div className={styles.hamburger} onClick={() => setOpen(!open)}>
             ☰
           </div>
         </div>
-      </nav>
+      </div>
 
-      {/* MOBILE DRAWER */}
-      <div
-        className={`${styles.drawer} ${menuOpen ? styles.open : ""}`}
-      >
-        <div className={styles.drawerHeader}>
-          <span>Menu</span>
-          <button onClick={() => setMenuOpen(false)}>✕</button>
+      {/* SIDEBAR */}
+      <aside className={`${styles.sidebar} ${open ? styles.open : styles.closed}`}>
+
+        {/* LOGO */}
+        <div className={styles.logo} onClick={() => router.push("/admin")}>
+          <Image src={vakroLogo} alt="Vakro" width={40} height={40} />
         </div>
 
-        <div className={styles.drawerLinks}>
+        {/* NAV ITEMS */}
+        <div className={styles.navItems}>
           {navItems.map((item) => (
             <button
               key={item.path}
-              className={router.pathname === item.path ? styles.active : ""}
+              className={
+                router.pathname === item.path ? styles.active : ""
+              }
               onClick={() => {
                 router.push(item.path);
-                setMenuOpen(false);
+                setOpen(false);
               }}
             >
               {item.label}
             </button>
           ))}
+        </div>
 
+        {/* LOGOUT */}
+        <div className={styles.bottom}>
           <button className={styles.logout} onClick={handleLogout}>
             Logout
           </button>
         </div>
+      </aside>
+
+      <div
+        className={`${styles.desktopToggle} ${open ? styles.shifted : ""}`}
+        onClick={() => setOpen(!open)}
+      >
+        {open ? "←" : "→"}
       </div>
 
       {/* BACKDROP */}
-      {menuOpen && (
+      {open && (
         <div
           className={styles.backdrop}
-          onClick={() => setMenuOpen(false)}
+          onClick={() => setOpen(false)}
         />
       )}
     </>

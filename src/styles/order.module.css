@@ -466,6 +466,14 @@
     font-size: 11px;
     text-align: start;
   }
+
+  .header {
+    flex-direction: column;
+  }
+
+  .header button {
+    margin-top: 12px;
+  }
 }
 
 .formGroup {

@@ -194,8 +194,25 @@
   }
 
   .productRow {
-    grid-template-columns: 0.4fr 0.4fr 0.4fr 0.4fr 0.4fr 0.2fr;
+    grid-template-columns: 0.4fr 0.4fr 0.4fr 0.4fr 0.4fr 0.2fr !important;
     padding: 10px 2px;
+  }
+
+  .form input {
+    max-width: 100%;
+  }
+
+  .form select {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+   .productRow {
+    display: flex !important;
+    flex-direction: column;
+    padding: 10px 2px;
+    align-items: flex-start !important;
   }
 }
 

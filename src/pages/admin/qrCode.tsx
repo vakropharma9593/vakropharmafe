@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import QRCodeStyling from "qr-code-styling";
 import styles from "../../styles/qrCode.module.css";
-import vakroLogo from "../../../public/assets/goldenLogo.svg";
-import AdminNavbar from "@/components/AdminNavbar";
+import AdminLayout from "@/components/AdminLayout";
 
 type QRCodeInstance = {
   update: (options: { data: string }) => void;
@@ -21,35 +20,59 @@ const QRCodeGenerator = () => {
 
   // Initialize QR once
   useEffect(() => {
+    // const qr = new QRCodeStyling({
+    //   width: 280,
+    //   height: 280,
+    //   data: qrUrl,
+    //   image: vakroLogo.src, // ✅ FIXED
+
+    //   dotsOptions: {
+    //     color: "#173F36",
+    //     type: "rounded",
+    //   },
+
+    //   backgroundOptions: {
+    //     color: "#F4EFE7",
+    //   },
+
+    //   imageOptions: {
+    //     crossOrigin: "anonymous",
+    //     margin: 6,
+    //     imageSize: 0.22,
+    //   },
+
+    //   cornersSquareOptions: {
+    //     type: "extra-rounded",
+    //     color: "#C9A25E",
+    //   },
+
+    //   cornersDotOptions: {
+    //     type: "dot",
+    //     color: "#C9A25E",
+    //   },
+    // });
     const qr = new QRCodeStyling({
       width: 280,
       height: 280,
       data: qrUrl,
-      image: vakroLogo.src, // ✅ FIXED
 
       dotsOptions: {
-        color: "#173F36",
-        type: "rounded",
+        color: "#333",
+        type: "square",
       },
 
       backgroundOptions: {
-        color: "#F4EFE7",
-      },
-
-      imageOptions: {
-        crossOrigin: "anonymous",
-        margin: 6,
-        imageSize: 0.22,
+        color: "#FFFFFF",
       },
 
       cornersSquareOptions: {
-        type: "extra-rounded",
-        color: "#C9A25E",
+        type: "square",
+        color: "#333",
       },
 
       cornersDotOptions: {
-        type: "dot",
-        color: "#C9A25E",
+        type: "square",
+        color: "#333",
       },
     });
 
@@ -78,38 +101,64 @@ const QRCodeGenerator = () => {
   };
 
   const downloadHD = () => {
+    // const highResQR = new QRCodeStyling({
+    //   width: 1000,
+    //   height: 1000,
+    //   data: qrUrl,
+    //   image: vakroLogo.src, // ✅ FIXED
+
+    //   dotsOptions: {
+    //     color: "#173F36",
+    //     type: "rounded",
+    //   },
+
+    //   backgroundOptions: {
+    //     color: "#FFFFFF",
+    //   },
+
+    //   imageOptions: {
+    //     crossOrigin: "anonymous",
+    //     margin: 8,
+    //     imageSize: 0.22,
+    //   },
+
+    //   cornersSquareOptions: {
+    //     type: "extra-rounded",
+    //     color: "#C9A25E",
+    //   },
+
+    //   cornersDotOptions: {
+    //     type: "dot",
+    //     color: "#C9A25E",
+    //   },
+    // });
+
     const highResQR = new QRCodeStyling({
       width: 1000,
       height: 1000,
       data: qrUrl,
-      image: vakroLogo.src, // ✅ FIXED
+
+      margin: 40,
 
       dotsOptions: {
-        color: "#173F36",
-        type: "rounded",
+        color: "#333",
+        type: "square",
       },
 
       backgroundOptions: {
         color: "#FFFFFF",
       },
 
-      imageOptions: {
-        crossOrigin: "anonymous",
-        margin: 8,
-        imageSize: 0.22,
-      },
-
       cornersSquareOptions: {
-        type: "extra-rounded",
-        color: "#C9A25E",
+        type: "square",
+        color: "#333",
       },
 
       cornersDotOptions: {
-        type: "dot",
-        color: "#C9A25E",
+        type: "square",
+        color: "#333",
       },
     });
-
     highResQR.download({
       name: "vakro-qr-print",
       extension: "png",
@@ -117,9 +166,8 @@ const QRCodeGenerator = () => {
   };
 
   return (
-    <div>
-        <AdminNavbar />
-        <div className={styles.page}>
+    <AdminLayout>
+      <div className={styles.page}>
         <div className={styles.card}>
             <h2 className={styles.heading}>QR Code Generator</h2>
 
@@ -149,8 +197,8 @@ const QRCodeGenerator = () => {
             </button>
             </div>
         </div>
-        </div>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 

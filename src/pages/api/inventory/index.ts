@@ -42,7 +42,7 @@ export default async function handler(
     if (req.method === "GET") {
       const inventory = await Inventory.find()
       .populate("productId", "name costPrice mrp gstPercentage gstPercentageOnCostPrice")
-      .sort({ createdAt: -1 });
+      .sort({receivedDate: -1,  createdAt: -1 });
 
       const inventoryToSend: {
         _id: ObjectId,

@@ -80,7 +80,7 @@ export const productData = {
     ],
     ingredients: [
       {
-        name: "Salicylic Acid",
+        name: "Kojic Acid",
         description: "Helps unclog pores and control acne."
       },
       {
@@ -88,7 +88,7 @@ export const productData = {
         description: "Controls excess oil and improves skin texture."
       },
       {
-        name: "Glutathione",
+        name: "Palmitic Acid",
         description: "Powerful antioxidant that helps brighten skin tone."
       }
     ],
