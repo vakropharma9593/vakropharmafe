@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import QRCodeStyling from "qr-code-styling";
 import styles from "../../styles/qrCode.module.css";
-import vakroLogo from "../../../public/assets/goldenLogo.svg";
-import AdminNavbar from "@/components/AdminNavbar";
+import AdminLayout from "@/components/AdminLayout";
 
 type QRCodeInstance = {
   update: (options: { data: string }) => void;
@@ -167,9 +166,8 @@ const QRCodeGenerator = () => {
   };
 
   return (
-    <div>
-        <AdminNavbar />
-        <div className={styles.page}>
+    <AdminLayout>
+      <div className={styles.page}>
         <div className={styles.card}>
             <h2 className={styles.heading}>QR Code Generator</h2>
 
@@ -199,8 +197,8 @@ const QRCodeGenerator = () => {
             </button>
             </div>
         </div>
-        </div>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 

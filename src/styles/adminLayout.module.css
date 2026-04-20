@@ -1,0 +1,24 @@
+.layout {
+  display: flex;
+}
+
+/* THIS IS IMPORTANT */
+.mainContent {
+  margin-left: 240px;
+  width: 100%;
+  transition: margin 0.3s ease;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* when sidebar closed */
+.sidebarClosed .mainContent {
+  margin-left: 0;
+}
+
+/* MOBILE */
+@media (max-width: 1024px) {
+  .mainContent {
+    margin-left: 0;
+  }
+}

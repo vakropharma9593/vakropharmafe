@@ -1,11 +1,10 @@
-import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
 import { booleanToYesNo, Review } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/order.module.css";
 import Pagination from "@/components/Pagination";
-
+import AdminLayout from "@/components/AdminLayout";
 
 const Reviews = () => {
 
@@ -72,129 +71,129 @@ const Reviews = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <AdminNavbar />
+    <AdminLayout>
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <div className={styles.header}>
+            <h1>
+              Reviews <span>{reviews.length} out of {totalReviews}</span>
+            </h1>
+          </div>
 
-      <div className={styles.content}>
-        <div className={styles.header}>
-          <h1>
-            Reviews <span>{reviews.length} out of {totalReviews}</span>
-          </h1>
-        </div>
-
-        <div className={styles.tableWrapper}>
-          {reviews.length > 0 ? (
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Reviewer</th>
-                  <th>Phone</th>
-                  <th>Email</th>
-                  <th>Product Name</th>
-                  <th>Skin Type</th>
-                  <th>Concerns</th>
-                  <th>Rating</th>
-                  <th>Review</th>
-                  <th>IsVerified</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reviews.map((review, index) => (
-                  <tr 
-                    key={review?._id || index}
-                  >
-                    <td>{index + 1}</td>
-                    <td>{review.reviewerName}</td>
-                    <td>{review?.phone || "-"}</td>
-                    <td>{review?.email || "-"}</td>
-                    <td>{review?.productId?.name}</td>
-                    <td>{review?.skinType}</td>
-                    <td>{review?.skinConcern}</td>
-                    <td>{review?.rating}</td>
-                    <td style={{ wordBreak: "break-all" }} >{review?.review}</td>
-                    <td>{booleanToYesNo(review?.isVerifiedUser || false)}</td>
-                    <td>
-                      <button
-                        className={styles.updateBtn}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedReview(review);
-                          setShowStatusModal(true);
-                        }}
-                        disabled={review.isVerifiedUser === true}
-                        style={{ cursor: review.isVerifiedUser === true ? "not-allowed" : "pointer"}}
-                      >
-                        Update
-                      </button>
-                    </td>
+          <div className={styles.tableWrapper}>
+            {reviews.length > 0 ? (
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Reviewer</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Product Name</th>
+                    <th>Skin Type</th>
+                    <th>Concerns</th>
+                    <th>Rating</th>
+                    <th>Review</th>
+                    <th>IsVerified</th>
+                    <th>Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className={styles.empty}>No reviews yet</p>
-          )}
+                </thead>
+                <tbody>
+                  {reviews.map((review, index) => (
+                    <tr 
+                      key={review?._id || index}
+                    >
+                      <td>{index + 1}</td>
+                      <td>{review.reviewerName}</td>
+                      <td>{review?.phone || "-"}</td>
+                      <td>{review?.email || "-"}</td>
+                      <td>{review?.productId?.name}</td>
+                      <td>{review?.skinType}</td>
+                      <td>{review?.skinConcern}</td>
+                      <td>{review?.rating}</td>
+                      <td style={{ wordBreak: "break-all" }} >{review?.review}</td>
+                      <td>{booleanToYesNo(review?.isVerifiedUser || false)}</td>
+                      <td>
+                        <button
+                          className={styles.updateBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedReview(review);
+                            setShowStatusModal(true);
+                          }}
+                          disabled={review.isVerifiedUser === true}
+                          style={{ cursor: review.isVerifiedUser === true ? "not-allowed" : "pointer"}}
+                        >
+                          Update
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className={styles.empty}>No reviews yet</p>
+            )}
+          </div>
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(p)}
+          />
         </div>
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={(p) => setPage(p)}
-        />
-      </div>
 
-      {/* STATUS MODAL */}
-      {showStatusModal && selectedReview && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <h2>Update IsVerified</h2>
-              <button onClick={() => setShowStatusModal(false)}>✕</button>
-            </div>
+        {/* STATUS MODAL */}
+        {showStatusModal && selectedReview && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <div className={styles.modalHeader}>
+                <h2>Update IsVerified</h2>
+                <button onClick={() => setShowStatusModal(false)}>✕</button>
+              </div>
 
-            <div className={styles.form}>
-                <p>{selectedReview.reviewerName}</p>
-                <div className={styles.radioGroup}>
-                    <p>Is Verified ?</p>
-                    <div className={styles.radioOptions}>
-                        <label>
-                        <input
-                            type="radio"
-                            name="isVerified"
-                            value="true"
-                            checked={selectedReview?.isVerifiedUser === true}
-                            onChange={() =>
-                                setSelectedReview({ ...selectedReview, isVerifiedUser: true })
-                            }
-                        />
-                            Yes
-                        </label>
-    
-                        <label>
-                        <input
-                            type="radio"
-                            name="isSettled"
-                            value="false"
-                            checked={selectedReview?.isVerifiedUser === false}
-                            onChange={() =>
-                                setSelectedReview({ ...selectedReview, isVerifiedUser: false })
-                            }
-                        />
-                            No
-                        </label>
-                    </div>
-                </div>
-                <button onClick={updateReview}>
-                    Update
-                </button>
+              <div className={styles.form}>
+                  <p>{selectedReview.reviewerName}</p>
+                  <div className={styles.radioGroup}>
+                      <p>Is Verified ?</p>
+                      <div className={styles.radioOptions}>
+                          <label>
+                          <input
+                              type="radio"
+                              name="isVerified"
+                              value="true"
+                              checked={selectedReview?.isVerifiedUser === true}
+                              onChange={() =>
+                                  setSelectedReview({ ...selectedReview, isVerifiedUser: true })
+                              }
+                          />
+                              Yes
+                          </label>
+      
+                          <label>
+                          <input
+                              type="radio"
+                              name="isSettled"
+                              value="false"
+                              checked={selectedReview?.isVerifiedUser === false}
+                              onChange={() =>
+                                  setSelectedReview({ ...selectedReview, isVerifiedUser: false })
+                              }
+                          />
+                              No
+                          </label>
+                      </div>
+                  </div>
+                  <button onClick={updateReview}>
+                      Update
+                  </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {loader && <Loader />}
-    </div>
+        {loader && <Loader />}
+      </div>
+    </AdminLayout>
   );
 };
 

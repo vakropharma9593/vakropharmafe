@@ -11,10 +11,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { UnitEconomicsBarChart } from "@/components/UnitEconomicsBarChart";
-import AdminNavbar from "@/components/AdminNavbar";
 import { ExpensePieChart } from "@/components/ExpensePieChart";
 import Loader from "@/components/Loader";
 import MonthlyDataLineChart from "@/components/MonthlyDataLineChart";
+import AdminLayout from "@/components/AdminLayout";
 
 type ProductData = {
   name: string;
@@ -302,15 +302,15 @@ const InsightPage = () => {
   }, [data]);
 
   if (!data || loader) return (
-    <div>
-      <AdminNavbar />
-      <Loader />
-    </div>
+    <AdminLayout>
+      <div>
+        <Loader />
+      </div>
+    </AdminLayout>
   );
 
   return (
-    <div>
-      <AdminNavbar />
+    <AdminLayout>
       <div className={styles.container}>
         <h1 className={styles.title}>Business Insights</h1>
 
@@ -463,7 +463,7 @@ const InsightPage = () => {
           })}
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
 

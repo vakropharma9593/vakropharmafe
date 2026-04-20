@@ -1,10 +1,10 @@
-import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
 import { booleanToYesNo, dateToShow, ExpenseCategoryType, PaymentType, ProductType } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "../../styles/inventory.module.css";
 import { useStore } from "@/store";
+import AdminLayout from "@/components/AdminLayout";
 
 export type ExpenseType = {
     voucher: string,
@@ -165,295 +165,295 @@ const Expense = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <AdminNavbar />
+    <AdminLayout>
+      <div className={styles.container}>
+        <div className={styles.content}>
+          {/* Header */}
+          <div className={styles.header}>
+            <h1>
+              Expenses
+              <span>{expenses.length}</span>
+            </h1>
 
-      <div className={styles.content}>
-        {/* Header */}
-        <div className={styles.header}>
-          <h1>
-            Expenses
-            <span>{expenses.length}</span>
-          </h1>
+            <button onClick={() => setShowModal(true)}>
+              + Add Expense
+            </button>
+          </div>
 
-          <button onClick={() => setShowModal(true)}>
-            + Add Expense
-          </button>
-        </div>
-
-        {/* Table */}
-        <div className={styles.tableWrapper}>
-          {expenses.length > 0 ? (
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Voucher</th>
-                  <th>Paid To</th>
-                  <th>Purpose</th>
-                  <th>Expense Category</th>
-                  <th>Paid By</th>
-                  <th>Amount Paid</th>
-                  <th>Payment Date</th>
-                  <th>PaymentMode</th>
-                  <th>Authorized By Director</th>
-                  <th>Is Settled</th>
-                  <th>Settlement Date</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {expenses.map((item: ExpenseType, i: number) => (
-                  <tr key={item._id} >
-                    <td>{i + 1}</td>
-                    <td>{item.voucher}</td>
-                    <td>{item.paidTo}</td>
-                    <td>{item.purpose}</td>
-                    <td>{item.expenseCategory}<br></br>{item?.expenseCategory === ExpenseCategoryType.COGS && "(" + stateProducts?.find((product: ProductType) => product._id === item.productId)?.name + ")"} </td>
-                    <td>{item.paidBy}</td>
-                    <td>₹{Number(item.amountPaid).toFixed(2)}</td>
-                    <td>{dateToShow(item.paymentDate)}</td>
-                    <td>{item.paymentMode}</td>
-                    <td>{booleanToYesNo(item.authorizedByDirector)}</td>
-                    <td>{booleanToYesNo(item.isSettled)}</td>
-                    <td>{item?.settlementDate !== "" ? dateToShow(item.settlementDate) : ""}</td>
-                    <td>
-                      <button
-                        className={styles.updateBtn}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedExpense(item);
-                          setFormData(item);
-                          setShowStatusModal(true);
-                        }}
-                        disabled={item?.isSettled}
-                        style={{ cursor: item?.isSettled ? "not-allowed" : "pointer"}}
-                      >
-                        Update
-                      </button>
-                    </td>
+          {/* Table */}
+          <div className={styles.tableWrapper}>
+            {expenses.length > 0 ? (
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Voucher</th>
+                    <th>Paid To</th>
+                    <th>Purpose</th>
+                    <th>Expense Category</th>
+                    <th>Paid By</th>
+                    <th>Amount Paid</th>
+                    <th>Payment Date</th>
+                    <th>PaymentMode</th>
+                    <th>Authorized By Director</th>
+                    <th>Is Settled</th>
+                    <th>Settlement Date</th>
+                    <th>Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className={styles.empty}>No expenses yet</p>
-          )}
+                </thead>
+
+                <tbody>
+                  {expenses.map((item: ExpenseType, i: number) => (
+                    <tr key={item._id} >
+                      <td>{i + 1}</td>
+                      <td>{item.voucher}</td>
+                      <td>{item.paidTo}</td>
+                      <td>{item.purpose}</td>
+                      <td>{item.expenseCategory}<br></br>{item?.expenseCategory === ExpenseCategoryType.COGS && "(" + stateProducts?.find((product: ProductType) => product._id === item.productId)?.name + ")"} </td>
+                      <td>{item.paidBy}</td>
+                      <td>₹{Number(item.amountPaid).toFixed(2)}</td>
+                      <td>{dateToShow(item.paymentDate)}</td>
+                      <td>{item.paymentMode}</td>
+                      <td>{booleanToYesNo(item.authorizedByDirector)}</td>
+                      <td>{booleanToYesNo(item.isSettled)}</td>
+                      <td>{item?.settlementDate !== "" ? dateToShow(item.settlementDate) : ""}</td>
+                      <td>
+                        <button
+                          className={styles.updateBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedExpense(item);
+                            setFormData(item);
+                            setShowStatusModal(true);
+                          }}
+                          disabled={item?.isSettled}
+                          style={{ cursor: item?.isSettled ? "not-allowed" : "pointer"}}
+                        >
+                          Update
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className={styles.empty}>No expenses yet</p>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <h2>Add Expenses</h2>
-              <button onClick={() => setShowModal(false)}>✕</button>
-            </div>
-            <div className={styles.expenseCategoryInfo} >
-              <h3>Expense Category</h3>
-              <p><span>COGS</span>: Ingredients, manufacturing, packaging. </p>
-              <p><span>Fixed Opex</span>: Salaries, rent, electricity bill, website related expense.</p>
-              <p><span>Marketing</span>: CAC, online spends on ads and influencers</p>
-              <p><span>Variable</span>: shipping cost, delivery boxes, payment fee, etc</p>
-            </div>
+        {/* Modal */}
+        {showModal && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <div className={styles.modalHeader}>
+                <h2>Add Expenses</h2>
+                <button onClick={() => setShowModal(false)}>✕</button>
+              </div>
+              <div className={styles.expenseCategoryInfo} >
+                <h3>Expense Category</h3>
+                <p><span>COGS</span>: Ingredients, manufacturing, packaging. </p>
+                <p><span>Fixed Opex</span>: Salaries, rent, electricity bill, website related expense.</p>
+                <p><span>Marketing</span>: CAC, online spends on ads and influencers</p>
+                <p><span>Variable</span>: shipping cost, delivery boxes, payment fee, etc</p>
+              </div>
 
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.formGroup}>
-                <label>Voucher</label>
-                <input name="voucher" placeholder="Voucher" onChange={handleChange} required />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Expense Paid To (Name)</label>
-                <input name="paidTo" placeholder="Paid To" onChange={handleChange} required />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Expense Purpose</label>
-                <input name="purpose" placeholder="Purpose" onChange={handleChange} required />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Expense Category</label>
-                <select name="expenseCategory" onChange={handleChange}>
-                  <option value="">Select Category</option>
-                  {Object.values(ExpenseCategoryType)?.map((category: string) => {
-                      return (
-                          <option key={category} value={category}>{category}</option>
-                      );
-                  })};
-                </select>
-              </div>
-              {formData?.expenseCategory === ExpenseCategoryType.COGS &&
+              <form onSubmit={handleSubmit} className={styles.form}>
                 <div className={styles.formGroup}>
-                  <label>Product Name</label>
-                  <select value={formData?.productId} name="productId" onChange={handleChange}>
-                      <option value="">Select Product</option>
-                      {stateProducts?.map((item: ProductType) => {
-                          return (
-                          <option key={item?._id} value={item?._id}>{item?.name}</option>
-                          )
-                      })}
+                  <label>Voucher</label>
+                  <input name="voucher" placeholder="Voucher" onChange={handleChange} required />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Expense Paid To (Name)</label>
+                  <input name="paidTo" placeholder="Paid To" onChange={handleChange} required />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Expense Purpose</label>
+                  <input name="purpose" placeholder="Purpose" onChange={handleChange} required />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Expense Category</label>
+                  <select name="expenseCategory" onChange={handleChange}>
+                    <option value="">Select Category</option>
+                    {Object.values(ExpenseCategoryType)?.map((category: string) => {
+                        return (
+                            <option key={category} value={category}>{category}</option>
+                        );
+                    })};
                   </select>
                 </div>
-              }
-              <div className={styles.formGroup}>
-                <label>Amount Paid By (Name)</label>
-                <input name="paidBy" placeholder="Paid By" onChange={handleChange} required />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Amount Paid ₹</label>
-                <input type="number" name="amountPaid" placeholder="Amount Paid" step="0.01" onChange={handleChange} />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Payment Date</label>
-                <input className={styles.dateField} type="date" name="paymentDate" onChange={handleChange} />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Payment Mode</label>
-                <select name="paymentMode" onChange={handleChange}>
-                  <option value="">Select Mode</option>
-                  {Object.values(PaymentType)?.map((payment: string) => {
-                      return (
-                          <option key={payment} value={payment}>{payment}</option>
-                      );
-                  })};
-                </select>
-              </div>
-              {/* Authorized By Director */}
-                <div className={styles.radioGroup}>
-                    <p>Authorized By Director</p>
-                    <div className={styles.radioOptions}>
-                        <label>
-                        <input
-                            type="radio"
-                            name="authorizedByDirector"
-                            value="true"
-                            checked={formData.authorizedByDirector === true}
-                            onChange={() =>
-                                setFormData({ ...formData, authorizedByDirector: true })
-                            }
-                        />
-                        Yes
-                        </label>
-
-                        <label>
-                        <input
-                            type="radio"
-                            name="authorizedByDirector"
-                            value="false"
-                            checked={formData.authorizedByDirector === false}
-                            onChange={() =>
-                                setFormData({ ...formData, authorizedByDirector: false })
-                            }
-                        />
-                        No
-                        </label>
-                    </div>
-                </div>
-
-                {/* Is Settled */}
-                <div className={styles.radioGroup}>
-                    <p>Is Settled</p>
-                    <div className={styles.radioOptions}>
-                        <label>
-                        <input
-                            type="radio"
-                            name="isSettled"
-                            value="true"
-                            checked={formData.isSettled === true}
-                            onChange={() =>
-                                setFormData({ ...formData, isSettled: true })
-                            }
-                        />
-                        Yes
-                        </label>
-
-                        <label>
-                        <input
-                            type="radio"
-                            name="isSettled"
-                            value="false"
-                            checked={formData.isSettled === false}
-                            onChange={() =>
-                                setFormData({ ...formData, isSettled: false })
-                            }
-                        />
-                        No
-                        </label>
-                    </div>
-                </div>
-              {formData?.isSettled && 
+                {formData?.expenseCategory === ExpenseCategoryType.COGS &&
+                  <div className={styles.formGroup}>
+                    <label>Product Name</label>
+                    <select value={formData?.productId} name="productId" onChange={handleChange}>
+                        <option value="">Select Product</option>
+                        {stateProducts?.map((item: ProductType) => {
+                            return (
+                            <option key={item?._id} value={item?._id}>{item?.name}</option>
+                            )
+                        })}
+                    </select>
+                  </div>
+                }
                 <div className={styles.formGroup}>
-                  <label>Settlement Date</label>
-                  <input className={styles.dateField} type="date" name="settlementDate" onChange={handleChange} />
+                  <label>Amount Paid By (Name)</label>
+                  <input name="paidBy" placeholder="Paid By" onChange={handleChange} required />
                 </div>
-              }
-
-              <button type="submit">Submit</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* STATUS MODAL */}
-      {showStatusModal && selectedExpense && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <h2>Update Status</h2>
-              <button onClick={() => setShowStatusModal(false)}>✕</button>
-            </div>
-
-            <div className={styles.form}>
-              <p>{selectedExpense.voucher}</p>
-
-              <div className={styles.radioGroup}>
-                <p>Is Settled</p>
-                <div className={styles.radioOptions}>
-                  <label>
-                    <input
-                      type="radio"
-                      name="isSettled"
-                      value="true"
-                      checked={formData.isSettled === true}
-                      onChange={() =>
-                          setFormData({ ...formData, isSettled: true })
-                      }
-                    />
-                      Yes
-                  </label>
-
-                  <label>
-                    <input
-                      type="radio"
-                      name="isSettled"
-                      value="false"
-                      checked={formData.isSettled === false}
-                      onChange={() =>
-                          setFormData({ ...formData, isSettled: false })
-                      }
-                    />
-                      No
-                  </label>
-                </div>
-              </div>
-              {formData?.isSettled && 
                 <div className={styles.formGroup}>
-                  <label>Settlement Date</label>
-                  <input className={styles.dateField} type="date" name="settlementDate" onChange={handleChange} />
+                  <label>Amount Paid ₹</label>
+                  <input type="number" name="amountPaid" placeholder="Amount Paid" step="0.01" onChange={handleChange} />
                 </div>
-              }
+                <div className={styles.formGroup}>
+                  <label>Payment Date</label>
+                  <input className={styles.dateField} type="date" name="paymentDate" onChange={handleChange} />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Payment Mode</label>
+                  <select name="paymentMode" onChange={handleChange}>
+                    <option value="">Select Mode</option>
+                    {Object.values(PaymentType)?.map((payment: string) => {
+                        return (
+                            <option key={payment} value={payment}>{payment}</option>
+                        );
+                    })};
+                  </select>
+                </div>
+                {/* Authorized By Director */}
+                  <div className={styles.radioGroup}>
+                      <p>Authorized By Director</p>
+                      <div className={styles.radioOptions}>
+                          <label>
+                          <input
+                              type="radio"
+                              name="authorizedByDirector"
+                              value="true"
+                              checked={formData.authorizedByDirector === true}
+                              onChange={() =>
+                                  setFormData({ ...formData, authorizedByDirector: true })
+                              }
+                          />
+                          Yes
+                          </label>
 
-              <button onClick={updateOrderStatus}>
-                Update Status
-              </button>
+                          <label>
+                          <input
+                              type="radio"
+                              name="authorizedByDirector"
+                              value="false"
+                              checked={formData.authorizedByDirector === false}
+                              onChange={() =>
+                                  setFormData({ ...formData, authorizedByDirector: false })
+                              }
+                          />
+                          No
+                          </label>
+                      </div>
+                  </div>
+
+                  {/* Is Settled */}
+                  <div className={styles.radioGroup}>
+                      <p>Is Settled</p>
+                      <div className={styles.radioOptions}>
+                          <label>
+                          <input
+                              type="radio"
+                              name="isSettled"
+                              value="true"
+                              checked={formData.isSettled === true}
+                              onChange={() =>
+                                  setFormData({ ...formData, isSettled: true })
+                              }
+                          />
+                          Yes
+                          </label>
+
+                          <label>
+                          <input
+                              type="radio"
+                              name="isSettled"
+                              value="false"
+                              checked={formData.isSettled === false}
+                              onChange={() =>
+                                  setFormData({ ...formData, isSettled: false })
+                              }
+                          />
+                          No
+                          </label>
+                      </div>
+                  </div>
+                {formData?.isSettled && 
+                  <div className={styles.formGroup}>
+                    <label>Settlement Date</label>
+                    <input className={styles.dateField} type="date" name="settlementDate" onChange={handleChange} />
+                  </div>
+                }
+
+                <button type="submit">Submit</button>
+              </form>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {loader && <Loader />}
-    </div>
+        {/* STATUS MODAL */}
+        {showStatusModal && selectedExpense && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <div className={styles.modalHeader}>
+                <h2>Update Status</h2>
+                <button onClick={() => setShowStatusModal(false)}>✕</button>
+              </div>
+
+              <div className={styles.form}>
+                <p>{selectedExpense.voucher}</p>
+
+                <div className={styles.radioGroup}>
+                  <p>Is Settled</p>
+                  <div className={styles.radioOptions}>
+                    <label>
+                      <input
+                        type="radio"
+                        name="isSettled"
+                        value="true"
+                        checked={formData.isSettled === true}
+                        onChange={() =>
+                            setFormData({ ...formData, isSettled: true })
+                        }
+                      />
+                        Yes
+                    </label>
+
+                    <label>
+                      <input
+                        type="radio"
+                        name="isSettled"
+                        value="false"
+                        checked={formData.isSettled === false}
+                        onChange={() =>
+                            setFormData({ ...formData, isSettled: false })
+                        }
+                      />
+                        No
+                    </label>
+                  </div>
+                </div>
+                {formData?.isSettled && 
+                  <div className={styles.formGroup}>
+                    <label>Settlement Date</label>
+                    <input className={styles.dateField} type="date" name="settlementDate" onChange={handleChange} />
+                  </div>
+                }
+
+                <button onClick={updateOrderStatus}>
+                  Update Status
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {loader && <Loader />}
+      </div>
+    </AdminLayout>
   );
 };
 

@@ -1,4 +1,3 @@
-import AdminNavbar from "@/components/AdminNavbar";
 import Loader from "@/components/Loader";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -7,6 +6,7 @@ import OrderModal from "@/components/OrderModal";
 import Pagination from "@/components/Pagination";
 import SearchBar from "@/components/SearchBar";
 import { CustomerType, OrderStatusType, OrderType, PaymentModeType, PaymentStatusType } from "@/lib/utils";
+import AdminLayout from "@/components/AdminLayout";
 
 type Customer = {
   name: string;
@@ -189,182 +189,182 @@ const Customers = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <AdminNavbar />
+    <AdminLayout>
+      <div className={styles.container}>
+        <div className={styles.content}>
+          {/* HEADER */}
+          <div className={styles.header}>
+            <h1>
+              Customers <span>{customers.length} out of {totalCustomers}</span>
+            </h1>
 
-      <div className={styles.content}>
-        {/* HEADER */}
-        <div className={styles.header}>
-          <h1>
-            Customers <span>{customers.length} out of {totalCustomers}</span>
-          </h1>
-
-          <button
-            onClick={() => {
-              setShowModal(true);
-              setIsEdit(false);
-              setFormData({
-                name: "",
-                phone: "",
-                address: "",
-                type: CustomerType.INDIVIDUAL,
-              });
-            }}
-          >
-            + Add Customer
-          </button>
-        </div>
-
-        <SearchBar
-          value={search}
-          onChange={setSearch}
-          placeholder="Search by name or phone..."
-        />
-
-        {/* TABLE */}
-        <div className={styles.tableWrapper}>
-          {customers.length > 0 ? (
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Name</th>
-                  <th>Phone</th>
-                  <th>Address</th>
-                  <th>Type</th>
-                  <th>GST</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {customers.map((item, index) => (
-                  <tr key={item?._id || index}>
-                    <td>{index + 1}</td>
-                    <td>{item.name}</td>
-                    <td>{item.phone}</td>
-                    <td>{item.address}</td>
-                    <td>{item.type}</td>
-                    <td>{item?.gst}</td>
-
-                    <td className={styles.actions}>
-                      <button onClick={() => handleEdit(item)}>Edit</button>
-                      <button onClick={() => {
-                        setOrderFormData({ ...orderFormData, customerPhone: item?.phone, customerName: item?.name, customerId: item?._id || "", customerType: item?.type });
-                        setShowOrderModal(true);
-                      }}>
-                        Place Order
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className={styles.empty}>No customers yet</p>
-          )}
-        </div>
-
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={(p) => setPage(p)}
-        />
-      </div>
-
-      {/* MODAL */}
-      {showModal && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <h2>{isEdit ? "Edit Customer" : "Add Customer"}</h2>
-              <button onClick={() => setShowModal(false)}>✕</button>
-            </div>
-
-            <form className={styles.form} onSubmit={handleSubmit}>
-              {isEdit ? 
-                <h4>Customer Name: {formData.name} </h4>
-              :
-                <div className={styles.formGroup}>
-                  <label>Customer Name</label>
-                  <input
-                    name="name"
-                    placeholder="Name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    onBlur={() => validateName(formData.name)}
-                  />
-                  {errors.name && <p className={styles.error}>{errors.name}</p>}
-                </div>
-              }
-              {isEdit ? 
-                <h4>Customer Phone: {formData.phone} </h4>
-              :
-                <div className={styles.formGroup}>
-                  <label>Phone Number</label>
-                  <input
-                    placeholder="Phone"
-                    value={formData.phone}
-                    maxLength={10}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        phone: e.target.value.replace(/\D/g, ""),
-                      })
-                    }
-                    onBlur={() => validatePhone(formData.phone)}
-                  />
-                  {errors.phone && <p className={styles.error}>{errors.phone}</p>}
-                </div>
-              }
-              <div className={styles.formGroup}>
-                <label>Address</label>
-                <input
-                  name="address"
-                  placeholder="Address"
-                  value={formData.address}
-                  onChange={handleChange}
-                />
-              </div>
-              {!isEdit && 
-                <div className={styles.formGroup}>
-                  <label>Customer Type</label>
-                  <select
-                    name="type"
-                    value={formData.type}
-                    onChange={handleChange}
-                  >
-                    <option value="Individual">Individual</option>
-                    <option value="Whole_Sale">Whole Sale</option>
-                    <option value="Retail">Retail</option>
-                    <option value="Doctor">Doctor</option>
-                  </select>
-                </div>
-              }
-              <div className={styles.formGroup}>
-                <label>GST Number</label>
-                <input
-                  name="gst"
-                  placeholder="GST Number"
-                  value={formData.gst}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <button type="submit">
-                {isEdit ? "Update Customer" : "Add Customer"}
-              </button>
-            </form>
+            <button
+              onClick={() => {
+                setShowModal(true);
+                setIsEdit(false);
+                setFormData({
+                  name: "",
+                  phone: "",
+                  address: "",
+                  type: CustomerType.INDIVIDUAL,
+                });
+              }}
+            >
+              + Add Customer
+            </button>
           </div>
+
+          <SearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Search by name or phone..."
+          />
+
+          {/* TABLE */}
+          <div className={styles.tableWrapper}>
+            {customers.length > 0 ? (
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Type</th>
+                    <th>GST</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {customers.map((item, index) => (
+                    <tr key={item?._id || index}>
+                      <td>{index + 1}</td>
+                      <td>{item.name}</td>
+                      <td>{item.phone}</td>
+                      <td>{item.address}</td>
+                      <td>{item.type}</td>
+                      <td>{item?.gst}</td>
+
+                      <td className={styles.actions}>
+                        <button onClick={() => handleEdit(item)}>Edit</button>
+                        <button onClick={() => {
+                          setOrderFormData({ ...orderFormData, customerPhone: item?.phone, customerName: item?.name, customerId: item?._id || "", customerType: item?.type });
+                          setShowOrderModal(true);
+                        }}>
+                          Place Order
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className={styles.empty}>No customers yet</p>
+            )}
+          </div>
+
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={(p) => setPage(p)}
+          />
         </div>
-      )}
 
-      {showOrderModal && (
-        <OrderModal setShowOrderModal={setShowOrderModal} orderData={orderFormData} source="customerPage" />
-      )}
+        {/* MODAL */}
+        {showModal && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <div className={styles.modalHeader}>
+                <h2>{isEdit ? "Edit Customer" : "Add Customer"}</h2>
+                <button onClick={() => setShowModal(false)}>✕</button>
+              </div>
 
-      {loader && <Loader />}
-    </div>
+              <form className={styles.form} onSubmit={handleSubmit}>
+                {isEdit ? 
+                  <h4>Customer Name: {formData.name} </h4>
+                :
+                  <div className={styles.formGroup}>
+                    <label>Customer Name</label>
+                    <input
+                      name="name"
+                      placeholder="Name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      onBlur={() => validateName(formData.name)}
+                    />
+                    {errors.name && <p className={styles.error}>{errors.name}</p>}
+                  </div>
+                }
+                {isEdit ? 
+                  <h4>Customer Phone: {formData.phone} </h4>
+                :
+                  <div className={styles.formGroup}>
+                    <label>Phone Number</label>
+                    <input
+                      placeholder="Phone"
+                      value={formData.phone}
+                      maxLength={10}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          phone: e.target.value.replace(/\D/g, ""),
+                        })
+                      }
+                      onBlur={() => validatePhone(formData.phone)}
+                    />
+                    {errors.phone && <p className={styles.error}>{errors.phone}</p>}
+                  </div>
+                }
+                <div className={styles.formGroup}>
+                  <label>Address</label>
+                  <input
+                    name="address"
+                    placeholder="Address"
+                    value={formData.address}
+                    onChange={handleChange}
+                  />
+                </div>
+                {!isEdit && 
+                  <div className={styles.formGroup}>
+                    <label>Customer Type</label>
+                    <select
+                      name="type"
+                      value={formData.type}
+                      onChange={handleChange}
+                    >
+                      <option value="Individual">Individual</option>
+                      <option value="Whole_Sale">Whole Sale</option>
+                      <option value="Retail">Retail</option>
+                      <option value="Doctor">Doctor</option>
+                    </select>
+                  </div>
+                }
+                <div className={styles.formGroup}>
+                  <label>GST Number</label>
+                  <input
+                    name="gst"
+                    placeholder="GST Number"
+                    value={formData.gst}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <button type="submit">
+                  {isEdit ? "Update Customer" : "Add Customer"}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {showOrderModal && (
+          <OrderModal setShowOrderModal={setShowOrderModal} orderData={orderFormData} source="customerPage" />
+        )}
+
+        {loader && <Loader />}
+      </div>
+    </AdminLayout>
   );
 };
 
