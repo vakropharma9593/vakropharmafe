@@ -89,7 +89,10 @@ export default async function handler(
           });
         }
 
-        inventory.remainingCount = orderType === OrderType.CREDIT_ORDER ? inventory.remainingCount - product.quantity - (product.freeQuantity || 0) : inventory.remainingCount - product.quantity;
+        const countToSubstract = orderType === OrderType.CREDIT_ORDER ? product.quantity + (product.freeQuantity || 0) : product.quantity;
+
+        inventory.remainingCount = inventory.remainingCount - countToSubstract;
+
 
         if (orderType === OrderType.CREDIT_ORDER && creditId) {
           const index = creditProducts.findIndex((item: { productId: ObjectId }) => item.productId.toString() === product.productId)
@@ -118,6 +121,8 @@ export default async function handler(
         finalProducts.push(newProduct);
 
         await inventory.save();
+        productData.currentQuantity = productData.currentQuantity - countToSubstract;
+        await productData.save();
       }
 
       if (orderType === OrderType.CREDIT_ORDER && creditId) {

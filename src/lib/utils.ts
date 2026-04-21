@@ -159,3 +159,21 @@ export type Review = {
   email?: string;
   isVerifiedUser?: boolean;
 };
+
+export type HomepageProduct = {
+  _id: string;
+  name: string;
+  mrp: number;
+  slug: string;
+  isActive: boolean;
+  averageRating: number;
+  totalReviews: number;
+  ratingBreakdown: {
+    5: number;
+    4: number;
+    3: number;
+    2: number;
+    1: number;
+  };
+  currentQuantity: number;
+};

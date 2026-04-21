@@ -4,8 +4,9 @@ import { persist } from "zustand/middleware";
 import { createAuthSlice, AuthSlice } from "./authStore";
 import { createAppSlice, AppSlice } from "./appStore";
 import { createAdminSlice, AdminSlice } from "./adminStore";
+import { createHomepageSlice, HomepageSlice } from "./homepageStore";
 
-type Store = AuthSlice & AppSlice & AdminSlice & {
+type Store = AuthSlice & AppSlice & AdminSlice & HomepageSlice & {
     hasHydrated: boolean;
     setHasHydrated: (state: boolean) => void;
   };
@@ -16,6 +17,7 @@ export const useStore = create<Store>()(
       ...createAuthSlice(set, get, store),
       ...createAppSlice(set, get, store),
       ...createAdminSlice(set, get, store),
+      ...createHomepageSlice(set, get, store),
 
       hasHydrated: false,
       setHasHydrated: (state) => set({ hasHydrated: state }),

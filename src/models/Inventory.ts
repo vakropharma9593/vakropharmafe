@@ -36,5 +36,7 @@ const InventorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+InventorySchema.index({ createdAt: -1 });
+
 export default mongoose.models.Inventory ||
   mongoose.model("Inventory", InventorySchema);

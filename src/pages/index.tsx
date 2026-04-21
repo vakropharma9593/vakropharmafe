@@ -12,24 +12,24 @@ import styles from "../styles/routeTransition.module.css";
 // import Dermatologist from "@/components/Dermatologist";
 
 const Index = () => {
-  const setProducts = useStore((state) => state.setProducts);
+  const setHomepageData = useStore((state) => state.setHomepageData);
 
   const [loader, setLoader] = useState<boolean>(false);
 
   useEffect(() => {
-    getProducts();
+    getHomepageData();
   },[])
 
-  const getProducts = async () => {
+  const getHomepageData = async () => {
     setLoader(true);
     try {
-        const res = await fetch("/api/product", {
+        const res = await fetch("/api/website/homepage", {
             method: "GET",
             headers: { "Content-Type": "application/json" },
         });
         const data = await res.json();
         if (data.success) {
-          setProducts(data.data || []);
+          setHomepageData(data.data || []);
         } else {
             toast.error(data.message);
         }
