@@ -8,7 +8,7 @@ import MiniLoader from "./MiniLoader";
 import { useRouter } from "next/router";
 
 const Products = () => {
-  const products = useStore((state) => state.adminData.products);
+  const homepageData = useStore((state) => state.homepageData);
   const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
   const router = useRouter();
 
@@ -35,8 +35,8 @@ const Products = () => {
         </div>
 
         <div className={styles.productsGrid}>
-          {products?.length > 0 &&
-            products.map((product, index) => {
+          {homepageData?.length > 0 &&
+            homepageData.map((product, index) => {
               if (!product.isActive) return null;
 
               const productHomeData: HomePageData =

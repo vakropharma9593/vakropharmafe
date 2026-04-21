@@ -2,16 +2,15 @@
 
 import Image from "next/image";
 import styles from "../styles/eachProduct.module.css";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import AddReviewModal from "./AddReviewModal";
-import { ProductType, Review } from "@/lib/utils";
+import { HomepageProduct, Review } from "@/lib/utils";
 import { productData, ProductUIData } from "@/lib/productData";
 import { Sparkles } from "lucide-react";
 import { toast } from "react-toastify";
 import { useStore } from "@/store";
 import Link from "next/link";
 import ProductSkeleton from "./ProductSkeleton";
-import Loader from "./Loader";
 
 type ProductPageProps = {
   product: {
@@ -35,8 +34,8 @@ const ProductPage = ({
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [loader, setLoader] = useState<boolean>(false);
   const [reviewLoader, setReviewLoader] = useState<boolean>(false);
-  const setProducts = useStore((state) => state.setProducts);
-  const allProducts = useStore((state) => state.adminData.products);
+  const setProducts = useStore((state) => state.setHomepageData);
+  const allProducts = useStore((state) => state.homepageData);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -49,7 +48,6 @@ const ProductPage = ({
 
   const [bestReview, setBestReview] = useState<Review | null>(null);
 
-  const observer = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
     if (product) {
@@ -60,14 +58,14 @@ const ProductPage = ({
 
   useEffect(() => {
     if(!allProducts || allProducts?.length === 0){
-      getProducts()
+      getHomepageData()
     }
   },[allProducts])
 
-  const getProducts = async () => {
+  const getHomepageData = async () => {
     setLoader(true);
     try {
-        const res = await fetch("/api/product", {
+        const res = await fetch("/api/website/homepage", {
             method: "GET",
             headers: { "Content-Type": "application/json" },
         });
@@ -115,24 +113,15 @@ const ProductPage = ({
     }
   };
 
-  const lastReviewRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (reviewLoader) return;
-      if (observer.current) observer.current.disconnect();
-
-      observer.current = new IntersectionObserver((entries) => {
-        if (!hasMore) return;
-        if (entries[0].isIntersecting && hasMore) {
-          const nextPage = page + 1;
-          setPage(nextPage);
-          getAllReviews(nextPage);
-        }
-      });
-
-      if (node) observer.current.observe(node);
-    },
-    [reviewLoader, hasMore, page]
-  );
+  const handleReviewScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop <= clientHeight + 5) {
+      if (hasMore && !reviewLoader) {
+        getAllReviews(page+1);
+        setPage(2);
+      }
+    }
+  }
 
   const handleBuyNow = () => {
     const phoneNumber = 919286382701;
@@ -141,6 +130,7 @@ const ProductPage = ({
 
   return (
     <main className={styles.productPage}>
+      {loader && <div className={styles.loaderBar} />}
       <section className={styles.hero}>
         <div className={styles.container}>
           <div className={styles.heroGrid}>
@@ -269,7 +259,7 @@ const ProductPage = ({
             {Object.keys(productData)?.map((slug: string, i: number) => {
               if (slug === product.slug) return null;
               const p: ProductUIData = productData[slug as ProductSlug];
-              const otherProduct = allProducts?.find((item: ProductType ) => item?.slug === slug);
+              const otherProduct = allProducts?.find((item: HomepageProduct ) => item?.slug === slug);
               return (
                 <div key={i} className={styles.productCard}>
 
@@ -306,82 +296,108 @@ const ProductPage = ({
 
       {/* REVIEWS */}
       <section className={styles.reviews}>
-        <div className={styles.container}>
-          <div className={styles.reviewHeader}>
-            <h2>Customer Reviews</h2>
+        {reviewLoader ? 
+          <ProductSkeleton />
+        : 
+          <div className={styles.container}>
+            <div className={styles.reviewHeader}>
+              <h2>Customer Reviews</h2>
 
-            {/* 🔥 STICKY SUMMARY */}
-            <div className={styles.reviewSummarySticky}>
-              <div className={styles.bigRating}>{stats.averageRating}</div>
-                <div className={styles.starWrapper}>
-                  <div
-                    className={styles.starFill}
-                    style={{
-                      width: `${(stats.averageRating / 5) * 100}%`
-                    }}
-                  >
-                    ★★★★★
+              {/* 🔥 STICKY SUMMARY */}
+              <div className={styles.reviewSummarySticky}>
+                <div className={styles.bigRating}>{stats.averageRating}</div>
+                  <div className={styles.starWrapper}>
+                    <div
+                      className={styles.starFill}
+                      style={{
+                        width: `${(stats.averageRating / 5) * 100}%`
+                      }}
+                    >
+                      ★★★★★
+                    </div>
+                    <div className={styles.starBase}>★★★★★</div>
                   </div>
-                  <div className={styles.starBase}>★★★★★</div>
+                  <div className={styles.totalReviews}>
+                    {stats.totalReviews} reviews
+                  </div>
+              </div>
+              <div className={styles.breakdownContainer} >
+                <div className={styles.breakdown}>
+                  {[5, 4, 3, 2, 1].map((star) => {
+                    const count = stats.ratingBreakdown[star] || 0;
+                    const percentage = stats.totalReviews
+                      ? (count / stats.totalReviews) * 100
+                      : 0;
+
+                    return (
+                      <div key={star} className={styles.breakdownRow}>
+                        <span>{star}★</span>
+
+                        <div className={styles.bar}>
+                          <div
+                            className={styles.fill}
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+
+                        <span>{count}</span>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className={styles.totalReviews}>
-                  {stats.totalReviews} reviews
-                </div>
+              </div>
+
+              <button
+                className={styles.reviewButton}
+                onClick={() => setOpenModal(true)}
+              >
+                Write a Review
+              </button>
             </div>
-            <div className={styles.breakdownContainer} >
-              <div className={styles.breakdown}>
-                {[5, 4, 3, 2, 1].map((star) => {
-                  const count = stats.ratingBreakdown[star] || 0;
-                  const percentage = stats.totalReviews
-                    ? (count / stats.totalReviews) * 100
-                    : 0;
 
+            {/* BEST REVIEW */}
+            {bestReview && (
+              <div className={styles.bestReview}>
+                <div className={styles.badge}>Top Review</div>
+                <div className={styles.reviewStars}>
+                  {"★".repeat(bestReview.rating)}
+                </div>
+                <p className={styles.bestText}>{bestReview.review}</p>
+                <span className={styles.bestUser}>
+                  {bestReview.reviewerName} • {bestReview.skinType}
+                </span>
+              </div>
+            )}
+
+            {/* LIST */}
+            <div className={styles.reviewScroll} onScroll={handleReviewScroll}>
+              {reviews.map((r, i) => {
+                if (i === reviews.length - 1) {
                   return (
-                    <div key={star} className={styles.breakdownRow}>
-                      <span>{star}★</span>
+                    <div key={i} className={styles.reviewCard}>
+                      <div className={styles.reviewTop}>
+                        <div>
+                          <strong>{r.reviewerName}</strong>
+                          <div className={styles.reviewMeta}>
+                            {r.skinType} • {r.skinConcern}
+                          </div>
+                        </div>
 
-                      <div className={styles.bar}>
-                        <div
-                          className={styles.fill}
-                          style={{ width: `${percentage}%` }}
-                        />
+                        {r.isVerifiedUser && (
+                          <span className={styles.verified}>✔ Verified</span>
+                        )}
                       </div>
 
-                      <span>{count}</span>
+                      <div className={styles.reviewStars}>
+                        {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
+                      </div>
+                      <p className={styles.reviewText}>{r.review}</p>
                     </div>
                   );
-                })}
-              </div>
-            </div>
+                }
 
-            <button
-              className={styles.reviewButton}
-              onClick={() => setOpenModal(true)}
-            >
-              Write a Review
-            </button>
-          </div>
-
-          {/* BEST REVIEW */}
-          {bestReview && (
-            <div className={styles.bestReview}>
-              <div className={styles.badge}>Top Review</div>
-              <div className={styles.reviewStars}>
-                {"★".repeat(bestReview.rating)}
-              </div>
-              <p className={styles.bestText}>{bestReview.review}</p>
-              <span className={styles.bestUser}>
-                {bestReview.reviewerName} • {bestReview.skinType}
-              </span>
-            </div>
-          )}
-
-          {/* LIST */}
-          <div className={styles.reviewScroll}>
-            {reviews.map((r, i) => {
-              if (i === reviews.length - 1) {
                 return (
-                  <div ref={lastReviewRef} key={i} className={styles.reviewCard}>
+                  <div key={i} className={styles.reviewCard}>
                     <div className={styles.reviewTop}>
                       <div>
                         <strong>{r.reviewerName}</strong>
@@ -401,34 +417,10 @@ const ProductPage = ({
                     <p className={styles.reviewText}>{r.review}</p>
                   </div>
                 );
-              }
-
-              return (
-                <div key={i} className={styles.reviewCard}>
-                  <div className={styles.reviewTop}>
-                    <div>
-                      <strong>{r.reviewerName}</strong>
-                      <div className={styles.reviewMeta}>
-                        {r.skinType} • {r.skinConcern}
-                      </div>
-                    </div>
-
-                    {r.isVerifiedUser && (
-                      <span className={styles.verified}>✔ Verified</span>
-                    )}
-                  </div>
-
-                  <div className={styles.reviewStars}>
-                    {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
-                  </div>
-                  <p className={styles.reviewText}>{r.review}</p>
-                </div>
-              );
-            })}
-
-            {reviewLoader && <Loader />}
+              })}
+            </div>
           </div>
-        </div>
+        }
       </section>
 
       {openModal && (
@@ -452,8 +444,6 @@ const ProductPage = ({
           </button>
         </div>
       </div>
-      {loader && <ProductSkeleton />}
-      {reviewLoader && <Loader />}
     </main>
   );
 };

@@ -33,6 +33,11 @@ const ProductSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    currentQuantity: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
     slug: {
       type: String,
       required: true,

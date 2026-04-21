@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import ReturnRefund, { ReturnRefundStatusType } from "@/models/ReturnRefund";
 import Inventory from "@/models/Inventory";
 import "@/models/Order";
+import Product from "@/models/Product";
 
 export default async function handler(
   req: NextApiRequest,
@@ -49,6 +50,10 @@ export default async function handler(
                         `Inventory not found for batch ${product.batchId}`
                     );
                 }
+
+                const existingProduct = await Product.findById(inventory.productId);
+                existingProduct.currentQuantity += product.quantity;
+                await existingProduct.save();
 
                 inventory.remainingCount += product.quantity;
                 await inventory.save();

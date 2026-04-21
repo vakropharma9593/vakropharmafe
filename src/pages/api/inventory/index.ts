@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import Inventory from "@/models/Inventory"
 import "@/models/Product";
 import { ObjectId } from "mongoose";
+import Product from "@/models/Product";
 
 export default async function handler(
   req: NextApiRequest,
@@ -22,20 +23,36 @@ export default async function handler(
         expiryDate,
       } = req.body;
 
-      const inventory = await Inventory.create({
-        batch,
-        productId,
-        totalCount,
-        remainingCount: totalCount,
-        mfgDate,
-        receivedDate,
-        expiryDate,
-      });
+      try {
+        const existingProduct = await Product.findById(productId);
+        if (!existingProduct) {
+          throw new Error("Product not found");
+        } 
+        
+        const inventory = await Inventory.create({
+          batch,
+          productId,
+          totalCount,
+          remainingCount: totalCount,
+          mfgDate,
+          receivedDate,
+          expiryDate,
+        });
 
-      return res.status(201).json({
-        success: true,
-        data: inventory,
-      });
+        existingProduct.currentQuantity = existingProduct.currentQuantity + totalCount;
+        await existingProduct.save();
+
+        return res.status(201).json({
+          success: true,
+          data: inventory,
+        });
+      } catch (error) {
+        console.error("INVENTORY API ERROR:", error);
+        res.status(500).json({
+          success: false,
+          message: error || "Inventory internal error",
+        });
+      }
     }
 
     // GET: Fetch inventory list
