@@ -32,6 +32,7 @@ export default async function handler(
         costPrice,
         gstPercentageOnCostPrice,
         gstPercentage,
+        currentQuantity: 0,
         slug,
         isActive
       });
