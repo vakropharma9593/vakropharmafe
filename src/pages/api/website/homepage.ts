@@ -48,7 +48,7 @@ export default async function handler(
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: error ?? "Failed to create review",
+            message: error ?? "Failed to fetch review",
         });
     }
 }
