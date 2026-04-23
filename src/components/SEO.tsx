@@ -12,7 +12,7 @@ export default function SEO({
   title,
   description,
   keywords,
-  image = "https://www.vakropharma.com/og-image.jpg",
+  image = "https://www.vakropharma.com/assets/vakroallproducts.jpeg",
   url = "https://www.vakropharma.com",
 }: SEOProps) {
   return (
@@ -31,6 +31,9 @@ export default function SEO({
       <meta property="og:image" content={image} />
       <meta property="og:url" content={url} />
       <meta property="og:type" content="website" />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:site_name" content="Vakro Pharma" />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />

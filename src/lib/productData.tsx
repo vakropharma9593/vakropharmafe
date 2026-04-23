@@ -56,40 +56,40 @@ export const productData = {
         { icon: <Droplets size={18}/>, text: "Deep pore cleansing" },
         { icon: <Sparkles size={18}/>, text: "Helps reduce dark spots" },
         { icon: <ShieldCheck size={18}/>, text: "Helps prevent acne breakouts" },
-        { icon: <Leaf size={18}/>, text: "Gentle for daily use" }
+        { icon: <Leaf size={18}/>, text: "Reduce uneven skin tone" }
     ],
     benefits: [
       {
         icon: <Droplets size={30}/>,
-        title: "Deep Cleansing",
+        title: "Reduce Dark Spots",
         description:
-          "Removes excess oil, dirt and impurities while keeping the skin fresh and balanced."
+          "Decrease melanin production and reduce dark spots"
       },
       {
         icon: <Sparkles size={30}/>,
-        title: "Depigmentation Support",
+        title: "Skin Brightening",
         description:
-          "Helps reduce dark spots, tanning and uneven skin tone with brightening ingredients."
+          "Reduce uneven skin tone and make skin brighter"
       },
       {
         icon: <ShieldCheck size={30}/>,
-        title: "Acne Control",
+        title: "Skin Glow",
         description:
-          "Helps unclog pores and control acne-causing impurities for clearer skin."
+          "Strong antioxidant help to enhance skin glow and reduce even skin tone"
       }
     ],
     ingredients: [
       {
         name: "Kojic Acid",
-        description: "Helps unclog pores and control acne."
+        description: "Decrease melanin production and reduce dark spots"
       },
       {
         name: "Niacinamide",
-        description: "Controls excess oil and improves skin texture."
+        description: "Reduce uneven skin tone and make skin brighter"
       },
       {
-        name: "Palmitic Acid",
-        description: "Powerful antioxidant that helps brighten skin tone."
+        name: "Vit C",
+        description: "Strong antioxidant help to enhance skin glow and reduce even skin tone"
       }
     ],
     usageSteps: [

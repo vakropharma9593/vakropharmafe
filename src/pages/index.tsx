@@ -45,7 +45,7 @@ const Index = () => {
       <SEO
         title="Vakro Pharma | Dermatologist Developed Skincare"
         description="Vakro Pharma offers dermatologist-formulated skincare including facewash, sunscreen, face serum and moisturizer designed for Indian skin."
-        keywords="dermatologist skincare India, facewash for oily skin, sunscreen gel India, vitamin c serum India, facewash, best facewash, best sunscreen, daily use moisturiser"
+        keywords="dermatologist skincare India, facewash for oily skin, sunscreen gel India, vitamin c serum India, facewash, best facewash, best sunscreen, daily use moisturiser, vacro, vakro, vacro pharma, vakro pharma"
         url="https://www.vakropharma.com"
       />
       <script
