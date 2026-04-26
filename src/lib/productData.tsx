@@ -1,12 +1,8 @@
 import { Sparkles, Droplets, ShieldCheck, Leaf, Sun } from "lucide-react";
 import facewash from "../../public/assets/vakro-glo-depigmenting-facewash.webp";
-import facewashHowToUse from "../../public/assets/vakro-glo-depigmenting-facewash_how_to_use.webp";
 import moisturizerImg from "../../public/assets/vakro-aqua-lite-moisturiser-face-gel.webp";
-import moisturizerUse from "../../public/assets/vakro-aqua-lite-moisturiser-face-gel_how_to_use.webp";
 import sunscreenImg from "../../public/assets/vakro-lite-depigmenting-fluid-sunscreen.webp";
-import sunscreenUse from "../../public/assets/vakro-lite-depigmenting-fluid-sunscreen_how_to_use.webp";
 import faceserum from "../../public/assets/vakro-lite-face-serum.webp";
-import faceserumusage from "../../public/assets/vakro-lite-face-serum_how_to_use.webp";
 import { StaticImageData } from "next/image";
 
 import { ReactNode } from "react";
@@ -43,7 +39,7 @@ export type ProductUIData = {
   ingredients: Ingredient[];
   usageSteps: string[];
   heroImage: StaticImageData;
-  howTOUseImage: StaticImageData;
+  // howTOUseImage: StaticImageData;
   tagLine: string;
   homepageData: HomePageData;
 };
@@ -56,7 +52,9 @@ export const productData = {
         { icon: <Droplets size={18}/>, text: "Deep pore cleansing" },
         { icon: <Sparkles size={18}/>, text: "Helps reduce dark spots" },
         { icon: <ShieldCheck size={18}/>, text: "Helps prevent acne breakouts" },
-        { icon: <Leaf size={18}/>, text: "Reduce uneven skin tone" }
+        { icon: <Leaf size={18}/>, text: "Reduce uneven skin tone" },
+        { icon: <Sparkles size={18}/>, text: "Regulate sebum production" },
+        { icon: <ShieldCheck size={18}/>, text: "Boost skin barrier and hydration" },
     ],
     benefits: [
       {
@@ -69,7 +67,7 @@ export const productData = {
         icon: <Sparkles size={30}/>,
         title: "Skin Brightening",
         description:
-          "Reduce uneven skin tone and make skin brighter"
+          "Regulate sebum production, boost skin barrier and hydration."
       },
       {
         icon: <ShieldCheck size={30}/>,
@@ -85,7 +83,7 @@ export const productData = {
       },
       {
         name: "Niacinamide",
-        description: "Reduce uneven skin tone and make skin brighter"
+        description: "Regulate sebum production, boost skin barrier and hydration"
       },
       {
         name: "Vit C",
@@ -100,8 +98,7 @@ export const productData = {
       "Use twice daily for best results."
     ],
     heroImage: facewash,
-    howTOUseImage: facewashHowToUse,
-    tagLine: "Depigmenting facewash formulated to cleanse excess oil, reduce dark spots and promote clear, healthy skin.",
+    tagLine: "Depigmenting facewash formulated to cleanse excess oil, reduce dark spots, enhace skin glow and promote clear, healthy skin.",
     homepageData: {
       description: "Experience the Art of Balanced Skin with Vakro Depigmenting Face Wash.",
       category: "Face Care",
@@ -166,7 +163,6 @@ export const productData = {
       "Use morning and night for best results."
     ],
     heroImage: moisturizerImg,
-    howTOUseImage: moisturizerUse,
     tagLine: "Lightweight daily moisturizer designed to deeply hydrate, repair skin barrier and keep your skin soft and radiant.",
     homepageData: {
       description: "Experience advanced hydration with powerful sun defense in one lightweight formula.",
@@ -220,18 +216,6 @@ export const productData = {
         name: "Vitamin E",
         description: "Antioxidant that protects skin from environmental damage."
       },
-      {
-        name: "Zinc Oxide",
-        description: "Provides strong protection from harmful UV rays."
-      },
-      {
-        name: "Niacinamide",
-        description: "Helps improve skin tone and reduce pigmentation."
-      },
-      {
-        name: "Aloe Extract",
-        description: "Soothes skin and prevents dryness caused by sun exposure."
-      },
     ],
     usageSteps: [
       "Apply sunscreen on clean face and neck.",
@@ -241,7 +225,6 @@ export const productData = {
       "Use daily even on cloudy days."
     ],
     heroImage: sunscreenImg,
-    howTOUseImage: sunscreenUse,
     tagLine: "Broad spectrum SPF 50 sunscreen that protects skin from harmful UV rays while keeping it hydrated and smooth.",
     homepageData: {
       description: "Broad-spectrum SPF 50+ sunscreen that protects from UV damage and helps reduce dark spots for an even-toned glow.",
@@ -256,10 +239,13 @@ export const productData = {
     description: "Vakro Face Serum helps brighten skin tone, reduce pigmentation and improve skin texture.",
     keywords: "vakro serum, face serum, skin brightening serum, india best face serum, best serum",
     features: [
-      { icon: <Sparkles size={18}/>, text: "Brightens skin tone" },
+      { icon: <Sparkles size={18}/>, text: "Reduces acne causing bacteria" },
       { icon: <Droplets size={18}/>, text: "Deep hydration" },
-      { icon: <ShieldCheck size={18}/>, text: "Skin barrier repair" },
-      { icon: <Sun size={18}/>, text: "Reduces pigmentation" }
+      { icon: <ShieldCheck size={18}/>, text: "Enhance and repair Skin barrier" },
+      { icon: <Sun size={18}/>, text: "Reduces pigmentation" },
+      { icon: <Sparkles size={18}/>, text: "Reduces dark spots" },
+      { icon: <Droplets size={18}/>, text: "Remove oily debris" },
+      { icon: <ShieldCheck size={18}/>, text: "Exfoliate dead layer of skin and clogged pores" },
     ],
     benefits: [
       {
@@ -280,28 +266,16 @@ export const productData = {
     ],
     ingredients: [
       {
-        name: "EXOSOMAL Azelaic Acid",
-        description: ""
-      },
-      {
-        name: "Niacinamide",
-        description: "Reduces pigmentation and improves skin texture."
+        name: "Exosomal Azelaic Acid",
+        description: "Enhanced penetration and efficacy, Reduces acne causing bacteria, Reduces dark spots"
       },
       {
         name: "Salicylic Acid",
-        description: ""
+        description: "Remove oily debris, Exfoliate dead layer of skin and open clogged pores"
       },
       {
-        name: "Vitamin C",
-        description: "Boosts brightness and glow."
-      },
-      {
-        name: "Hyaluronic Acid",
-        description: "Deep hydration and plump skin."
-      },
-      {
-        name: "Glutathione",
-        description: "Powerful antioxidant for brighter tone."
+        name: "Niacinamide",
+        description: "Potent antioxidant, enhance skin barrier and hydration, Regulate oil and sebum skin"
       }
     ],
     usageSteps: [
@@ -312,7 +286,6 @@ export const productData = {
       "Follow with moisturizer and sunscreen."
     ],
     heroImage: faceserum,
-    howTOUseImage: faceserumusage,
     tagLine: "A lightweight serum formulated to brighten skin tone and restore natural glow.",
     homepageData: {
       description: "Multi-Active Acne Clarifying & Oil Balancing Serum.",
