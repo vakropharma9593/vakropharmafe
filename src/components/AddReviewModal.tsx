@@ -155,6 +155,7 @@ const AddReviewModal = ({ onClose, productId, afterSuccessCall, source, products
           </div>}
           <div className={styles.formGroup}>
             <label>Rating <span>*</span></label>
+            {/*  need to add half star selection also */}
             <div className={styles.starContainer}>
               {[1,2,3,4,5].map((star) => (
                 <span
