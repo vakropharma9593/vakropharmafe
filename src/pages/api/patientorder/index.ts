@@ -172,6 +172,12 @@ export default async function handler(
 
       return res.status(200).json({
         success: true,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
         data: result
       });
     }
