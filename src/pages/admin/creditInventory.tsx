@@ -293,33 +293,42 @@ const CreditInventory = () => {
                 </thead>
 
                 <tbody>
-                  {creditInventory.map((item: CreditInventoryItem, i: number) => (
-                    <tr key={item._id}>
-                      <td>{i + 1}</td>
-                      <td>{item?.customerName}</td>
-                      <td>{item?.customerPhone}</td>
-                      <td>{dateToShow(item?.dateOfInventory)}</td>
-                      <td>
-                        {item.products.map((p, i) => (
-                          <div key={i} className={styles.productItem}>
-                            {p.productName} × {"(" + p.remainingQuantity + "+" + (p.remainingFreeQuantity || 0) + ")" + "/" + "(" + p.totalQuantity + "+" + (p.freeQuantity || 0) + ")"}
-                          </div>
-                        ))}
-                      </td>
-                      <td className={styles.actions}>
-                        <button onClick={() => {
-                          const currentProductsName: string[] = [];
-                          item?.products?.forEach((e: {productId: string, remainingQuantity: number }) => {
-                            if (e.remainingQuantity > 0) currentProductsName.push(e.productId);
-                          })
-                          setOrderFormData({ ...orderFormData, date: item?.dateOfInventory, customerPhone: JSON.stringify(item?.customerPhone), customerName: item?.customerName, selectedProductId: currentProductsName, customerId: item?.customerId || "", customerType: item.customerType, creditId: item?._id || "" });
-                          setShowOrderModal(true);
-                        }}>
-                          Place Order
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {creditInventory.map((item: CreditInventoryItem, i: number) => {
+                    let isEmpty = true;
+                    item?.products?.forEach((product) => {
+                      if (product.remainingQuantity !== 0 || product.remainingFreeQuantity !== 0) {
+                        isEmpty = false;
+                      }
+                    })
+                    return (
+                      <tr key={item._id} style={{ backgroundColor: isEmpty ? "#E1C88A" : "", color: isEmpty ? "black" :  "" }}>
+                        <td>{i + 1}</td>
+                        <td>{item?.customerName}</td>
+                        <td>{item?.customerPhone}</td>
+                        <td>{dateToShow(item?.dateOfInventory)}</td>
+                        <td>
+                          {item.products.map((p, i) => (
+                            <div key={i} className={styles.productItem}>
+                              {p.productName} × {"(" + p.remainingQuantity + "+" + (p.remainingFreeQuantity || 0) + ")" + "/" + "(" + p.totalQuantity + "+" + (p.freeQuantity || 0) + ")"}
+                            </div>
+                          ))}
+                        </td>
+                        <td className={styles.actions} >
+                          {!isEmpty && <button disabled={isEmpty} onClick={() => {
+                            const currentProductsName: string[] = [];
+                            item?.products?.forEach((e: {productId: string, remainingQuantity: number }) => {
+                              if (e.remainingQuantity > 0) currentProductsName.push(e.productId);
+                            })
+                            setOrderFormData({ ...orderFormData, date: item?.dateOfInventory, customerPhone: JSON.stringify(item?.customerPhone), customerName: item?.customerName, selectedProductId: currentProductsName, customerId: item?.customerId || "", customerType: item.customerType, creditId: item?._id || "" });
+                            setShowOrderModal(true);
+                          }}
+                          >
+                            Place Order
+                          </button>}
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             ) : (
@@ -372,7 +381,7 @@ const CreditInventory = () => {
                 {formData?.customerName && <h4>Customer Details :: {formData?.customerName} ({formData.customerType})</h4>}
 
 
-                {formData.customerType && (formData.customerType === CustomerType.WHOLE_SALE || formData.customerType === CustomerType.RETAIL) ? 
+                {formData.customerType && (formData.customerType !== CustomerType.INDIVIDUAL) ? 
                   <div>
                     <div className={styles.formGroup}>
                       <label>Date of Inventory Given</label>
@@ -474,7 +483,7 @@ const CreditInventory = () => {
                     <button type="submit" disabled={isLastRowEmpty(products)}>Submit</button>
                   </div>
                 :
-                  <h4>Credit products can be given to retailer or whole sale customer only.</h4>
+                  <h4>Credit products can be given to retailer, doctor or whole sale customer only.</h4>
                 }
               </form>
             </div>
