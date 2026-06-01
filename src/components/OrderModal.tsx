@@ -33,7 +33,10 @@ interface OrderModalInterface {
 const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData, source, callAfterSave }) => {
     const stateInventory = useStore((state) => state.adminData.inventory);
     const stateProducts = useStore((state) => state.adminData.products);
-    const setInventyory = useStore((state) => state.setInventory);
+    const setInventory = useStore((state) => state.setInventory);
+    const setStateProducts = useStore((state) => state.setProducts);
+
+
 
     const [orderFormData, setOrderFormData] = useState<Order>({
         customerPhone: "",
@@ -70,18 +73,43 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
         }
     },[orderData])
 
-    const getInventory = async () => {
+    useEffect(() => {
+        const getProducts = async () => {
+            setLoader(true);
+            try {
+                const res = await fetch("/api/product");
+                const data = await res.json();
+                if (data.success) {
+                    setStateProducts(data.data || []);
+                } else {
+                    toast.error("Failed to fetch products");
+                }
+            } catch {
+                toast.error("Failed to fetch products");
+            } finally {
+                setLoader(false);
+            }
+        };
+
+        getInventory(false);
+        getProducts();
+    }, []);
+
+    const getInventory = async (shouldClose: boolean) => {
+        setLoader(true)
         try {
             const res = await fetch("/api/inventory");
             const data = await res.json();
             if(data.success) {
-                setInventyory(data.data || [])
-                setShowOrderModal(false);
+                setInventory(data.data || [])
+                shouldClose && setShowOrderModal(false);
             } else {
                 toast.error(data.message);
             }
         } catch (error) {
-         toast.error("Failed to get inventory");
+            toast.error("Failed to get inventory");
+        } finally {
+            setLoader(false);
         }
     };
 
@@ -119,7 +147,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
             const data = await res.json();
             if (data.success) {
     
-                getInventory();
+                getInventory(true);
                 callAfterSave && callAfterSave();
         
                 toast.success("Order created successfully");
@@ -202,7 +230,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
             const currentTotalInfo = calculateTotal(updated);
             setTotalInfo(currentTotalInfo);
         }
-        if ((field === "discountPercentage" || field === "totalPrice" || (field === "quantity" && orderFormData.customerType === CustomerType.WHOLE_SALE)) && p) {
+        if ((field === "discountPercentage" || field === "totalPrice" || (field === "quantity" && (orderFormData.customerType !== CustomerType.INDIVIDUAL ))) && p) {
             const mrp = stateProducts?.filter((b: ProductType) => b._id === p.productId)[0].mrp;
             let totalPrice = updated[index].totalPrice;
             let discountPercentage = updated[index].discountPercentage;
