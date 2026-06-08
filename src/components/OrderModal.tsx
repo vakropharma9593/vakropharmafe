@@ -239,7 +239,7 @@ const OrderModal:React.FC<OrderModalInterface> = ({ setShowOrderModal, orderData
             } else if (field === "totalPrice") {
                 discountPercentage = Number((((mrp - totalPrice)/mrp)*100).toFixed(2));
             } else if (field === "quantity") {
-                totalPrice = (updated[index].totalAmountReceived || 0)/updated[index].quantity;
+                totalPrice = Number(((updated[index].totalAmountReceived || 0)/updated[index].quantity).toFixed(2));
                 discountPercentage = Number((((mrp - totalPrice)/mrp)*100).toFixed(2));
             }
             updated[index] = {
